@@ -31,9 +31,6 @@ class LoginPage extends StatelessWidget {
             ),
           ),
           const BorderLine(thickness: 2),
-          const TextField(
-            cursorColor: Colors.black,
-          ),
           const InfoBlank(
             infoname: '아이디',
             textalign: TextAlign.center,

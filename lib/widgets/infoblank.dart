@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class InfoBlank extends StatelessWidget {
   final String infoname;
   final TextAlign textalign;
+  final bool hideword;
 
   const InfoBlank({
     super.key,
     required this.infoname,
     required this.textalign,
+    required this.hideword,
   });
 
   @override
@@ -31,12 +33,13 @@ class InfoBlank extends StatelessWidget {
           const SizedBox(
             width: 15,
           ),
-          const SizedBox(
+          SizedBox(
             width: 270,
             child: TextField(
-                decoration: InputDecoration(
-              border: OutlineInputBorder(),
-            )),
+                obscureText: hideword,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                )),
           ),
         ],
       ),

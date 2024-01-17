@@ -30,9 +30,9 @@ class _AuthorityAreaState extends State<AuthorityArea> {
             ),
           ),
           SizedBox(
-            width: 350,
+            width: 330,
             child: DropdownMenu<String>(
-              width: 350,
+              width: 330,
               hintText: '관리자 유형을 선택해주세요.',
               onSelected: (String? value) {
                 // This is called when the user selects an item.
@@ -46,7 +46,6 @@ class _AuthorityAreaState extends State<AuthorityArea> {
                   value: value,
                   label: value,
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.white),
                     surfaceTintColor:
                         MaterialStateProperty.all(const Color(0xFFD9D9D9)),
                   ),

@@ -31,9 +31,10 @@ class InformantionArea extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 350,
+            width: 330,
             child: TextField(
               obscureText: hideword,
+              cursorColor: Colors.black,
               decoration: InputDecoration(
                 hintText: memo,
                 hintStyle: const TextStyle(

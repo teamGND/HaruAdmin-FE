@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/screens/authentication/login_page.dart';
 
+import 'screens/authentication/signup_page.dart';
+
 void main() {
   runApp(const MyApp());
 }

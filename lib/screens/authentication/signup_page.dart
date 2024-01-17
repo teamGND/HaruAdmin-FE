@@ -1,116 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/borderline.dart';
+import 'package:haru_admin/widgets/request_auth_area.dart';
+import 'package:haru_admin/widgets/information_area.dart';
 
-import 'package:haru_admin/widgets/infoblank.dart';
-
-const List<String> list = <String>['총관리자', '콘텐츠 관리자', '번역 관리자'];
-
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          const Text(
-            'HaruHangeul\nAdmin Page\nAdmin',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.w900,
+      body: Center(
+        child: Column(
+          children: [
+            Text(
+              'HaruHangeul\nAdmin Page\nSign Up',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.w900,
+              ),
             ),
-          ),
-          const BorderLine(
-            thickness: 2,
-          ),
-          const InfoBlank(
-            infoname: '아이디',
-            textalign: TextAlign.start,
-          ),
-          const BorderLine(
-            thickness: 1,
-          ),
-          const InfoBlank(
-            infoname: '비밀번호',
-            textalign: TextAlign.start,
-          ),
-          const BorderLine(
-            thickness: 1,
-          ),
-          const InfoBlank(
-            infoname: '비밀번호 확인',
-            textalign: TextAlign.start,
-          ),
-          const BorderLine(
-            thickness: 1,
-          ),
-          const DropdownButton(),
-          const BorderLine(
-            thickness: 1,
-          ),
-          const InfoBlank(
-            infoname: '이름',
-            textalign: TextAlign.start,
-          ),
-          const BorderLine(
-            thickness: 1,
-          ),
-          const InfoBlank(
-            infoname: '연락처',
-            textalign: TextAlign.start,
-          ),
-          const BorderLine(
-            thickness: 2,
-          ),
-          TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                '이전으로',
-              ))
-        ],
-      ),
-    );
-  }
-}
-
-class DropdownButton extends StatefulWidget {
-  const DropdownButton({super.key});
-
-  @override
-  State<DropdownButton> createState() => _DropdownButtonState();
-}
-
-class _DropdownButtonState extends State<DropdownButton> {
-  String dropdownValue = list.first;
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownMenu<String>(
-      textStyle: const TextStyle(
-        fontWeight: FontWeight.w600,
-      ),
-      width: 270,
-      menuStyle: const MenuStyle(
-        backgroundColor: MaterialStatePropertyAll(Colors.white),
-        surfaceTintColor: MaterialStatePropertyAll(
-          Color(0xFFD9D9D9),
+            BorderLine(thick: 2),
+            InformantionArea(
+              infoname: '아이디',
+              hideword: false,
+              memo: '',
+            ),
+            BorderLine(thick: 1),
+            InformantionArea(
+              infoname: '비밀번호',
+              hideword: true,
+              memo: '',
+            ),
+            BorderLine(thick: 1),
+            InformantionArea(
+              infoname: '비밀번호 확인',
+              hideword: true,
+              memo: '비밀번호는 10~16자로 지정해주세요.',
+            ),
+            BorderLine(thick: 1),
+            AuthorityArea(),
+            BorderLine(thick: 1),
+            InformantionArea(
+              infoname: '이름',
+              hideword: false,
+              memo: '',
+            ),
+            BorderLine(thick: 1),
+            InformantionArea(
+              infoname: '연락처',
+              hideword: false,
+              memo: '',
+            ),
+            BorderLine(thick: 2),
+          ],
         ),
-        elevation: MaterialStatePropertyAll(5),
       ),
-      initialSelection: list.first,
-      onSelected: (String? value) {
-        // This is called when the user selects an item.
-        setState(() {
-          dropdownValue = value!;
-        });
-      },
-      dropdownMenuEntries: list.map<DropdownMenuEntry<String>>((String value) {
-        return DropdownMenuEntry<String>(value: value, label: value);
-      }).toList(),
     );
   }
 }

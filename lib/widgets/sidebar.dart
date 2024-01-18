@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../utils/routing_url.dart';
 
 class SideBar extends StatelessWidget {
   const SideBar({super.key, required this.state, required this.child});
@@ -18,21 +19,16 @@ class SideBar extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                ListTile(
-                  onTap: () => context.go('/login'),
-                  title: const Text('LOGIN',
-                      style: TextStyle(color: Colors.white)),
-                ),
-                ListTile(
-                  onTap: () => context.go('/signup'),
-                  title: const Text('SIGNUP',
-                      style: TextStyle(color: Colors.white)),
-                ),
-                ListTile(
-                  onTap: () => context.go('/home'),
-                  title:
-                      const Text('HOME', style: TextStyle(color: Colors.white)),
-                ),
+                for (var url in routingURL)
+                  ListTile(
+                    title: Text(
+                      url['path'] as String,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    onTap: () {
+                      context.go(url['path'] as String);
+                    },
+                  ),
               ],
             ),
           ),

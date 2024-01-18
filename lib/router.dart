@@ -1,21 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'utils/routing_url.dart';
 import 'widgets/sidebar.dart';
-import 'screens/home.dart';
-import 'screens/authentication/login_page.dart';
-import 'screens/authentication/signup_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
     GlobalKey<NavigatorState>();
-
-final routingURL = [
-  {'path': '/', 'page': const Home()},
-  {'path': '/login', 'page': const LoginPage()},
-  {'path': '/signup', 'page': const SignUpScreen()},
-  {'path': '/home', 'page': const Home()},
-];
 
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,

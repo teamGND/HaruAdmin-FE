@@ -14,7 +14,7 @@ class SideBar extends StatelessWidget {
       body: Row(
         children: [
           Container(
-            width: 300.0,
+            width: 250,
             color: Colors.black,
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -22,7 +22,7 @@ class SideBar extends StatelessWidget {
                 for (var url in routingURL)
                   ListTile(
                     title: Text(
-                      url['path'] as String,
+                      url['name'] as String,
                       style: const TextStyle(color: Colors.white),
                     ),
                     onTap: () {

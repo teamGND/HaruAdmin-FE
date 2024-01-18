@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'utils/routing_url.dart';
 import 'widgets/sidebar.dart';
+import 'screens/home.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
@@ -12,6 +13,10 @@ final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/login',
   routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const Home(),
+    ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) {

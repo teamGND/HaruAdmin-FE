@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'router.dart';
 import 'package:haru_admin/screens/authentication/login_page.dart';
 
 import 'screens/authentication/signup_page.dart';
@@ -12,6 +14,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: SignUpScreen());
+    return MaterialApp.router(
+      routerConfig: router,
+    );
   }
 }

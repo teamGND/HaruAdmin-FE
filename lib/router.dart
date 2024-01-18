@@ -10,6 +10,13 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
     GlobalKey<NavigatorState>();
 
+final routingURL = [
+  {'path': '/', 'page': const Home()},
+  {'path': '/login', 'page': const LoginPage()},
+  {'path': '/signup', 'page': const SignUpScreen()},
+  {'path': '/home', 'page': const Home()},
+];
+
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/login',
@@ -17,34 +24,13 @@ final GoRouter router = GoRouter(
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) {
-        return SideBar(child: child, state: state, key: state.pageKey);
+        return SideBar(state: state, key: state.pageKey, child: child);
       },
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) {
-            return const Home();
-          },
-        ),
-        GoRoute(
-          path: '/login',
-          builder: (BuildContext context, GoRouterState state) {
-            return const LoginPage();
-          },
-        ),
-        GoRoute(
-          path: '/signup',
-          builder: (BuildContext context, GoRouterState state) {
-            return const SignUpScreen();
-          },
-        ),
-        GoRoute(
-          path: '/home',
-          builder: (BuildContext context, GoRouterState state) {
-            return const Home();
-          },
-        )
-      ],
-    ),
+      routes: routingURL
+          .map((url) => GoRoute(
+              path: url['path'] as String,
+              builder: (context, state) => url['page'] as Widget))
+          .toList(),
+    )
   ],
 );

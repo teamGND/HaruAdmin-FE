@@ -15,15 +15,16 @@ class SideBar extends StatelessWidget {
         children: [
           Container(
             width: 250,
-            color: Colors.black,
+            color: const Color.fromARGB(255, 179, 179, 179),
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
+                const Text("HaruHangeul\nAdmin Page"),
                 for (var url in routingURL)
                   ListTile(
                     title: Text(
                       url['name'] as String,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black),
                     ),
                     onTap: () {
                       context.go(url['path'] as String);

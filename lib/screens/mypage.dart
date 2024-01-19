@@ -84,8 +84,11 @@ class _MypageState extends State<Mypage> {
   }
 }
 
-AlertDialog changeAdminPopUp(
-    {required context, required String title, required String content}) {
+AlertDialog changeAdminPopUp({
+  required context,
+  required String title,
+  required String content,
+}) {
   return AlertDialog(
     title: Text(title + ' 변경'.toString()),
     content: TextField(
@@ -95,6 +98,7 @@ AlertDialog changeAdminPopUp(
       ElevatedButton(
         onPressed: () {
           // change the content
+          Navigator.of(context).pop();
         },
         child: const Text('저장'),
       ),

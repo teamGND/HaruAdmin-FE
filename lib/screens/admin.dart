@@ -8,11 +8,14 @@ class Admin extends StatefulWidget {
 }
 
 class _AdminState extends State<Admin> {
+  final content = ['사번', '아이디', '이름', '연락처', '관리자 권한', '상태'];
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text('Mypage'),
+        child:
+            // make a gride of column = content
+            Text('Admin'),
       ),
     );
   }

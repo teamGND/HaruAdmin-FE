@@ -8,19 +8,21 @@ class PhoneNumberArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SizedBox(
-      width: 650,
+      width: 750,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           SizedBox(
             width: 130,
             child: Text(
               '연락처',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+          SizedBox(
+            width: 75,
           ),
           SizedBox(
             width: 330,

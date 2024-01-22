@@ -1,32 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/textbutton.dart';
 
-class InformantionArea extends StatelessWidget {
-  final String infoname;
-  final bool hideword;
-  final String memo;
-  final double Width;
+class IdArea extends StatefulWidget {
+  const IdArea({super.key});
 
-  const InformantionArea({
-    super.key,
-    required this.infoname,
-    required this.hideword,
-    required this.memo,
-    required this.Width,
-  });
+  @override
+  State<IdArea> createState() => _IdAreaState();
+}
 
+class _IdAreaState extends State<IdArea> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 750,
       child: Row(
         children: [
-          SizedBox(
+          const SizedBox(
             width: 130,
             child: Text(
-              infoname,
+              '아이디',
               textAlign: TextAlign.start,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
@@ -36,11 +30,11 @@ class InformantionArea extends StatelessWidget {
             width: 75,
           ),
           SizedBox(
-            width: Width,
+            width: 330,
             child: TextField(
-              obscureText: hideword,
+              obscureText: false,
               decoration: InputDecoration(
-                hintText: memo,
+                hintText: '',
                 hintStyle: const TextStyle(
                   fontSize: 15,
                   color: Color(0xFFD9D9D9),
@@ -51,6 +45,15 @@ class InformantionArea extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(
+            width: 10,
+          ),
+          const TextButtons(
+              buttonName: '중복확인',
+              buttonColor: Color(0xFF9C9C9C),
+              seroPadding: 20,
+              garoPadding: 10,
+              fontSize: 20),
         ],
       ),
     );

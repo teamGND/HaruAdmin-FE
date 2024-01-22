@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
 
-const List<String> TypeList = ['총관리자', '콘텐츠 관리자', '번역 관리자'];
+const List<String> typeList = ['총관리자', '콘텐츠 관리자', '번역 관리자'];
 
-class AuthorityArea extends StatefulWidget {
-  const AuthorityArea({super.key});
+class RankArea extends StatefulWidget {
+  const RankArea({super.key});
 
   @override
-  State<AuthorityArea> createState() => _AuthorityAreaState();
+  State<RankArea> createState() => _RankAreaState();
 }
 
-class _AuthorityAreaState extends State<AuthorityArea> {
-  String dropdownValue = TypeList.first;
+class _RankAreaState extends State<RankArea> {
+  String dropdownValue = typeList.first;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 650,
+      width: 750,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           const SizedBox(
             width: 130,
             child: Text(
               '요청 권한',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+          const SizedBox(
+            width: 75,
           ),
           SizedBox(
             width: 330,
@@ -41,7 +43,7 @@ class _AuthorityAreaState extends State<AuthorityArea> {
                 });
               },
               dropdownMenuEntries:
-                  TypeList.map<DropdownMenuEntry<String>>((String value) {
+                  typeList.map<DropdownMenuEntry<String>>((String value) {
                 return DropdownMenuEntry<String>(
                   value: value,
                   label: value,

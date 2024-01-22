@@ -1,93 +1,129 @@
 import 'package:flutter/material.dart';
-import 'package:haru_admin/screens/authentication/signup_page.dart';
-import 'package:haru_admin/widgets/borderline.dart';
-import 'package:haru_admin/widgets/information_area.dart';
+import 'package:dio/dio.dart';
+import 'package:haru_admin/utils/secure_storage.dart';
 
-class LoginPage extends StatelessWidget {
+SecureStorage secureStorage = SecureStorage();
+final dio = Dio();
+
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
-  void onSignupTap(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const SignUpScreen()),
-    );
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  SecureStorage secureStorage = SecureStorage();
+  final dio = Dio();
+  var username = '';
+  var password = '';
+
+  @override // 위젯이 처음 생성되었을 때 하고 싶은 작업
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 50,
-            ),
-            const Text(
-              'HaruHangeul\nAdmin Page',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 27,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const BorderLine(thick: 2),
-            const InformantionArea(
-              infoname: '아이디',
-              hideword: true,
-              memo: '',
-            ),
-            const BorderLine(thick: 1),
-            const InformantionArea(
-              infoname: '비밀번호',
-              hideword: false,
-              memo: '',
-            ),
-            const BorderLine(thick: 2),
-            const Text(
-              '로그인 정보가 틀렸습니다. (1/10)',
-              style: TextStyle(
-                color: Color(0xFFF05A2A),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFF3F99F7),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 100,
-                  vertical: 20,
+        backgroundColor: Colors.white,
+        body: Center(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.6,
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(
+                    top: 200.0,
+                  ),
                 ),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                const Text(
+                  'HaruHangeul\nAdmin Page',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 27,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              onPressed: () {},
-              child: const Text(
-                '로그인',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            GestureDetector(
-              onTap: () => onSignupTap(context),
-              child: const Text(
-                '회원가입',
-                style: TextStyle(
-                  color: Color(0xFF9C9C9C),
-                  fontWeight: FontWeight.w500,
-                  decoration: TextDecoration.underline,
+                const SizedBox(
+                  height: 10,
                 ),
-              ),
+                InputArea(
+                  infoname: '아이디',
+                  topwidth: 2,
+                  value: username,
+                ),
+                InputArea(
+                  infoname: '비밀번호',
+                  topwidth: 0,
+                  value: password,
+                ),
+                ElevatedButton(
+                  // 로그인 버튼을 누를 때, 토큰 읽어오기
+                  onPressed: () async {
+                    secureStorage.getAccessToken(context);
+                  },
+                  child: const Text('로그인'),
+                ),
+              ],
             ),
-          ],
+          ),
+        ));
+  }
+}
+
+class InputArea extends StatelessWidget {
+  final String infoname;
+  final double topwidth;
+  final String value;
+
+  const InputArea({
+    super.key,
+    required this.infoname,
+    required this.topwidth,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      height: 80,
+      width: MediaQuery.of(context).size.width * 0.4,
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(width: topwidth, color: Colors.grey),
+          bottom: const BorderSide(width: 1, color: Colors.grey),
         ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              infoname,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(
+            width: 20,
+          ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.2,
+            child: TextField(
+              onChanged: (value) {
+                value = value;
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

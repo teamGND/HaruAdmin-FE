@@ -22,6 +22,31 @@ class _LoginPageState extends State<LoginPage> {
   String? idError;
   String? passwordError;
 
+  login() {
+    // 텍스트필드 입력여부 확인
+    /** 이기능 다시 밑에 넣어서 수정하면 좋을듯
+    showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('계정정보가 없습니다. '),
+              content: const Text('회원가입을 진행해주세요'),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    context.go('/login');
+                  },
+                  child: const Text('뒤로가기'),
+                ),
+              ],
+            );
+          });
+     */
+  }
+
   @override // 위젯이 처음 생성되었을 때 하고 싶은 작업
   void initState() {
     super.initState();
@@ -146,34 +171,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  void loginChenk() async {
-    print(idController.text);
-    print(passwordController.text);
-
-    SecureStorage secureStorage = SecureStorage();
-    dynamic value = secureStorage.getAccessToken();
-    if (value == null) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('계정정보가 없습니다. '),
-              content: const Text('회원가입을 진행해주세요'),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    context.go('/login');
-                  },
-                  child: const Text('뒤로가기'),
-                ),
-              ],
-            );
-          });
-    }
   }
 }

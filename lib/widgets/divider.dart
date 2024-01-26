@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // 구분선
 
 class LineDivider extends StatelessWidget {
   final double thick;

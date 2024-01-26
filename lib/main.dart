@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:haru_admin/screens/authentication/login_page.dart';
+import 'router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,6 +10,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: LoginPage());
+    return MaterialApp.router(
+      routerConfig: router,
+    );
   }
 }

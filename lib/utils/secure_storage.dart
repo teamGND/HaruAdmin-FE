@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../screens/authentication/signup_page.dart';
-
 class SecureStorage {
   static final SecureStorage _instance = SecureStorage._internal();
   late FlutterSecureStorage _storage;
@@ -20,14 +18,7 @@ class SecureStorage {
   // 토큰 가져오기 = read
   Future<String?> getAccessToken(BuildContext context) async {
     String? value = await _storage.read(key: 'accessToken');
-    if (value == null) {
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => const SignUpScreen(),
-          ),
-          (route) => false);
-    }
-    return null;
+    return value;
   }
 
   // 토큰 설정하기 = 토큰 저장

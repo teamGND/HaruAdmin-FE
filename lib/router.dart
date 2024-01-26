@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// TODO - sidebar 는 shell router 사용하기
+import 'utils/routing_url.dart';
+import 'widgets/sidebar.dart';
 
-final router = GoRouter(
-  routes: [],
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _shellNavigatorKey =
+    GlobalKey<NavigatorState>();
 
-  debugLogDiagnostics: true, // 기본갑은 false. go router 관련 로그 찍힘
+final GoRouter router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
+  initialLocation: '/login',
+  routes: [
+    /*
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) => const LoginPage(),
+      ),
+    */
+    ShellRoute(
+      navigatorKey: _shellNavigatorKey,
+      builder: (context, state, child) {
+        return SideBar(state: state, key: state.pageKey, child: child);
+      },
+      routes: routingURL
+          .map((url) => GoRoute(
+              path: url['path'] as String,
+              builder: (context, state) => url['page'] as Widget))
+          .toList(),
+    )
+  ],
 );

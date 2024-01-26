@@ -16,7 +16,7 @@ class SecureStorage {
   FlutterSecureStorage get secureStorage => _storage;
 
   // 토큰 가져오기 = read
-  Future<String?> getAccessToken(BuildContext context) async {
+  Future<String?> getAccessToken() async {
     String? value = await _storage.read(key: 'accessToken');
     return value;
   }

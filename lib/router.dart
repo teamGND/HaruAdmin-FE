@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haru_admin/screens/authentication/login_page.dart';
+import 'package:haru_admin/screens/authentication/signup_page.dart';
 
 import 'utils/routing_url.dart';
 import 'widgets/sidebar.dart';
@@ -12,12 +14,14 @@ final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/login',
   routes: [
-    /*
-      GoRoute(
-        path: '/login',
-        pageBuilder: (context, state) => const LoginPage(),
-      ),
-    */
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: '/signup',
+      builder: (context, state) => const SignUpPage(),
+    ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) {
@@ -25,8 +29,7 @@ final GoRouter router = GoRouter(
       },
       routes: routingURL
           .map((url) => GoRoute(
-              path: url['path'] as String,
-              builder: (context, state) => url['page'] as Widget))
+              path: url.getPath, builder: (context, state) => url.getpage))
           .toList(),
     )
   ],

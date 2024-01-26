@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                       // 로그인 버튼을 누를 때, 토큰 발급
                       onPressed: () async {
                         SecureStorage secureStorage = SecureStorage();
-                        dynamic value = secureStorage.getAccessToken(context);
+                        dynamic value = secureStorage.getAccessToken();
                         if (value == null) {
                           // 토큰이 없으면 회원가입 알림 띄우기  넘기기
                         } else {
@@ -153,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
     print(passwordController.text);
 
     SecureStorage secureStorage = SecureStorage();
-    dynamic value = secureStorage.getAccessToken(context);
+    dynamic value = secureStorage.getAccessToken();
     if (value == null) {
       showDialog(
           context: context,

@@ -3,11 +3,16 @@ import 'package:go_router/go_router.dart';
 import '../utils/routing_url.dart';
 
 class SideBar extends StatefulWidget {
-  const SideBar({Key? key, required this.state, required this.child})
-      : super(key: key);
+  const SideBar({
+    Key? key,
+    required this.state,
+    required this.child,
+    // required this.sidebar,
+  }) : super(key: key);
 
   final GoRouterState state;
   final Widget child;
+  // final bool sidebar; // 사이드바 있없 여부
 
   @override
   _SideBarState createState() => _SideBarState();
@@ -39,7 +44,7 @@ class _SideBarState extends State<SideBar> {
                 for (var index = 0; index < routingURL.length; index++)
                   ListTile(
                     title: Text(
-                      routingURL[index]['name'] as String,
+                      routingURL[index].getName,
                       style: TextStyle(
                         color:
                             selectedIndex == index ? Colors.blue : Colors.black,
@@ -49,7 +54,7 @@ class _SideBarState extends State<SideBar> {
                       setState(() {
                         selectedIndex = index;
                       });
-                      context.go(routingURL[index]['path'] as String);
+                      context.go(routingURL[index].getPath);
                     },
                   ),
               ],

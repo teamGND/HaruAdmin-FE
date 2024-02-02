@@ -21,7 +21,7 @@ class AuthRepository {
         "phoneNumber": "$phoneNumber",
       };
 
-      Response response = await dio.post('/admin/signup', data: requestBody);
+      Response response = await dio.post('/signup', data: requestBody);
 
       if (response.statusCode == 200) {
         print('회원가입 완료!');
@@ -43,9 +43,9 @@ class AuthRepository {
         'adminId': '$adminId',
         'password': "$password",
       };
-      Response response = await dio.post('/signup', data: requestBody);
+      Response response = await dio.post('/login', data: requestBody);
 
-      AdminLogin login = AdminLogin.fromJson(response.data);
+      // AdminLogin login = AdminLogin.fromJson(response.data);
 
       final authorization = response.headers['Authorization'];
       if (authorization != null) {

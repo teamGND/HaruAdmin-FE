@@ -136,25 +136,32 @@ class _SignUpPageState extends State<SignUpPage> {
       validator: (value) {
         if (value?.isEmpty ?? true) {
           return '아이디를 입력해주세요';
+        } else if (authRepository.isIdavailable != true &&
+            value!.isNotEmpty == true) {
+          return '중복확인을 진행해주세요';
         }
-        return null;
+        return authRepository.adminIdCheck.toString();
       },
       width: 10,
       textbutton: TextButton(
         style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          backgroundColor: hintTextColor,
-        ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            backgroundColor: authRepository.isIdavailable == true
+                ? blueColor
+                : hintTextColor),
         onPressed: () async {
-          if (_formKey.currentState!.validate() == false) {
-            return;
-          }
           authRepository.adminIdCheck(adminIdController.text);
         },
-        child: isIdavailable ? const Icon(Icons.check) : const Text('중복확인'),
+        child: authRepository.isIdavailable == true
+            ? const Icon(Icons.check_rounded)
+            : const Text(
+                '중복확인',
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+              ),
       ),
     );
   }

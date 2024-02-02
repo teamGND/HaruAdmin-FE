@@ -45,16 +45,26 @@ class AuthRepository {
       };
       Response response = await dio.post('/login', data: requestBody);
 
-      // AdminLogin login = AdminLogin.fromJson(response.data);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = response.data;
+        Map<String, dynamic> adminData = responseData['headers'];
+        // print type of adminData
+        print(adminData['Authorization']);
+        //Map<String, dynamic> token = adminData['Authorization'];
 
-      final authorization = response.headers['Authorization'];
-      if (authorization != null) {
-        secureStorage.setAccessToken(authorization.first);
-      } else if (response.statusCode == 401) {
-        print('로그인 실패: 승인되지 않은 사용자');
+        //print("token: $token");
       } else {
         print('로그인 실패: ${response.statusCode}');
       }
+
+      // final authorization = response.headers['Authorization'];
+      // if (authorization != null) {
+      //   secureStorage.setAccessToken(authorization.first);
+      // } else if (response.statusCode == 401) {
+      //   print('로그인 실패: 승인되지 않은 사용자');
+      // } else {
+      //   print('로그인 실패: ${response.statusCode}');
+      // }
     } catch (e) {
       print('회원가입 중 예외 발생 $e');
     }

@@ -48,6 +48,14 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  bool saveAndValidateForm(GlobalKey<FormState> formKey) {
+    if (!formKey.currentState!.validate()) {
+      return false;
+    }
+    formKey.currentState!.save();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -96,17 +104,16 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                             onPressed: () async {
-                              if (_formKey.currentState!.validate() == false) {
+                              if (!saveAndValidateForm(_formKey)) {
                                 return;
-                              } else {
-                                authRepository.signup(
-                                  adminIdController.text,
-                                  passwordController.text,
-                                  adminNameController.text,
-                                  Rank.values.toString(),
-                                  phoneNumberController.text,
-                                );
                               }
+                              authRepository.signup(
+                                adminIdController.text,
+                                passwordController.text,
+                                adminNameController.text,
+                                Rank.values.toString(),
+                                phoneNumberController.text,
+                              );
                             },
                             child: const Text('회원가입')),
                       ],
@@ -119,9 +126,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget signUpuserId() {
     return RowItems(
+      obscureText: false,
       useDropdownMenu: false,
       infoname: '아이디',
-      obscureText: false,
       controller: adminIdController,
       onSaved: (value) {
         adminIdController.text = value!;
@@ -208,7 +215,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return RowItems(
       useDropdownMenu: false,
       infoname: '이름',
-      obscureText: true,
+      obscureText: false,
       onSaved: (value) {
         adminNameController.text = value!;
       },
@@ -226,7 +233,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return RowItems(
       useDropdownMenu: false,
       infoname: '연락처',
-      obscureText: true,
+      obscureText: false,
       controller: phoneNumberController,
       onSaved: (value) {
         phoneNumberController.text = value!;

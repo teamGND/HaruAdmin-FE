@@ -15,10 +15,10 @@ class RowItems extends StatefulWidget {
   final Widget? widget;
   final double? width;
   final Widget? textbutton;
-  final bool obscureText;
   final String? hintText;
   final String? errorText;
   final bool useDropdownMenu;
+  final bool obscureText;
   final Function(String?)? onSaved;
   final TextEditingController? controller;
   final void Function(String)? onChanged;
@@ -34,9 +34,9 @@ class RowItems extends StatefulWidget {
     this.onChanged,
     this.hintText,
     this.onSaved,
+    required this.obscureText,
     required this.useDropdownMenu,
     required this.controller,
-    required this.obscureText,
     required this.validator,
   });
 
@@ -91,7 +91,7 @@ class _RowItemsState extends State<RowItems> {
                     }).toList(),
                   )
                 : TextFormField(
-                    obscureText: widget.obscureText,
+                    obscureText: widget.obscureText ? true : false,
                     controller: widget.controller,
                     validator: widget.validator,
                     decoration: InputDecoration(

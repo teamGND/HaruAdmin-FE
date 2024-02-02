@@ -28,45 +28,15 @@ class _LoginPageState extends State<LoginPage> {
     adminIdController = TextEditingController(text: '');
     passwordController = TextEditingController(text: '');
     authRepository = AuthRepository();
-    checkToken();
+    //checkToken();
   }
 
-  void checkToken() async {
-    final accessToken = await secureStorage.getAccessToken();
-    if (accessToken == null) {
-      //showdialog를 그 때가서 쓰도록, alertdialog만 뺴서 갖다 붙히던지 + context.go도
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              actions: [
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: blueColor,
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero),
-                  ),
-                  onPressed: () {
-                    context.go('/login');
-                    // login화면으로 이동해야함,
-                  },
-                  child: const Text('로그인 화면으로'),
-                ),
-              ],
-              insetPadding: const EdgeInsets.all(130),
-              surfaceTintColor: Colors.white,
-              title: const Text('토큰이 없습니다./n회원가입을 진행해주세요.'),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-            );
-          });
-      context.go('/login');
-    } else {
-      context.go('/mypage');
-    }
-  }
-
+  // void checkToken() async {
+  //회원가입 이력이 있다.(get으로 admininfo에 요청 응답이 오면 정보가 있다는 의미) = 로그인화면으로 -> 로그인 -> 토큰 저장(final accessToken = await secureStorage.getAccessToken();) -> 마이페이지 화면
+  //다음 번 접속시 토큰이 있다. = 자동 로그인(마이페이지로 보내기)
+  //회원가입 안 한 상태에서 로그인 버튼을 누르면, showAlertDialog ('해당 관리자 계정이 존재하지 않습니다. 회원가입을 진행해주세요')
+  //-> 아이디랑 비밀번호 입력받기 -> 서버로 보내기 -> 응답받아서 예전에 요청 보낸 적이 있는지 확인
+//}
   @override
   void dispose() {
     adminIdController.dispose();
@@ -173,9 +143,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-/*로그인 버튼 클릭 횟수 추적 -> State<''>{int index = 0;}
-onTap: (int index) {
-  setState(({this.index = index;
-currentIndex = index}));
-
-}*/

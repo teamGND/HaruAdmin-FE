@@ -48,11 +48,8 @@ class AuthRepository {
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = response.data;
         Map<String, dynamic> adminData = responseData['headers'];
-        // print type of adminData
-        print(adminData['Authorization']);
-        //Map<String, dynamic> token = adminData['Authorization'];
-
-        //print("token: $token");
+        String token = adminData['Authorization'][0];
+        print(token);
       } else {
         print('로그인 실패: ${response.statusCode}');
       }

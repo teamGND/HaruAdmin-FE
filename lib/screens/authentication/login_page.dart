@@ -1,8 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haru_admin/api/Auth_services.dart';
+
 import 'package:haru_admin/utils/secure_storage.dart';
 import 'package:haru_admin/widgets/colors.dart';
 import 'package:haru_admin/widgets/rowitems.dart';
@@ -11,52 +11,75 @@ class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
   final dio = Dio();
-  TextEditingController idController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  late AuthRepository authRepository;
+  final SecureStorage secureStorage = SecureStorage();
+  TextEditingController adminIdController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  String? idError;
-  String? passwordError;
+  @override
+  void initState() {
+    super.initState();
+    adminIdController = TextEditingController(text: '');
+    passwordController = TextEditingController(text: '');
+    authRepository = AuthRepository();
+    checkToken();
+  }
 
-  login() {
-    // 텍스트필드 입력여부 확인
-    /** 이기능 다시 밑에 넣어서 수정하면 좋을듯
-    showDialog(
+  void checkToken() async {
+    final accessToken = await secureStorage.getAccessToken();
+    if (accessToken == null) {
+      //showdialog를 그 때가서 쓰도록, alertdialog만 뺴서 갖다 붙히던지 + context.go도
+      showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('계정정보가 없습니다. '),
-              content: const Text('회원가입을 진행해주세요'),
+              actions: [
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: blueColor,
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero),
+                  ),
+                  onPressed: () {
+                    context.go('/login');
+                    // login화면으로 이동해야함,
+                  },
+                  child: const Text('로그인 화면으로'),
+                ),
+              ],
+              insetPadding: const EdgeInsets.all(130),
+              surfaceTintColor: Colors.white,
+              title: const Text('토큰이 없습니다./n회원가입을 진행해주세요.'),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    context.go('/login');
-                  },
-                  child: const Text('뒤로가기'),
-                ),
-              ],
             );
           });
-     */
+      context.go('/login');
+    } else {
+      context.go('/mypage');
+    }
   }
 
-  @override // 위젯이 처음 생성되었을 때 하고 싶은 작업
-  void initState() {
-    super.initState();
+  @override
+  void dispose() {
+    adminIdController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Scaffold(
+    return Form(
+      key: _formKey,
+      child: Scaffold(
+        backgroundColor: Colors.white,
         body: Padding(
           padding: const EdgeInsets.only(top: 200),
           child: Center(
@@ -70,99 +93,40 @@ class _LoginPageState extends State<LoginPage> {
                 width: MediaQuery.of(context).size.width * 0.6,
                 child: Column(
                   children: [
-                    const Divider(
-                      thickness: 2,
-                    ),
-                    RowItems(
-                      infoname: '아이디',
-                      widget: TextFormField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          errorText: idError,
-                        ),
-                        controller: idController,
-                        onChanged: (String value) {
-                          setState(() {
-                            idError = value.isEmpty ? '아이디를 입력해주세요' : null;
-                          });
-                          idController;
-                        },
-                      ),
-                    ),
-                    const Divider(
-                      thickness: 1,
-                    ),
-                    RowItems(
-                      infoname: '비밀번호',
-                      widget: TextFormField(
-                        obscureText: true,
-                        controller: passwordController,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            errorText: passwordError),
-                        onChanged: (String value) {
-                          passwordError = value.isEmpty ? '비밀번호를 입력해주세요' : null;
-                        },
-                      ),
-                    ),
-
-                    const Divider(
-                      thickness: 1,
-                    ),
+                    const Divider(thickness: 2),
+                    userId(),
+                    const Divider(thickness: 1),
+                    password(),
+                    const Divider(thickness: 1),
                     // 로그인 버튼 누르는 숫자 카운트 10번까지 10이 되면, 로그인 접근 막기->관리자에게 문의해주세요 메세지 프린트
                     TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: blueColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 130,
-                          vertical: 25,
+                        style: TextButton.styleFrom(
+                          backgroundColor: blueColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 130,
+                            vertical: 25,
+                          ),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(7)),
+                          ),
                         ),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(7)),
-                        ),
-                      ),
 
-                      // 로그인 버튼을 누를 때, 토큰 발급
-                      onPressed: () async {
-                        SecureStorage secureStorage = SecureStorage();
-                        dynamic value = secureStorage.getAccessToken();
-                        if (value == null) {
-                          // 토큰이 없으면 회원가입 알림 띄우기  넘기기
-                        } else {
-                          final rawString =
-                              '${idController.text}:${passwordController.text}';
-                          Codec<String, String> stringToBase64 =
-                              utf8.fuse(base64);
-                          print(stringToBase64);
-                          String token = stringToBase64.encode(rawString);
-                          print(token);
-                          final response = await dio.post(
-                            'http://3.38.61.170:8080/admin/login', //example
-                            options: Options(
-                              headers: {
-                                'Authorization': 'Basic $token',
-                              },
-                            ),
-                          );
-                          print(response.data);
-                          if (response.statusCode == 200) {
-                            secureStorage.setAccessToken(token);
-                            print(json.encode(response.data));
-                            context.go('/mypage');
+                        // 로그인 버튼을 누를 때, 토큰 발급
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate() == false) {
+                            return;
                           } else {
-                            print(response.statusMessage);
+                            authRepository.loginPressed(adminIdController.text,
+                                passwordController.text);
                           }
-                        }
-                      },
-
-                      //access 토큰 + refresh토큰 발급
-                      child: const Text('로그인'),
-                    ),
+                        },
+                        child: const Text('로그인')),
+                    TextButton(
+                        onPressed: () {
+                          context.go('/signup');
+                        },
+                        child: const Text('회원가입'))
                   ],
                 ),
               ),
@@ -172,4 +136,46 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+  Widget userId() {
+    return RowItems(
+      useDropdownMenu: false,
+      infoname: '아이디',
+      obscureText: false,
+      controller: adminIdController,
+      onSaved: (value) {
+        adminIdController.text = value!;
+      },
+      validator: (value) {
+        if (value?.isEmpty ?? true) {
+          return '아이디를 입력해주세요';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget password() {
+    return RowItems(
+      useDropdownMenu: false,
+      infoname: '비밀번호',
+      obscureText: true,
+      onSaved: (value) {
+        passwordController.text = value!;
+      },
+      controller: passwordController,
+      validator: (value) {
+        if (value?.isEmpty ?? true) {
+          return '비밀번호를 입력해주세요';
+        }
+        return null;
+      },
+    );
+  }
 }
+/*로그인 버튼 클릭 횟수 추적 -> State<''>{int index = 0;}
+onTap: (int index) {
+  setState(({this.index = index;
+currentIndex = index}));
+
+}*/

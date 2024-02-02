@@ -4,21 +4,22 @@ class LineDivider extends StatelessWidget {
   final double thick;
 
   const LineDivider({
-    super.key,
     required this.thick,
+    super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 10),
-        Container(
-          height: thick,
-          width: 750.00,
-          color: const Color(0xFFD9D9D9),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: Container(
+            height: thick,
+            width: 750.00,
+            color: const Color(0xFFD9D9D9),
+          ),
         ),
-        const SizedBox(height: 10)
       ],
     );
   }

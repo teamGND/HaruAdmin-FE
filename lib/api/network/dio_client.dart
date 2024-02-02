@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
+import 'package:haru_admin/api/network/log_interceptor.dart';
 
 class DioClient {
   factory DioClient() => _instance;
@@ -14,6 +15,7 @@ class DioClient {
     ));
 
     dio.interceptors.add(AuthInterceptor());
+    dio.interceptors.add(CustomLogInterceptor());
 
     return dio;
   }

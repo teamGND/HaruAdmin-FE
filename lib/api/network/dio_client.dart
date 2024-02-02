@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:haru_admin/utils/secure_storage.dart';
 
 class DioClient {
   factory DioClient() => _instance;
@@ -7,40 +8,46 @@ class DioClient {
   static final DioClient _instance = DioClient._();
 
   Dio provideDio() {
-    final Dio dio = Dio(BaseOptions(baseUrl: "https://www.haruhangeul.com"));
+    final Dio dio = Dio(BaseOptions(
+      baseUrl: "https://www.haruhangeul.com/admin",
+      contentType: 'application/json',
+    ));
+
+    dio.interceptors.add(AuthInterceptor());
+
     return dio;
   }
 }
 
-// class AuthInterceptor extends Interceptor {
-//   @override
-//   Future<void> onRequest(
-//     RequestOptions options,
-//     RequestInterceptorHandler handler,
-//   ) async {
-//     // 인증이 필요 없는 API 인 경우
-//     if (options.uri.path.startsWith('/login') ||
-//         options.uri.path.startsWith('/signup')) {
-//       return super.onRequest(options, handler);
-//     }
+class AuthInterceptor extends Interceptor {
+  @override
+  Future<void> onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    // 인증이 필요 없는 API 인 경우
+    if (options.uri.path.startsWith('/login') ||
+        options.uri.path.startsWith('/signup')) {
+      return super.onRequest(options, handler);
+    }
 
-//     // storage로부터 토큰을 가져온다.
-//     final String? userToken = await SecureStorage().getAccessToken();
+    // storage로부터 토큰을 가져온다.
+    final String? userToken = await SecureStorage().getAccessToken();
 
-//     // 토큰이 없으면 reject
-//     if (userToken == null) {
-//       handler.reject(DioException(requestOptions: options));
-//     }
+    // 토큰이 없으면 reject
+    if (userToken == null) {
+      handler.reject(DioException(requestOptions: options));
+    }
 
+    // 토큰 유효성 검증.
+    super.onRequest(
+      options..headers['Authorization'] = 'Bearer $userToken',
+      handler,
+    );
+  }
+}
     // TODO - 세션 방법으로 해야됨. 밑에는 refreshtoken jwt 방법임
 
-    //   // 토큰 유효성 검증. 백엔드와 상의. 보통 JWT 안에는 만료시간이 있음.
-    //   if (checkIsTokenValid(userToken!)) {
-    //     return super.onRequest(
-    //       options..headers['Authorization'] = 'Bearer $userToken',
-    //       handler,
-    //     );
-    //   }
 
     //   // 토큰 갱신 및 다시 request
     //   await _handleRefreshAuth(options, handler);

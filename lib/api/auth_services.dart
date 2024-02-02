@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/model/auth_model.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
 
 class AuthRepository {
-  final dio = Dio(BaseOptions(
-      baseUrl: 'https://www.haruhangeul.com/admin',
-      contentType: 'application/json'));
+  final dio = DioClient().provideDio();
   SecureStorage secureStorage = SecureStorage();
 //텍스트 폼 유효성 검사
 

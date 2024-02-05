@@ -30,17 +30,17 @@ class _AdminState extends State<Admin> {
   getAdminList(String? token, int pageNumber) async {
     try {
       final response = await dio.get(
-        //'/role-list?page=$pageNumber',
-        '/admin',
+        '/admin/role-list?page=1',
+        //'/admin',
         options: Options(headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': '$token',
         }),
       );
       final adminData = response.data;
       print(adminData);
       return adminData;
     } catch (e) {
-      rethrow;
+      print(e);
     }
   }
 

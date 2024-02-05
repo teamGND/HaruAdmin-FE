@@ -1,6 +1,5 @@
 import 'package:haru_admin/api/auth_services.dart';
 import 'package:flutter/material.dart';
-import 'package:haru_admin/utils/secure_storage.dart';
 import 'package:haru_admin/widgets/colors.dart';
 import 'package:haru_admin/widgets/divider.dart';
 import 'package:haru_admin/widgets/rowitems.dart';
@@ -16,13 +15,13 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   late final AuthRepository authRepository;
   bool isIdavailable = false;
+  RankLabel? selectedRank;
   TextEditingController adminIdController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController adminNameController = TextEditingController();
   TextEditingController rankController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
-  SecureStorage secureStorage = SecureStorage();
 
   @override
   void initState() {
@@ -107,11 +106,11 @@ class _SignUpPageState extends State<SignUpPage> {
                               if (!saveAndValidateForm(_formKey)) {
                                 return;
                               }
-                              authRepository.signup(
+                              await authRepository.signup(
                                 adminIdController.text,
                                 passwordController.text,
                                 adminNameController.text,
-                                Rank.values.toString(),
+                                selectedRank,
                                 phoneNumberController.text,
                               );
                             },
@@ -149,9 +148,6 @@ class _SignUpPageState extends State<SignUpPage> {
           backgroundColor: hintTextColor,
         ),
         onPressed: () async {
-          if (_formKey.currentState!.validate() == false) {
-            return;
-          }
           authRepository.adminIdCheck(adminIdController.text);
         },
         child: isIdavailable ? const Icon(Icons.check) : const Text('중복확인'),
@@ -203,11 +199,11 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget rank() {
     return const RowItems(
-      controller: null,
       obscureText: false,
       infoname: '요청권한',
       validator: null,
       useDropdownMenu: true,
+      controller: null,
     );
   }
 

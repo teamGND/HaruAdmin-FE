@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/Auth_services.dart';
 
@@ -15,7 +14,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final dio = Dio();
   final _formKey = GlobalKey<FormState>();
   late AuthRepository authRepository;
   final SecureStorage secureStorage = SecureStorage();
@@ -31,12 +29,6 @@ class _LoginPageState extends State<LoginPage> {
     //checkToken();
   }
 
-  // void checkToken() async {
-  //회원가입 이력이 있다.(get으로 admininfo에 요청 응답이 오면 정보가 있다는 의미) = 로그인화면으로 -> 로그인 -> 토큰 저장(final accessToken = await secureStorage.getAccessToken();) -> 마이페이지 화면
-  //다음 번 접속시 토큰이 있다. = 자동 로그인(마이페이지로 보내기)
-  //회원가입 안 한 상태에서 로그인 버튼을 누르면, showAlertDialog ('해당 관리자 계정이 존재하지 않습니다. 회원가입을 진행해주세요')
-  //-> 아이디랑 비밀번호 입력받기 -> 서버로 보내기 -> 응답받아서 예전에 요청 보낸 적이 있는지 확인
-//}
   @override
   void dispose() {
     adminIdController.dispose();
@@ -87,8 +79,11 @@ class _LoginPageState extends State<LoginPage> {
                           if (_formKey.currentState!.validate() == false) {
                             return;
                           } else {
-                            authRepository.loginPressed(adminIdController.text,
-                                passwordController.text);
+                            authRepository.loginPressed(
+                              adminIdController.text,
+                              passwordController.text,
+                            );
+                            //context.go('/mypage');
                           }
                         },
                         child: const Text('로그인')),

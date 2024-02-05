@@ -14,18 +14,18 @@ class SecureStorage {
 
   FlutterSecureStorage get secureStorage => _storage;
 
-  // 토큰 가져오기 = read
+  // 토큰 가져오기
   Future<String?> getAccessToken() async {
     String? value = await _storage.read(key: 'accessToken');
     return value;
   }
 
-  // 토큰 설정하기 = 토큰 저장
+  // 토큰 설정하기
   Future<void> setAccessToken(String token) async {
     _storage.write(key: 'accessToken', value: token);
   }
 
-  // 토큰 삭제하기 = delete
+  // 토큰 삭제하기
   Future<void> deleteAccessToken() async {
     _storage.delete(key: 'accessToken');
   }

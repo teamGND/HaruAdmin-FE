@@ -5,21 +5,21 @@ class AdminSignUp {
   String ranks;
   String phoneNumber;
 
-  AdminSignUp({
-    required this.adminId,
-    required this.password,
-    required this.name,
-    required this.ranks,
-    required this.phoneNumber,
-  });
+  AdminSignUp(
+    this.adminId,
+    this.password,
+    this.name,
+    this.ranks,
+    this.phoneNumber,
+  );
 
   factory AdminSignUp.fromJson(Map<String, dynamic> jsondata) {
     return AdminSignUp(
-        adminId: jsondata['amdinId'], //adminId key에 있는 value 값을 가져옴
-        password: jsondata['password'],
-        name: jsondata['name'],
-        ranks: jsondata['ranks'],
-        phoneNumber: jsondata['phoneNumber']);
+        jsondata['amdinId'], //adminId key에 있는 value 값을 가져옴
+        jsondata['password'],
+        jsondata['name'],
+        jsondata['ranks'],
+        jsondata['phoneNumber']);
   }
 }
 

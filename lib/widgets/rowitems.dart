@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/colors.dart'; //sign_up 페이지 칸 한 개에 대한 정의
 
-enum Rank {
-  master('총 관리자'),
-  content('콘텐츠 관리자'),
-  translation('번역 관리자');
+enum RankLabel {
+  MASTER('MASTER', '총 관리자'),
+  CONTENTS('CONTENTS', '컨텐츠 관리자'),
+  TRANSLATION('TRANSLATION', '번역관리자');
 
-  const Rank(this.rankname);
-  final String rankname;
+  const RankLabel(this.englabel, this.korlabel);
+  final String englabel;
+  final String korlabel;
 }
 
 class RowItems extends StatefulWidget {
@@ -45,7 +46,8 @@ class RowItems extends StatefulWidget {
 }
 
 class _RowItemsState extends State<RowItems> {
-  late Rank selectedRank;
+  RankLabel? selectedRank;
+  TextEditingController rankController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -68,24 +70,32 @@ class _RowItemsState extends State<RowItems> {
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.2,
             child: widget.useDropdownMenu
-                ? DropdownMenu<Rank>(
-                    width: MediaQuery.of(context).size.width * 0.2,
+                ? DropdownMenu<RankLabel>(
                     initialSelection: null,
-                    hintText: '관리자 유형을 선택해주세요.',
-                    onSelected: (Rank? rankname) {
+                    width: MediaQuery.of(context).size.width * 0.2,
+                    hintText: selectedRank == null
+                        ? '관리자 유형을 선택해주세요'
+                        : '${selectedRank?.korlabel}',
+                    requestFocusOnTap: true,
+                    enableFilter: true,
+                    inputDecorationTheme: const InputDecorationTheme(
+                      filled: true,
+                    ),
+                    onSelected: (RankLabel? rank) {
                       setState(() {
-                        selectedRank = Rank.content;
-                        rankname == null ? '요청 권한을 선택해주세요' : null;
+                        selectedRank =
+                            rank; //RankLabel.CONTENTS, RankLabel.~~~라고 각각 타입별로 찍히긴 찍힘
+                        print(selectedRank);
                       });
                     },
-                    dropdownMenuEntries: Rank.values
-                        .map<DropdownMenuEntry<Rank>>((Rank rankname) {
-                      return DropdownMenuEntry<Rank>(
-                        value: rankname,
-                        label: rankname.rankname,
+                    dropdownMenuEntries: RankLabel.values
+                        .map<DropdownMenuEntry<RankLabel>>((RankLabel rank) {
+                      return DropdownMenuEntry<RankLabel>(
+                        value: rank,
+                        label: rank.korlabel,
                         style: ButtonStyle(
-                          surfaceTintColor: MaterialStateProperty.all(
-                              const Color(0xFFD9D9D9)),
+                          surfaceTintColor:
+                              MaterialStateProperty.all(greycolor),
                         ),
                       );
                     }).toList(),
@@ -101,7 +111,8 @@ class _RowItemsState extends State<RowItems> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         errorText: widget.errorText),
-                    onChanged: widget.onChanged),
+                    onChanged: widget.onChanged,
+                  ),
           ),
           SizedBox(
             width: widget.width,

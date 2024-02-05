@@ -9,6 +9,7 @@ import '../screens/authentication/signup_page.dart';
 import '../screens/intro.dart';
 import '../screens/logout.dart';
 import '../screens/mypage.dart';
+import '../screens/data.dart';
 
 class RouteState {
   final String routepath; // path
@@ -37,7 +38,8 @@ final List<RouteState> routingURL = [
       routepage: const Admin(), routepath: '/admin', routename: '관리자 계정 관리'),
   RouteState(
       routepage: const Intro(), routepath: '/intro', routename: '인트로 데이터'),
-  RouteState(routepage: const Intro(), routepath: '/data', routename: '총 데이터'),
+  RouteState(
+      routepage: const TotalData(), routepath: '/data', routename: '총 데이터'),
   RouteState(
       routepage: const Mypage(), routepath: '/mypage', routename: '마이페이지'),
   RouteState(

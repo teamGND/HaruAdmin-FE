@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:haru_admin/api/auth_services.dart';
-import 'package:haru_admin/utils/secure_storage.dart';
+// import 'package:haru_admin/utils/secure_storage.dart';
 
 import 'package:dio/dio.dart';
 import 'package:haru_admin/api/network/log_interceptor.dart';
-import 'package:haru_admin/widgets/colors.dart';
+import 'package:haru_admin/model/auth_model.dart';
+//  import 'package:haru_admin/widgets/colors.dart';
 
 class Admin extends StatefulWidget {
   const Admin({super.key});
@@ -15,30 +15,31 @@ class Admin extends StatefulWidget {
 
 class _AdminState extends State<Admin> {
   final content = ['사번', '아이디', '이름', '연락처', '관리자 권한', '상태'];
-  final List<List<String>> rowData = [
-    // example
-    ['001', 'user1', 'John Doe', '123-456-7890', 'Admin', '대기'],
-    ['002', 'user2', 'Jane Smith', '987-654-3210', 'User', '승인'],
-  ];
+  int totalPage = 1;
+  int totalElements = 0;
+  List<dynamic> adminData = [];
 
   final Dio dio = Dio(BaseOptions(
-    baseUrl: "https://www.haruhangeul.com",
+    baseUrl: "https://www.haruhangeul.com/admin",
     contentType: 'application/json',
   ))
     ..interceptors.add(CustomLogInterceptor());
 
-  getAdminList(String? token, int pageNumber) async {
+  getAdminList(int pageNumber) async {
     try {
       final response = await dio.get(
-        '/admin/role-list?page=1',
-        //'/admin',
+        '/role-list?page=$pageNumber',
         options: Options(headers: {
-          'Authorization': '$token',
+          'Authorization':
+              'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcm9udCIsImlhdCI6MTcwNzEyMTgwOCwiZXhwIjoxNzE1NzYxODA4fQ.Lj5kDiyhu1oGMqu1hqdA506Xdh2Y30xgX2wtYPjhQ9o',
         }),
       );
-      final adminData = response.data;
-      print(adminData);
-      return adminData;
+      setState(() {
+        adminData =
+            response.data['content'].map((e) => AdminList.fromJson(e)).toList();
+        totalPage = response.data['totalPages'];
+        totalElements = response.data['totalElements'];
+      });
     } catch (e) {
       print(e);
     }
@@ -47,26 +48,50 @@ class _AdminState extends State<Admin> {
   @override
   void initState() {
     super.initState();
-    getAdminList(
-        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcm9udCIsImlhdCI6MTcwNzEyMTgwOCwiZXhwIjoxNzE1NzYxODA4fQ.Lj5kDiyhu1oGMqu1hqdA506Xdh2Y30xgX2wtYPjhQ9o",
-        1);
+    getAdminList(1);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        const SizedBox(height: 50),
-        const Text('관리자 계정 관리',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        DataTable(
-          columns: _buildColumns(),
-          rows: _buildRows(),
-        )
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(height: 50),
+          const Text('관리자 계정 관리',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          DataTable(
+            columns: _buildColumns(),
+            rows: _buildRows(),
+          ),
+          // page number list button navigation
+          Container(
+            margin: const EdgeInsets.only(top: 20),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (int i = 1; i <= totalPage; i++)
+                    TextButton(
+                      onPressed: () {
+                        getAdminList(i);
+                      },
+                      child: Text(
+                        '$i',
+                        style: const TextStyle(
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -82,34 +107,33 @@ class _AdminState extends State<Admin> {
   }
 
   List<DataRow> _buildRows() {
-    return rowData.map((List<String> rowData) {
+    return adminData.map((adminData) {
       return DataRow(
-        cells: rowData.map((String cellData) {
-          if (rowData.indexOf(cellData) == 5) {
-            return DataCell(
-              InkWell(
-                onTap: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return buildAlertDialog(context);
-                      });
-                  // Add your custom logic here
-                },
-                child: Text(
-                  cellData,
-                  style: TextStyle(
-                    color: cellData == '승인'
-                        ? Colors.blue
-                        : (cellData == '대기' ? Colors.red : Colors.black),
-                  ), // Set the text color to blue
-                ),
+        cells: [
+          DataCell(Text(adminData.id.toString())),
+          DataCell(Text(adminData.adminId ?? "none")),
+          DataCell(Text(adminData.name ?? "none")),
+          DataCell(Text(adminData.phoneNumber ?? "none")),
+          DataCell(Text(adminData.ranks ?? "none")),
+          DataCell(
+            InkWell(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return buildAlertDialog(context);
+                    });
+                // Add your custom logic here
+              },
+              child: Text(
+                adminData.status == 'WAIT' ? "대기" : "승인",
+                style: TextStyle(
+                  color: adminData.status == 'WAIT' ? Colors.red : Colors.blue,
+                ), // Set the text color to blue
               ),
-            );
-          } else {
-            return DataCell(Text(cellData));
-          }
-        }).toList(),
+            ),
+          ),
+        ],
       );
     }).toList();
   }

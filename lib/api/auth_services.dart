@@ -48,7 +48,8 @@ class AuthRepository {
         Map<String, dynamic> responseData = response.data;
         Map<String, dynamic> adminData = responseData['headers'];
         String token = adminData['Authorization'][0];
-        secureStorage.setAccessToken(token);
+        print("token : ${token}");
+        //secureStorage.setAccessToken(token);
       } else {
         print('로그인 실패: ${response.statusCode}');
       }

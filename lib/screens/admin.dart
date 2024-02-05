@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:haru_admin/api/auth_services.dart';
+import 'package:haru_admin/utils/secure_storage.dart';
+
+import 'package:dio/dio.dart';
+import 'package:haru_admin/api/network/log_interceptor.dart';
+import 'package:haru_admin/widgets/colors.dart';
 
 class Admin extends StatefulWidget {
   const Admin({super.key});
@@ -14,6 +20,37 @@ class _AdminState extends State<Admin> {
     ['001', 'user1', 'John Doe', '123-456-7890', 'Admin', '대기'],
     ['002', 'user2', 'Jane Smith', '987-654-3210', 'User', '승인'],
   ];
+
+  final Dio dio = Dio(BaseOptions(
+    baseUrl: "https://www.haruhangeul.com",
+    contentType: 'application/json',
+  ))
+    ..interceptors.add(CustomLogInterceptor());
+
+  getAdminList(String? token, int pageNumber) async {
+    try {
+      final response = await dio.get(
+        //'/role-list?page=$pageNumber',
+        '/admin',
+        options: Options(headers: {
+          'Authorization': 'Bearer $token',
+        }),
+      );
+      final adminData = response.data;
+      print(adminData);
+      return adminData;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAdminList(
+        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcm9udCIsImlhdCI6MTcwNzEyMTgwOCwiZXhwIjoxNzE1NzYxODA4fQ.Lj5kDiyhu1oGMqu1hqdA506Xdh2Y30xgX2wtYPjhQ9o",
+        1);
+  }
 
   @override
   Widget build(BuildContext context) {

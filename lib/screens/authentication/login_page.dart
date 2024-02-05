@@ -89,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                           } else {
                             authRepository.loginPressed(adminIdController.text,
                                 passwordController.text);
+                            context.go('/admin');
                           }
                         },
                         child: const Text('로그인')),

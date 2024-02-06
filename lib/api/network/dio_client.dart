@@ -28,9 +28,9 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     // 인증이 필요 없는 API 인 경우
-    if (options.uri.path.startsWith('/login') ||
-        options.uri.path.startsWith('/signup')) {
-      return super.onRequest(options, handler);
+    if (options.uri.path.startsWith('/admin/login') ||
+        options.uri.path.startsWith('/admin/signup')) {
+      return handler.next(options);
     }
 
     // storage로부터 토큰을 가져온다.
@@ -38,14 +38,13 @@ class AuthInterceptor extends Interceptor {
 
     // 토큰이 없으면 reject
     if (userToken == null) {
-      handler.reject(DioException(requestOptions: options));
+      throw DioError(requestOptions: options, error: 'User token is null');
     }
 
     // 토큰 유효성 검증.
-    super.onRequest(
-      options..headers['Authorization'] = 'Bearer $userToken',
-      handler,
-    );
+    options.headers['Authorization'] = userToken;
+
+    return handler.next(options);
   }
 }
     // TODO - 세션 방법으로 해야됨. 밑에는 refreshtoken jwt 방법임

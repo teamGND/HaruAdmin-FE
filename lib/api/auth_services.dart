@@ -60,9 +60,9 @@ class AuthRepository {
       } else {
         print('로그인 실패: ${response.statusCode}');
       }
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.badResponse) {
-        print('로그인 실패: ${e.response?.data}');
+    } catch (e) {
+      if (e == DioErrorType.connectTimeout) {
+        print('로그인 실패: ${e.toString()}');
       } else {
         print('로그인 중 예외 발생 $e');
       }

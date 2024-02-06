@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/auth_services.dart';
 import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/colors.dart';
@@ -57,69 +58,87 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Scaffold(
-          body: Padding(
-              padding: const EdgeInsets.only(top: 30),
-              child: Center(
-                child: Column(children: [
-                  const Text(
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(30),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    context
+                        .go('/login'); // Navigate back to the previous screen
+                  },
+                ),
+                const Center(
+                  child: Text(
                     'HaruHangeul\nAdmin\nSign Up',
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(
+                ),
+                Center(
+                  child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.8,
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const LineDivider(thick: 2),
-                        signUpuserId(),
-                        const LineDivider(thick: 1),
-                        signUpPassword(),
-                        const LineDivider(thick: 1),
-                        checkPassword(),
-                        const LineDivider(thick: 1),
-                        rank(),
-                        const LineDivider(thick: 1),
-                        signUpUsername(),
-                        const LineDivider(thick: 1),
-                        phoneNumber(),
-                        const LineDivider(thick: 2),
-                        TextButton(
-                            style: TextButton.styleFrom(
-                              backgroundColor: blueColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 130,
-                                vertical: 25,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const LineDivider(thick: 2),
+                          signUpuserId(),
+                          const LineDivider(thick: 1),
+                          signUpPassword(),
+                          const LineDivider(thick: 1),
+                          checkPassword(),
+                          const LineDivider(thick: 1),
+                          rank(),
+                          const LineDivider(thick: 1),
+                          signUpUsername(),
+                          const LineDivider(thick: 1),
+                          phoneNumber(),
+                          const LineDivider(thick: 2),
+                          TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: blueColor,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 130,
+                                  vertical: 25,
+                                ),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(7)),
+                                ),
                               ),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(7)),
-                              ),
-                            ),
-                            onPressed: () async {
-                              if (!saveAndValidateForm(_formKey)) {
-                                return;
-                              }
-                              await authRepository.signup(
-                                adminIdController.text,
-                                passwordController.text,
-                                adminNameController.text,
-                                selectedRank,
-                                phoneNumberController.text,
-                              );
-                            },
-                            child: const Text('회원가입')),
-                      ],
+                              onPressed: () async {
+                                if (!saveAndValidateForm(_formKey)) {
+                                  return;
+                                }
+                                await authRepository.signup(
+                                  adminIdController.text,
+                                  passwordController.text,
+                                  adminNameController.text,
+                                  selectedRank,
+                                  phoneNumberController.text,
+                                );
+                              },
+                              child: const Text('회원가입')),
+                        ],
+                      ),
                     ),
                   ),
-                ]),
-              ))),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

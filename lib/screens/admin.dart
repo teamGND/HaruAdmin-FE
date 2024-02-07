@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:haru_admin/utils/secure_storage.dart';
-
-import 'package:dio/dio.dart';
-import 'package:haru_admin/api/network/log_interceptor.dart';
-import 'package:haru_admin/model/auth_model.dart';
-//  import 'package:haru_admin/widgets/colors.dart';
+import 'package:haru_admin/api/auth_services.dart';
+import 'package:haru_admin/api/network/dio_client.dart';
 
 class Admin extends StatefulWidget {
   const Admin({super.key});
@@ -19,36 +15,19 @@ class _AdminState extends State<Admin> {
   int totalElements = 0;
   List<dynamic> adminData = [];
 
-  final Dio dio = Dio(BaseOptions(
-    baseUrl: "https://www.haruhangeul.com/admin",
-    contentType: 'application/json',
-  ))
-    ..interceptors.add(CustomLogInterceptor());
-
-  getAdminList(int pageNumber) async {
-    try {
-      final response = await dio.get(
-        '/role-list?page=$pageNumber',
-        options: Options(headers: {
-          'Authorization':
-              'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcm9udCIsImlhdCI6MTcwNzEyMTgwOCwiZXhwIjoxNzE1NzYxODA4fQ.Lj5kDiyhu1oGMqu1hqdA506Xdh2Y30xgX2wtYPjhQ9o',
-        }),
-      );
-      setState(() {
-        adminData =
-            response.data['content'].map((e) => AdminList.fromJson(e)).toList();
-        totalPage = response.data['totalPages'];
-        totalElements = response.data['totalElements'];
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
+  final dio = DioClient().provideDio();
+  final authRepository = AuthRepository();
 
   @override
   void initState() {
     super.initState();
-    getAdminList(1);
+    authRepository.getAdminList(1).then((value) {
+      setState(() {
+        adminData = value['adminData'];
+        totalPage = value['totalPage'];
+        totalElements = value['totalElements'];
+      });
+    });
   }
 
   @override
@@ -66,7 +45,6 @@ class _AdminState extends State<Admin> {
             columns: _buildColumns(),
             rows: _buildRows(),
           ),
-          // page number list button navigation
           Container(
             margin: const EdgeInsets.only(top: 20),
             child: Container(
@@ -77,7 +55,13 @@ class _AdminState extends State<Admin> {
                   for (int i = 1; i <= totalPage; i++)
                     TextButton(
                       onPressed: () {
-                        getAdminList(i);
+                        authRepository.getAdminList(i).then((value) {
+                          setState(() {
+                            adminData = value['adminData'];
+                            totalPage = value['totalPage'];
+                            totalElements = value['totalElements'];
+                          });
+                        });
                       },
                       child: Text(
                         '$i',

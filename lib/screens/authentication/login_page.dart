@@ -31,12 +31,6 @@ class _LoginPageState extends State<LoginPage> {
     //checkToken();
   }
 
-  // void checkToken() async {
-  //회원가입 이력이 있다.(get으로 admininfo에 요청 응답이 오면 정보가 있다는 의미) = 로그인화면으로 -> 로그인 -> 토큰 저장(final accessToken = await secureStorage.getAccessToken();) -> 마이페이지 화면
-  //다음 번 접속시 토큰이 있다. = 자동 로그인(마이페이지로 보내기)
-  //회원가입 안 한 상태에서 로그인 버튼을 누르면, showAlertDialog ('해당 관리자 계정이 존재하지 않습니다. 회원가입을 진행해주세요')
-  //-> 아이디랑 비밀번호 입력받기 -> 서버로 보내기 -> 응답받아서 예전에 요청 보낸 적이 있는지 확인
-//}
   @override
   void dispose() {
     adminIdController.dispose();
@@ -68,7 +62,6 @@ class _LoginPageState extends State<LoginPage> {
                     const Divider(thickness: 1),
                     password(),
                     const Divider(thickness: 1),
-                    // 로그인 버튼 누르는 숫자 카운트 10번까지 10이 되면, 로그인 접근 막기->관리자에게 문의해주세요 메세지 프린트
                     TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: blueColor,
@@ -81,15 +74,16 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.all(Radius.circular(7)),
                           ),
                         ),
-
-                        // 로그인 버튼을 누를 때, 토큰 발급
                         onPressed: () async {
                           if (_formKey.currentState!.validate() == false) {
                             return;
                           } else {
-                            authRepository.loginPressed(adminIdController.text,
-                                passwordController.text);
-                            context.go('/admin');
+                            await authRepository
+                                .loginPressed(adminIdController.text,
+                                    passwordController.text)
+                                .then((value) {
+                              context.go('/admin');
+                            });
                           }
                         },
                         child: const Text('로그인')),

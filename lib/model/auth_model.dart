@@ -15,7 +15,7 @@ class AdminSignUp {
 
   factory AdminSignUp.fromJson(Map<String, dynamic> jsondata) {
     return AdminSignUp(
-        adminId: jsondata['amdinId'], //adminId key에 있는 value 값을 가져옴
+        adminId: jsondata['amdinId'],
         password: jsondata['password'],
         name: jsondata['name'],
         ranks: jsondata['ranks'],
@@ -36,6 +36,28 @@ class AdminLogin {
   factory AdminLogin.fromJson(Map<String, dynamic> jsondata) {
     return AdminLogin(
         adminId: jsondata['adminId'], password: jsondata['password']);
+  }
+}
+
+class MyInfo {
+  int adminId;
+  String? name;
+  String? rank;
+  String? phoneNumber;
+
+  MyInfo({
+    required this.adminId,
+    this.name,
+    this.rank,
+    this.phoneNumber,
+  });
+
+  factory MyInfo.fromJson(Map<String, dynamic> jsondata) {
+    return MyInfo(
+        adminId: jsondata['seq'],
+        name: jsondata['name'],
+        rank: jsondata['rank'],
+        phoneNumber: jsondata['phoneNumber']);
   }
 }
 

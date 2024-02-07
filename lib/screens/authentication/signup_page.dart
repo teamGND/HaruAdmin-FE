@@ -149,10 +149,7 @@ class _SignUpPageState extends State<SignUpPage> {
           backgroundColor: hintTextColor,
         ),
         onPressed: () async {
-          if (_formKey.currentState!.validate() == false) {
-            return;
-          }
-          authRepository.adminIdCheck(adminIdController.text);
+          await authRepository.adminIdCheck(adminIdController.text);
         },
         child: isIdavailable ? const Icon(Icons.check) : const Text('중복확인'),
       ),

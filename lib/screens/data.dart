@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:dio/dio.dart';
-import 'package:haru_admin/api/network/log_interceptor.dart';
+import 'package:haru_admin/api/network/dio_client.dart';
+import 'package:haru_admin/api/auth_services.dart';
 import 'package:haru_admin/model/auth_model.dart';
 import 'package:haru_admin/widgets/colors.dart';
 
@@ -18,38 +18,16 @@ class _TotalDataState extends State<TotalData> {
   int totalElements = 0;
   List<dynamic> testData = [];
 
-  final Dio dio = Dio(BaseOptions(
-    baseUrl: "https://www.haruhangeul.com/admin",
-    contentType: 'application/json',
-  ))
-    ..interceptors.add(CustomLogInterceptor());
-
-  getdataList() async {
-    try {
-      final response = await dio.get(
-        '/test-list',
-        options: Options(headers: {
-          'Authorization':
-              'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcm9udCIsImlhdCI6MTcwNzEyMTgwOCwiZXhwIjoxNzE1NzYxODA4fQ.Lj5kDiyhu1oGMqu1hqdA506Xdh2Y30xgX2wtYPjhQ9o',
-        }),
-      );
-      setState(() {
-        testData =
-            response.data['content'].map((e) => AdminList.fromJson(e)).toList();
-        totalPage = response.data['totalPages'];
-        totalElements = response.data['totalElements'];
-
-        print(testData);
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
+  final AuthRepository authRepository = AuthRepository();
 
   @override
   void initState() {
     super.initState();
-    getdataList();
+    authRepository.getdataList().then((value) {
+      setState(() {
+        print(value);
+      });
+    });
   }
 
   @override
@@ -60,14 +38,9 @@ class _TotalDataState extends State<TotalData> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const SizedBox(height: 50),
-          const Text('관리자 계정 관리',
+          const Text('전체 데이터',
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
-          // DataTable(
-          //   columns: _buildColumns(),
-          //   rows: _buildRows(),
-          // ),
-          // page number list button navigation
           Container(
             margin: const EdgeInsets.only(top: 20),
             child: Container(
@@ -78,7 +51,11 @@ class _TotalDataState extends State<TotalData> {
                   for (int i = 1; i <= totalPage; i++)
                     TextButton(
                       onPressed: () {
-                        getdataList();
+                        // authRepository.getdataList().then((value) {
+                        //   setState(() {
+                        //     testData = value['testData'];
+                        //   });
+                        // });
                       },
                       child: Text(
                         '$i',

@@ -12,7 +12,7 @@ final GlobalKey<NavigatorState> _shellNavigatorKey =
 
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/admin',
+  initialLocation: '/login',
   routes: [
     GoRoute(
       path: '/login',

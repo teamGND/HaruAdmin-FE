@@ -120,13 +120,38 @@ class _SignUpPageState extends State<SignUpPage> {
                                 if (!saveAndValidateForm(_formKey)) {
                                   return;
                                 }
-                                await authRepository.signup(
-                                  adminIdController.text,
-                                  passwordController.text,
-                                  adminNameController.text,
-                                  selectedRank,
-                                  phoneNumberController.text,
-                                );
+                                await authRepository
+                                    .signup(
+                                      adminIdController.text,
+                                      passwordController.text,
+                                      adminNameController.text,
+                                      selectedRank,
+                                      phoneNumberController.text,
+                                    )
+                                    .then((response) => {
+                                          context.go('/login'),
+                                        })
+                                    .catchError((e) => {
+                                          print('회원가입 실패: $e'),
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text('회원가입 실패'),
+                                                  content:
+                                                      const Text('다시 확인해주세요'),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      child: const Text('확인'),
+                                                    ),
+                                                  ],
+                                                );
+                                              })
+                                        });
                               },
                               child: const Text('회원가입')),
                         ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:haru_admin/api/auth_services.dart';
+import 'package:haru_admin/api/network/dio_client.dart';
 
 class Admin extends StatefulWidget {
   const Admin({super.key});
@@ -9,27 +11,71 @@ class Admin extends StatefulWidget {
 
 class _AdminState extends State<Admin> {
   final content = ['사번', '아이디', '이름', '연락처', '관리자 권한', '상태'];
-  final List<List<String>> rowData = [
-    // example
-    ['001', 'user1', 'John Doe', '123-456-7890', 'Admin', '대기'],
-    ['002', 'user2', 'Jane Smith', '987-654-3210', 'User', '승인'],
-  ];
+  int totalPage = 1;
+  int totalElements = 0;
+  List<dynamic> adminData = [];
+
+  final dio = DioClient().provideDio();
+  final authRepository = AuthRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    authRepository.getAdminList(1).then((value) {
+      setState(() {
+        adminData = value['adminData'];
+        totalPage = value['totalPage'];
+        totalElements = value['totalElements'];
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        const SizedBox(height: 50),
-        const Text('관리자 계정 관리',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        DataTable(
-          columns: _buildColumns(),
-          rows: _buildRows(),
-        )
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(height: 50),
+          const Text('관리자 계정 관리',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          DataTable(
+            columns: _buildColumns(),
+            rows: _buildRows(),
+          ),
+          Container(
+            margin: const EdgeInsets.only(top: 20),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (int i = 1; i <= totalPage; i++)
+                    TextButton(
+                      onPressed: () {
+                        authRepository.getAdminList(i).then((value) {
+                          setState(() {
+                            adminData = value['adminData'];
+                            totalPage = value['totalPage'];
+                            totalElements = value['totalElements'];
+                          });
+                        });
+                      },
+                      child: Text(
+                        '$i',
+                        style: const TextStyle(
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -45,34 +91,33 @@ class _AdminState extends State<Admin> {
   }
 
   List<DataRow> _buildRows() {
-    return rowData.map((List<String> rowData) {
+    return adminData.map((adminData) {
       return DataRow(
-        cells: rowData.map((String cellData) {
-          if (rowData.indexOf(cellData) == 5) {
-            return DataCell(
-              InkWell(
-                onTap: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return buildAlertDialog(context);
-                      });
-                  // Add your custom logic here
-                },
-                child: Text(
-                  cellData,
-                  style: TextStyle(
-                    color: cellData == '승인'
-                        ? Colors.blue
-                        : (cellData == '대기' ? Colors.red : Colors.black),
-                  ), // Set the text color to blue
-                ),
+        cells: [
+          DataCell(Text(adminData.id.toString())),
+          DataCell(Text(adminData.adminId ?? "none")),
+          DataCell(Text(adminData.name ?? "none")),
+          DataCell(Text(adminData.phoneNumber ?? "none")),
+          DataCell(Text(adminData.ranks ?? "none")),
+          DataCell(
+            InkWell(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return buildAlertDialog(context);
+                    });
+                // Add your custom logic here
+              },
+              child: Text(
+                adminData.status == 'WAIT' ? "대기" : "승인",
+                style: TextStyle(
+                  color: adminData.status == 'WAIT' ? Colors.red : Colors.blue,
+                ), // Set the text color to blue
               ),
-            );
-          } else {
-            return DataCell(Text(cellData));
-          }
-        }).toList(),
+            ),
+          ),
+        ],
       );
     }).toList();
   }

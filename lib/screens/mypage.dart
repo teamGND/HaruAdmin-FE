@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:haru_admin/api/auth_services.dart';
+import 'package:haru_admin/model/auth_model.dart';
 
 class Mypage extends StatefulWidget {
   const Mypage({Key? key}) : super(key: key);
@@ -8,13 +10,64 @@ class Mypage extends StatefulWidget {
 }
 
 class _MypageState extends State<Mypage> {
-  var info = [
-    {'key': '아이디', 'val': "test", 'chage': false},
-    {'key': '비밀번호', 'val': "testpw", 'chage': true},
-    {'key': '이름', 'val': "testname", 'chage': true},
-    {'key': '연락처', 'val': "010-xx", 'chage': true},
-    {'key': '관리자등급', 'val': "test", 'chage': false},
-  ];
+  dynamic myInfo;
+  AuthRepository authRepository = AuthRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    authRepository.getMyInfo().then((value) {
+      setState(() {
+        myInfo = value;
+      });
+    });
+  }
+
+  Widget buildInfoList(String text, String content, bool change) {
+    return Container(
+        height: 50,
+        width: MediaQuery.of(context).size.width * 0.6,
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(width: 0.8, color: Colors.grey),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              color: const Color.fromARGB(255, 244, 244, 244),
+              height: 48,
+              padding: const EdgeInsets.all(10),
+              width: MediaQuery.of(context).size.width * 0.2,
+              child: Text(text),
+            ),
+            Container(
+              padding: const EdgeInsets.all(10),
+              child: Text(content),
+            ),
+            const SizedBox(width: 30),
+            if (change)
+              TextButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return changeAdminPopUp(
+                        context: context,
+                        title: text,
+                        content: content,
+                      );
+                    },
+                  );
+                },
+                child: const Text(
+                  '변경',
+                  style: TextStyle(color: Colors.blueAccent),
+                ),
+              )
+          ],
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,50 +88,10 @@ class _MypageState extends State<Mypage> {
                     child: const Text('나의 관리자 정보',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold))),
-                for (var i in info)
-                  Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width * 0.6,
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(width: 0.8, color: Colors.grey),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            color: const Color.fromARGB(255, 244, 244, 244),
-                            height: 48,
-                            padding: const EdgeInsets.all(10),
-                            width: MediaQuery.of(context).size.width * 0.2,
-                            child: Text(i['key'] as String),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            child: Text(i['val'] as String),
-                          ),
-                          const SizedBox(width: 30),
-                          if (i['chage'] as bool)
-                            TextButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return changeAdminPopUp(
-                                      context: context,
-                                      title: i['key'] as String,
-                                      content: i['val'] as String,
-                                    );
-                                  },
-                                );
-                              },
-                              child: const Text(
-                                '변경',
-                                style: TextStyle(color: Colors.blueAccent),
-                              ),
-                            )
-                        ],
-                      )),
+                buildInfoList('사번', myInfo.adminId.toString(), false),
+                buildInfoList('아이디', myInfo.name.toString(), true),
+                buildInfoList('등급', myInfo.rank.toString(), true),
+                buildInfoList('연락처', myInfo.phoneNumber.toString(), true),
               ],
             )));
   }

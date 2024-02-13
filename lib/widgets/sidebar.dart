@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../utils/routing_url.dart';
+import 'package:haru_admin/utils/routing_url.dart';
+import 'package:haru_admin/utils/secure_storage.dart';
 
 class SideBar extends StatefulWidget {
   const SideBar({
@@ -19,7 +20,29 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
-  int selectedIndex = 0; // Initially, no item is selected
+  String selectedURL = '/admin';
+
+  Widget sideBarComponent(url) {
+    return Column(children: [
+      for (var index = 0; index < url.length; index++)
+        ListTile(
+          title: Text(
+            url[index].getName,
+            style: TextStyle(
+              color: selectedURL == url[index].getPath
+                  ? Colors.blue
+                  : Colors.black,
+            ),
+          ),
+          onTap: () {
+            setState(() {
+              selectedURL = url[index].getPath;
+            });
+            context.go(url[index].getPath);
+          },
+        ),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,22 +64,28 @@ class _SideBarState extends State<SideBar> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
-                for (var index = 0; index < routingURL.length; index++)
-                  ListTile(
-                    title: Text(
-                      routingURL[index].getName,
-                      style: TextStyle(
-                        color:
-                            selectedIndex == index ? Colors.blue : Colors.black,
-                      ),
+                sideBarComponent(manageURL),
+                const Divider(
+                  thickness: 2,
+                ),
+                sideBarComponent(dataURL),
+                const Divider(
+                  thickness: 2,
+                ),
+                sideBarComponent(myURL),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text(
+                    'Logout',
+                    style: TextStyle(
+                      color: Colors.black,
                     ),
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = index;
-                      });
-                      context.go(routingURL[index].getPath);
-                    },
                   ),
+                  onTap: () {
+                    SecureStorage().deleteAccessToken();
+                    context.go('/login');
+                  },
+                ),
               ],
             ),
           ),

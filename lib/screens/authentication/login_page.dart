@@ -81,9 +81,32 @@ class _LoginPageState extends State<LoginPage> {
                             await authRepository
                                 .loginPressed(adminIdController.text,
                                     passwordController.text)
-                                .then((value) {
-                              context.go('/admin');
-                            });
+                                .then((response) => {
+                                      if (response.statusCode == 200)
+                                        {
+                                          context.go('/mypage'),
+                                        }
+                                    })
+                                .catchError((e) => {
+                                      print('로그인 실패: $e'),
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('로그인 실패'),
+                                              content: const Text(
+                                                  '아이디와 비밀번호를 확인해주세요'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text('확인'),
+                                                ),
+                                              ],
+                                            );
+                                          })
+                                    });
                           }
                         },
                         child: const Text('로그인')),

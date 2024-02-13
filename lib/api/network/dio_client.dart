@@ -51,25 +51,8 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 400) {
-      print(
-          'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.uri.path}\n');
-      print('DATA : ${err.response?.data}\n');
-      return;
-    }
-    if (err.response?.statusCode == 401) {
-      print(
-          'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.uri.path}\n');
-      return;
-    }
-    if (err.response?.statusCode == 500) {
-      print(
-          'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.uri.path}\n');
-      return;
-    }
-
     print(
-      'ERROR[${err.response?.statusCode}] => PATH: ${err.requestOptions.uri.path}\n',
+      'ERROR[${err.response}] => PATH: ${err.requestOptions.uri.path}\n',
     );
     super.onError(err, handler);
   }

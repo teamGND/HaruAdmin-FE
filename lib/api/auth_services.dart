@@ -63,7 +63,6 @@ class AuthRepository {
         '/id-validate/$adminId',
       );
       // alert 창 띄우기
-
       if (response.statusCode == 200) {
         print('사용 가능한 아이디입니다.');
       } else {
@@ -109,10 +108,6 @@ class AuthRepository {
     try {
       final response = await dio.get(
         '/test-list',
-        options: Options(headers: {
-          'Authorization':
-              'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmcm9udCIsImlhdCI6MTcwNzEyMTgwOCwiZXhwIjoxNzE1NzYxODA4fQ.Lj5kDiyhu1oGMqu1hqdA506Xdh2Y30xgX2wtYPjhQ9o',
-        }),
       );
     } catch (e) {
       print("error : $e");

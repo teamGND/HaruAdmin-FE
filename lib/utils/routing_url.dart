@@ -8,6 +8,8 @@ import '../screens/authentication/signup_page.dart';
 import '../screens/intro.dart';
 import '../screens/mypage.dart';
 import '../screens/data.dart';
+import '../screens/add_grammer_data.dart';
+import '../screens/add_vocadata.dart';
 import '../screens/grammer.dart';
 import '../screens/voca_data.dart';
 
@@ -47,9 +49,17 @@ final List<RouteState> dataURL = [
   RouteState(
       routepage: const VocaData(), routepath: '/vocadata', routename: '단어 데이터'),
   RouteState(
+      routepage: const ModifyVoca(),
+      routepath: '/addvocadata',
+      routename: '단어 데이터 추가'),
+  RouteState(
       routepage: const GrammerData(),
       routepath: '/grammerdata',
       routename: '문법 데이터'),
+  RouteState(
+      routepage: const ModifyGrammer(),
+      routepath: '/addgrammerdata',
+      routename: '문법 데이터 추가'),
 ];
 
 final List<RouteState> myURL = [

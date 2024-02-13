@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/api/auth_services.dart';
-import 'package:haru_admin/model/auth_model.dart';
 
 class Mypage extends StatefulWidget {
   const Mypage({Key? key}) : super(key: key);

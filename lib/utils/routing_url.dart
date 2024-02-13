@@ -8,6 +8,8 @@ import '../screens/authentication/signup_page.dart';
 import '../screens/intro.dart';
 import '../screens/mypage.dart';
 import '../screens/data.dart';
+import '../screens/grammer.dart';
+import '../screens/voca_data.dart';
 
 class RouteState {
   final String routepath; // path
@@ -42,6 +44,12 @@ final List<RouteState> dataURL = [
       routepage: const Intro(), routepath: '/intro', routename: '인트로 데이터'),
   RouteState(
       routepage: const TotalData(), routepath: '/data', routename: '총 데이터'),
+  RouteState(
+      routepage: const VocaData(), routepath: '/vocadata', routename: '단어 데이터'),
+  RouteState(
+      routepage: const GrammerData(),
+      routepath: '/grammerdata',
+      routename: '문법 데이터'),
 ];
 
 final List<RouteState> myURL = [

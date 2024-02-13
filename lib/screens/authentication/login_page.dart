@@ -60,7 +60,6 @@ class _LoginPageState extends State<LoginPage> {
                     const Divider(thickness: 1),
                     password(),
                     const Divider(thickness: 1),
-                    // 로그인 버튼 누르는 숫자 카운트 10번까지 10이 되면, 로그인 접근 막기->관리자에게 문의해주세요 메세지 프린트
                     TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: blueColor,
@@ -73,17 +72,36 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.all(Radius.circular(7)),
                           ),
                         ),
-
-                        // 로그인 버튼을 누를 때, 토큰 발급
                         onPressed: () async {
                           if (_formKey.currentState!.validate() == false) {
                             return;
                           } else {
-                            authRepository.loginPressed(
-                              adminIdController.text,
-                              passwordController.text,
-                            );
-                            //context.go('/mypage');
+                            await authRepository
+                                .loginPressed(adminIdController.text,
+                                    passwordController.text)
+                                .then((response) => {
+                                      context.go('/mypage'),
+                                    })
+                                .catchError((e) => {
+                                      print('로그인 실패: $e'),
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('로그인 실패'),
+                                              content: const Text(
+                                                  '아이디와 비밀번호를 확인해주세요'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: const Text('확인'),
+                                                ),
+                                              ],
+                                            );
+                                          })
+                                    });
                           }
                         },
                         child: const Text('로그인')),

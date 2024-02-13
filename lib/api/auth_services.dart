@@ -1,19 +1,16 @@
+import 'package:flutter/material.dart';
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:haru_admin/model/auth_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
 
 class AuthRepository {
   final dio = DioClient().provideDio();
+  SecureStorage secureStorage = SecureStorage();
 
-//회원가입 로직
-  signup(
-    adminId,
-    password,
-    name,
-    ranks,
-    phoneNumber,
-  ) async {
+  signup(adminId, password, name, ranks, phoneNumber) async {
     try {
       Map<String, dynamic> requestBody = {
         "adminId": '$adminId',
@@ -39,7 +36,6 @@ class AuthRepository {
     }
   }
 
-//로그인 로직
   loginPressed(
     adminId,
     password,
@@ -55,34 +51,70 @@ class AuthRepository {
         Map<String, dynamic> responseData = response.data;
         Map<String, dynamic> adminData = responseData['headers'];
         String token = adminData['Authorization'][0];
-        SecureStorage secureStorage = SecureStorage();
+        print('로그인 성공: $token');
         secureStorage.setAccessToken(token);
       } else {
         print('로그인 실패: ${response.statusCode}');
       }
     } catch (e) {
-      if (e == DioErrorType.connectTimeout) {
-        print('로그인 실패: ${e.toString()}');
-      } else {
-        print('로그인 중 예외 발생 $e');
-      }
+      print('로그인 중 예외 발생 $e');
     }
   }
 
-  // 아이디 중복체크
-  adminIdCheck(
-    String adminId,
-  ) async {
+  adminIdCheck(adminId) async {
     try {
-      Response response =
-          await dio.post('/id-validate/$adminId', data: adminId);
-
+      final response = await dio.get(
+        '/id-validate/$adminId',
+      );
+      // alert 창 띄우기
       if (response.statusCode == 200) {
-        json.decode(response.data.toString());
-        print(response.data);
+        print('사용 가능한 아이디입니다.');
+      } else {
+        print('이미 사용중인 아이디입니다.');
       }
     } catch (e) {
-      print('$e');
+      print("error : $e");
+    }
+  }
+
+  getMyInfo() async {
+    try {
+      final response = await dio.get(
+        '/',
+      );
+      final myInfo = MyInfo.fromJson(response.data);
+      return myInfo;
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  getAdminList(int pageNumber) async {
+    try {
+      final response = await dio.get(
+        '/role-list?page=$pageNumber',
+      );
+      final testData =
+          response.data['content'].map((e) => AdminList.fromJson(e)).toList();
+      final totalPage = response.data['totalPages'];
+      final totalElements = response.data['totalElements'];
+      return {
+        'adminData': testData,
+        'totalPage': totalPage,
+        'totalElements': totalElements
+      };
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  getdataList() async {
+    try {
+      final response = await dio.get(
+        '/test-list',
+      );
+    } catch (e) {
+      print("error : $e");
     }
   }
 }

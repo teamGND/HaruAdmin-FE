@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                                 .loginPressed(adminIdController.text,
                                     passwordController.text)
                                 .then((response) => {
-                                      context.go('/mypage'),
+                                      context.go('/admin'),
                                     })
                                 .catchError((e) => {
                                       print('로그인 실패: $e'),

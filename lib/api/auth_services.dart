@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:haru_admin/model/auth_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
 

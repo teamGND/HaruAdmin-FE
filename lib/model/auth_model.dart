@@ -1,17 +1,17 @@
 class AdminSignUp {
-  String adminId;
-  String password;
-  String name;
-  String ranks;
-  String phoneNumber;
+  String? adminId;
+  String? password;
+  String? name;
+  String? ranks;
+  String? phoneNumber;
 
-  AdminSignUp(
+  AdminSignUp({
     this.adminId,
     this.password,
     this.name,
     this.ranks,
     this.phoneNumber,
-  );
+  });
 
   factory AdminSignUp.fromJson(Map<String, dynamic> jsondata) {
     return AdminSignUp(

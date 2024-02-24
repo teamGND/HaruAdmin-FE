@@ -42,79 +42,85 @@ class _LoginPageState extends State<LoginPage> {
       key: _formKey,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Padding(
-          padding: const EdgeInsets.only(top: 200),
-          child: Center(
-            child: Column(children: [
-              const Text(
-                'HaruHangeul\nAdmin Page',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.6,
-                child: Column(
-                  children: [
-                    const Divider(thickness: 2),
-                    userId(),
-                    const Divider(thickness: 1),
-                    password(),
-                    const Divider(thickness: 1),
-                    TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: blueColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 130,
-                            vertical: 25,
-                          ),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(7)),
-                          ),
-                        ),
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate() == false) {
-                            return;
-                          } else {
-                            await authRepository
-                                .loginPressed(adminIdController.text,
-                                    passwordController.text)
-                                .then((response) => {
-                                      context.go('/admin'),
-                                    })
-                                .catchError((e) => {
-                                      print('로그인 실패: $e'),
-                                      showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text('로그인 실패'),
-                                              content: const Text(
-                                                  '아이디와 비밀번호를 확인해주세요'),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: const Text('확인'),
-                                                ),
-                                              ],
-                                            );
-                                          })
-                                    });
-                          }
-                        },
-                        child: const Text('로그인')),
-                    TextButton(
-                        onPressed: () {
-                          context.go('/signup');
-                        },
-                        child: const Text('회원가입'))
-                  ],
+        body: Center(
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'HaruHangeul\nAdmin Page',
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ]),
-          ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Column(
+                    children: [
+                      const Divider(thickness: 2),
+                      userId(),
+                      const Divider(thickness: 1),
+                      password(),
+                      const Divider(thickness: 1),
+                      TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: blueColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 130,
+                              vertical: 25,
+                            ),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(7)),
+                            ),
+                          ),
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate() == false) {
+                              return;
+                            } else {
+                              await authRepository
+                                  .loginPressed(adminIdController.text,
+                                      passwordController.text)
+                                  .then((response) => {
+                                        print(response),
+                                        if (response.statusCode == 200)
+                                          {
+                                            context.go('/admin'),
+                                          }
+                                      })
+                                  .catchError((e) => {
+                                        print('로그인 실패: $e'),
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: const Text('로그인 실패'),
+                                                content: const Text(
+                                                    '아이디와 비밀번호를 확인해주세요'),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                    child: const Text('확인'),
+                                                  ),
+                                                ],
+                                              );
+                                            })
+                                      });
+                            }
+                          },
+                          child: const Text('로그인')),
+                      TextButton(
+                          onPressed: () {
+                            context.go('/signup');
+                          },
+                          child: const Text('회원가입'))
+                    ],
+                  ),
+                ),
+              ]),
         ),
       ),
     );
@@ -122,7 +128,6 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget userId() {
     return RowItems(
-      useDropdownMenu: false,
       infoname: '아이디',
       obscureText: false,
       controller: adminIdController,
@@ -140,7 +145,6 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget password() {
     return RowItems(
-      useDropdownMenu: false,
       infoname: '비밀번호',
       obscureText: true,
       onSaved: (value) {

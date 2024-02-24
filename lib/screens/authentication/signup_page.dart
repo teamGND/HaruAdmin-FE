@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/colors.dart';
 import 'package:haru_admin/widgets/divider.dart';
 import 'package:haru_admin/widgets/rowitems.dart';
+import 'package:go_router/go_router.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -21,7 +22,8 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController adminNameController = TextEditingController();
-  TextEditingController rankController = TextEditingController();
+
+  String rankController = 'MASTER';
   TextEditingController phoneNumberController = TextEditingController();
 
   @override
@@ -31,7 +33,6 @@ class _SignUpPageState extends State<SignUpPage> {
     passwordController = TextEditingController(text: '');
     confirmPasswordController = TextEditingController(text: '');
     adminNameController = TextEditingController(text: '');
-    rankController = TextEditingController(text: '');
     phoneNumberController = TextEditingController(text: '');
     authRepository = AuthRepository();
   }
@@ -42,7 +43,6 @@ class _SignUpPageState extends State<SignUpPage> {
     passwordController.dispose();
     confirmPasswordController.dispose();
     adminNameController.dispose();
-    rankController.dispose();
     phoneNumberController.dispose();
 
     super.dispose();
@@ -58,119 +58,139 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
+    return Form(
+      key: _formKey,
+      child: Scaffold(
+          body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    context
-                        .go('/login'); // Navigate back to the previous screen
-                  },
+            padding: const EdgeInsets.only(top: 30),
+            child: Center(
+              child: Column(children: [
+                const Text(
+                  'HaruHangeul\nAdmin\nSign Up',
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                const Center(
-                  child: Text(
-                    'HaruHangeul\nAdmin\nSign Up',
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const LineDivider(thick: 2),
+                      signUpuserId(),
+                      const LineDivider(thick: 1),
+                      signUpPassword(),
+                      const LineDivider(thick: 1),
+                      checkPassword(),
+                      const LineDivider(thick: 1),
+                      Row(
                         children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          const LineDivider(thick: 2),
-                          signUpuserId(),
-                          const LineDivider(thick: 1),
-                          signUpPassword(),
-                          const LineDivider(thick: 1),
-                          checkPassword(),
-                          const LineDivider(thick: 1),
-                          rank(),
-                          const LineDivider(thick: 1),
-                          signUpUsername(),
-                          const LineDivider(thick: 1),
-                          phoneNumber(),
-                          const LineDivider(thick: 2),
-                          TextButton(
-                              style: TextButton.styleFrom(
-                                backgroundColor: blueColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 130,
-                                  vertical: 25,
-                                ),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(7)),
-                                ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            child: const Text(
+                              "권한",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
                               ),
-                              onPressed: () async {
-                                if (!saveAndValidateForm(_formKey)) {
-                                  return;
-                                }
-                                await authRepository
-                                    .signup(
-                                      adminIdController.text,
-                                      passwordController.text,
-                                      adminNameController.text,
-                                      selectedRank,
-                                      phoneNumberController.text,
-                                    )
-                                    .then((response) => {
-                                          context.go('/login'),
-                                        })
-                                    .catchError((e) => {
-                                          print('회원가입 실패: $e'),
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: const Text('회원가입 실패'),
-                                                  content:
-                                                      const Text('다시 확인해주세요'),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      child: const Text('확인'),
-                                                    ),
-                                                  ],
-                                                );
-                                              })
-                                        });
+                            ),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: DropdownButton<String>(
+                              value: rankController,
+                              icon: const Icon(Icons.arrow_drop_down),
+                              iconSize: 24,
+                              elevation: 16,
+                              isExpanded: true,
+                              style: const TextStyle(color: Colors.black),
+                              underline: Container(
+                                height: 2,
+                                color: Colors.blue,
+                              ),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  rankController = newValue!;
+                                });
                               },
-                              child: const Text('회원가입')),
+                              items: <String>[
+                                'MASTER',
+                                'CONTENTS',
+                                'TRANSLATION'
+                              ].map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
+                          ),
                         ],
                       ),
-                    ),
+                      const LineDivider(thick: 1),
+                      signUpUsername(),
+                      const LineDivider(thick: 1),
+                      phoneNumber(),
+                      const LineDivider(thick: 2),
+                      TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: blueColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 130,
+                              vertical: 25,
+                            ),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(7)),
+                            ),
+                          ),
+                          onPressed: () async {
+                            if (!saveAndValidateForm(_formKey) ||
+                                !isIdavailable) {
+                              return;
+                            }
+                            authRepository.signup(
+                              adminIdController.text,
+                              passwordController.text,
+                              adminNameController.text,
+                              rankController,
+                              phoneNumberController.text,
+                            );
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('회원가입 성공'),
+                                    content: const Text('회원가입이 완료되었습니다.'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          context.go('/login');
+                                        },
+                                        child: const Text('확인'),
+                                      ),
+                                    ],
+                                  );
+                                });
+                          },
+                          child: const Text('회원가입')),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ]),
+            )),
+      )),
     );
   }
 
   Widget signUpuserId() {
     return RowItems(
       obscureText: false,
-      useDropdownMenu: false,
       infoname: '아이디',
       controller: adminIdController,
       onSaved: (value) {
@@ -180,11 +200,15 @@ class _SignUpPageState extends State<SignUpPage> {
         if (value?.isEmpty ?? true) {
           return '아이디를 입력해주세요';
         }
+        if (!isIdavailable) {
+          return '아이디 중복확인을 해주세요';
+        }
         return null;
       },
-      width: 10,
+      width: MediaQuery.of(context).size.width * 0.4 - 100,
       textbutton: TextButton(
         style: TextButton.styleFrom(
+          fixedSize: const Size(100, 55),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(7),
           ),
@@ -192,16 +216,51 @@ class _SignUpPageState extends State<SignUpPage> {
           backgroundColor: hintTextColor,
         ),
         onPressed: () async {
-          await authRepository.adminIdCheck(adminIdController.text);
+          await authRepository
+              .adminIdCheck(adminIdController.text)
+              .then((response) => {
+                    print(response),
+                    if (response.statusCode == 200)
+                      {
+                        setState(() {
+                          isIdavailable = true;
+                        }),
+                      }
+                  })
+              .catchError((e) {
+            setState(() {
+              isIdavailable = false;
+            });
+            showDialog<Widget>(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('아이디 중복'),
+                    content: const Text('아이디가 중복되었습니다.'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('확인'),
+                      ),
+                    ],
+                  );
+                });
+          });
         },
-        child: isIdavailable ? const Icon(Icons.check) : const Text('중복확인'),
+        child: isIdavailable
+            ? const Icon(Icons.check)
+            : const Text(
+                '중복확인',
+                style: TextStyle(color: Colors.black),
+              ),
       ),
     );
   }
 
   Widget signUpPassword() {
     return RowItems(
-      useDropdownMenu: false,
       infoname: '비밀번호',
       obscureText: true,
       hintText: '비밀번호는 10~16자로 지정해주세요.',
@@ -223,7 +282,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget checkPassword() {
     return RowItems(
-      useDropdownMenu: false,
       infoname: '비밀번호 확인',
       obscureText: true,
       controller: confirmPasswordController,
@@ -241,19 +299,8 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget rank() {
-    return const RowItems(
-      obscureText: false,
-      infoname: '요청권한',
-      validator: null,
-      useDropdownMenu: true,
-      controller: null,
-    );
-  }
-
   Widget signUpUsername() {
     return RowItems(
-      useDropdownMenu: false,
       infoname: '이름',
       obscureText: false,
       onSaved: (value) {
@@ -271,7 +318,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget phoneNumber() {
     return RowItems(
-      useDropdownMenu: false,
       infoname: '연락처',
       obscureText: false,
       controller: phoneNumberController,

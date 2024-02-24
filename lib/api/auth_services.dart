@@ -53,6 +53,7 @@ class AuthRepository {
         String token = adminData['Authorization'][0];
         print('로그인 성공: $token');
         secureStorage.setAccessToken(token);
+        return response;
       } else {
         print('로그인 실패: ${response.statusCode}');
       }
@@ -68,12 +69,13 @@ class AuthRepository {
       );
       // alert 창 띄우기
       if (response.statusCode == 200) {
-        print('사용 가능한 아이디입니다.');
+        return response;
       } else {
         print('이미 사용중인 아이디입니다.');
       }
     } catch (e) {
       print("error : $e");
+      return e;
     }
   }
 

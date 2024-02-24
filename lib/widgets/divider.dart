@@ -16,7 +16,7 @@ class LineDivider extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Container(
             height: thick,
-            width: 750.00,
+            width: MediaQuery.of(context).size.width * 0.6,
             color: const Color(0xFFD9D9D9),
           ),
         ),

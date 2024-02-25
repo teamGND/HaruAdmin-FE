@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 
 import 'package:haru_admin/api/network/dio_client.dart';
-import 'package:haru_admin/api/auth_services.dart';
-import 'package:haru_admin/model/auth_model.dart';
+import 'package:haru_admin/api/test_data_services.dart';
+import 'package:haru_admin/model/test_data_model.dart';
 import 'package:haru_admin/widgets/colors.dart';
 
-class TotalData extends StatefulWidget {
-  const TotalData({super.key});
+class Test extends StatefulWidget {
+  const Test({super.key});
 
   @override
-  State<TotalData> createState() => _TotalDataState();
+  State<Test> createState() => _TestState();
 }
 
-class _TotalDataState extends State<TotalData> {
+class _TestState extends State<Test> {
   final content = ['레벨', '유형', '회차', '사이클', '데이터셋', '상태', '수정'];
   int totalPage = 1;
   int totalElements = 0;
   List<dynamic> testData = [];
 
-  final AuthRepository authRepository = AuthRepository();
+  final TestDataRepository testRepository = TestDataRepository();
 
   @override
   void initState() {
     super.initState();
-    authRepository.getdataList().then((value) {
+    testRepository.getTestDataList().then((value) {
       setState(() {
         print(value);
       });
@@ -38,7 +38,7 @@ class _TotalDataState extends State<TotalData> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const SizedBox(height: 50),
-          const Text('전체 데이터',
+          const Text('테스트 데이터',
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Container(

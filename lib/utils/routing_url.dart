@@ -5,13 +5,23 @@ import 'package:flutter/material.dart';
 import '../screens/admin.dart';
 import '../screens/authentication/login_page.dart';
 import '../screens/authentication/signup_page.dart';
-import '../screens/intro.dart';
+
+import '../screens/intro/intro.dart';
+import '../screens/intro/add_intro.dart';
+
 import '../screens/mypage.dart';
-import '../screens/data.dart';
-import '../screens/add_grammer_data.dart';
-import '../screens/add_vocadata.dart';
-import '../screens/grammer.dart';
-import '../screens/voca_data.dart';
+
+import '../screens/test/test.dart';
+import '../screens/test/add_test.dart';
+
+import '../screens/word/word.dart';
+import '../screens/word/add_word.dart';
+
+import '../screens/grammer/grammer.dart';
+import '../screens/grammer/add_grammer_data.dart';
+
+import '../screens/meta/meta.dart';
+import '../screens/meta/add_meta.dart';
 
 class RouteState {
   final String routepath; // path
@@ -45,21 +55,32 @@ final List<RouteState> dataURL = [
   RouteState(
       routepage: const Intro(), routepath: '/intro', routename: '인트로 데이터'),
   RouteState(
-      routepage: const TotalData(), routepath: '/data', routename: '총 데이터'),
+      routepage: const AddIntro(),
+      routepath: '/intro/add',
+      routename: '인트로 데이터 추가'),
+  RouteState(routepage: const Test(), routepath: '/test', routename: '테스트 데이터'),
   RouteState(
-      routepage: const VocaData(), routepath: '/vocadata', routename: '단어 데이터'),
-  RouteState(
-      routepage: const ModifyVoca(),
-      routepath: '/addvocadata',
-      routename: '단어 데이터 추가'),
+      routepage: const AddTest(),
+      routepath: '/test/add',
+      routename: '테스트 데이터 추가'),
   RouteState(
       routepage: const GrammerData(),
-      routepath: '/grammerdata',
+      routepath: '/grammer',
       routename: '문법 데이터'),
   RouteState(
       routepage: const ModifyGrammer(),
-      routepath: '/addgrammerdata',
+      routepath: '/grammer/add',
       routename: '문법 데이터 추가'),
+  RouteState(routepage: const Word(), routepath: '/word', routename: '단어 데이터'),
+  RouteState(
+      routepage: const AddWord(),
+      routepath: '/word/add',
+      routename: '단어 데이터 추가'),
+  RouteState(routepage: const Meta(), routepath: '/meta', routename: '메타 데이터'),
+  RouteState(
+      routepage: const AddMeta(),
+      routepath: '/meta/add',
+      routename: '메타 데이터 추가'),
 ];
 
 final List<RouteState> myURL = [

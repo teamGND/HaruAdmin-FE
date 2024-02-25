@@ -109,14 +109,4 @@ class AuthRepository {
       print("error : $e");
     }
   }
-
-  getdataList() async {
-    try {
-      final response = await dio.get(
-        '/test-list',
-      );
-    } catch (e) {
-      print("error : $e");
-    }
-  }
 }

@@ -40,13 +40,13 @@ class AdminLogin {
 }
 
 class MyInfo {
-  int adminId;
+  int seq;
   String? name;
   String? rank;
   String? phoneNumber;
 
   MyInfo({
-    required this.adminId,
+    required this.seq,
     this.name,
     this.rank,
     this.phoneNumber,
@@ -54,7 +54,7 @@ class MyInfo {
 
   factory MyInfo.fromJson(Map<String, dynamic> jsondata) {
     return MyInfo(
-        adminId: jsondata['seq'],
+        seq: jsondata['seq'],
         name: jsondata['name'],
         rank: jsondata['rank'],
         phoneNumber: jsondata['phoneNumber']);
@@ -73,7 +73,7 @@ class AdminList {
 
   AdminList({
     required this.id,
-    this.adminId,
+    required this.adminId,
     this.password,
     this.name,
     this.ranks,
@@ -90,42 +90,5 @@ class AdminList {
         phoneNumber: jsondata['phoneNumber'],
         ranks: jsondata['ranks'],
         status: jsondata['status']);
-  }
-}
-
-class testData {
-  int testDataId;
-  int chapter;
-  int order;
-  String type;
-  String question;
-  String answer;
-  String admin;
-  String createdAt;
-  String updatedAt;
-
-  testData({
-    required this.testDataId,
-    required this.chapter,
-    required this.order,
-    required this.type,
-    required this.question,
-    required this.answer,
-    required this.admin,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory testData.fromJson(Map<String, dynamic> jsondata) {
-    return testData(
-        testDataId: jsondata['testDataId'],
-        chapter: jsondata['chapter'],
-        order: jsondata['order'],
-        type: jsondata['type'],
-        question: jsondata['question'],
-        answer: jsondata['answer'],
-        admin: jsondata['admin'],
-        createdAt: jsondata['createdAt'],
-        updatedAt: jsondata['updatedAt']);
   }
 }

@@ -87,7 +87,7 @@ class _MypageState extends State<Mypage> {
                     child: const Text('나의 관리자 정보',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold))),
-                buildInfoList('사번', myInfo.adminId.toString(), false),
+                buildInfoList('사번', myInfo.seq.toString(), false),
                 buildInfoList('아이디', myInfo.name.toString(), true),
                 buildInfoList('등급', myInfo.rank.toString(), true),
                 buildInfoList('연락처', myInfo.phoneNumber.toString(), true),

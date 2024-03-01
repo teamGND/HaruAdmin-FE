@@ -18,7 +18,8 @@ import '../screens/word/word.dart';
 import '../screens/word/add_word.dart';
 
 import '../screens/grammer/grammer.dart';
-import '../screens/grammer/add_grammer_data.dart';
+import '../screens/grammer/add_grammer.dart';
+import '../screens/grammer/modify_grammer_data.dart';
 
 import '../screens/meta/meta.dart';
 import '../screens/meta/add_meta.dart';
@@ -68,7 +69,7 @@ final List<RouteState> dataURL = [
       routepath: '/grammer',
       routename: '문법 데이터'),
   RouteState(
-      routepage: const ModifyGrammer(),
+      routepage: const AddGrammer(),
       routepath: '/grammer/add',
       routename: '문법 데이터 추가'),
   RouteState(routepage: const Word(), routepath: '/word', routename: '단어 데이터'),

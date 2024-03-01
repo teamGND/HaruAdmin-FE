@@ -13,13 +13,13 @@ class _AddIntroState extends State<AddIntro> {
   final IntroDataRepository introRepository = IntroDataRepository();
 
   final AddIntroData sampleData = AddIntroData(
-    level: 'ALPHABET',
-    category: 'WORD',
+    level: 'LEVEL1',
+    category: 1,
     chapter: 1,
     cycle: 1,
-    state: 'NOTCOMPLETED',
-    titleKor: '안녕하세요',
-    contentKor: '안녕하세요',
+    state: 'COMPLETED',
+    titleKor: 'Hello',
+    contentKor: 'Hello',
     titleEng: 'Hello',
     contentEng: 'Hello',
     titleVie: 'Hello',

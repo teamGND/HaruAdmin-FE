@@ -61,7 +61,7 @@ class IntroData {
 
 class AddIntroData {
   String level;
-  String category;
+  int category;
   int chapter;
   int cycle;
   String state;

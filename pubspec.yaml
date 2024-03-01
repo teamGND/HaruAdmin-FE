@@ -38,6 +38,8 @@ dependencies:
   dio: ^5.4.0
   flutter_secure_storage: ^9.0.0
   flutter_feather_icons: ^2.0.0+1
+  image_picker_for_web: ^3.0.2
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:

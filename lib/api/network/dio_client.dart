@@ -16,6 +16,16 @@ class DioClient {
     dio.interceptors.add(AuthInterceptor());
     return dio;
   }
+
+  Dio provideDioForFile() {
+    final Dio dio = Dio(BaseOptions(
+      baseUrl: "https://www.haruhangeul.com/admin",
+      contentType: 'multipart/form-data',
+    ));
+
+    dio.interceptors.add(AuthInterceptor());
+    return dio;
+  }
 }
 
 class AuthInterceptor extends Interceptor {

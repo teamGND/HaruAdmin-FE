@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/api/test_data_services.dart';
-import 'package:haru_admin/model/test_data_model.dart';
+import 'package:haru_admin/screens/test_data_model.dart';
 import 'package:haru_admin/widgets/colors.dart';
 
 class Test extends StatefulWidget {

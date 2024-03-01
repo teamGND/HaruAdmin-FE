@@ -11,7 +11,7 @@ class IntroDataRepository {
   getIntroDataList() async {
     try {
       final response = await dio.get(
-        '/introdata-list',
+        '/intro-list',
       );
       final introData =
           response.data.map((e) => IntroData.fromJson(e)).toList();
@@ -23,8 +23,7 @@ class IntroDataRepository {
 
   addToIntroDataList(AddIntroData data) async {
     try {
-      final response =
-          await dio.post('/intro', data: {"request": data.toJson()});
+      final response = await dio.post('/intro', data: data.toJson());
 
       return response;
     } catch (e) {

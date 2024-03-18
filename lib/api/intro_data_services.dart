@@ -10,9 +10,8 @@ class IntroDataRepository {
 
   getIntroDataList() async {
     try {
-      final response = await dio.get(
-        '/intro-list',
-      );
+      final response =
+          await dio.get('/intro-list', data: {"page": 1, "size": 10});
       final introData =
           response.data.map((e) => IntroData.fromJson(e)).toList();
       return introData;

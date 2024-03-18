@@ -49,6 +49,12 @@ class _AddGrammerState extends State<AddGrammer> {
     //     print(value);
     //   });
     // });
+
+    grammerRepository.getGrammerDataList().then((value) {
+      setState(() {
+        print(value);
+      });
+    });
   }
 
   @override
@@ -69,7 +75,7 @@ class _AddGrammerState extends State<AddGrammer> {
               : ElevatedButton(
                   onPressed: () async {
                     grammerRepository
-                        .addToGrammerFile(_imageDataUrl!, 'apple.png')
+                        .addToGrammerFile(_imageDataUrl!)
                         .then((value) {
                       setState(() {
                         print(value);

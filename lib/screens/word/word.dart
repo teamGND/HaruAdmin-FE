@@ -12,29 +12,36 @@ class Word extends StatefulWidget {
 
 class _WordState extends State<Word> {
   Future<dynamic> fetchWordDataList =
-      Future.delayed(const Duration(seconds: 1), () {
+      Future.delayed(const Duration(milliseconds: 500 ), () {
     return WordDataRepository().getWordDataList();
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: SizedBox(
-        width: 500,
-        height: 500,
-        child: DefaultFutureBuilder(
-            future: fetchWordDataList,
-            titleRow: const ListTile(
-              title: Text('단어 목록'),
-            ),
-            childRow: (dynamic wordData) {
-              return Row(children: [
-                Text(wordData.title),
-                Text(wordData.level),
-                Text(wordData.wordCount.toString()),
-              ]);
-            }),
-      ),
+      child: DefaultFutureBuilder(
+          future: fetchWordDataList,
+          titleRow: const ListTile(
+            title: Text('단어 목록'),
+          ),
+          childRow: (dynamic wordData) {
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: wordData.length,
+              itemBuilder: (context, index) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: ListTile(
+                        title: Text(wordData.content[index].titleKor),
+                        subtitle: Text(wordData.content[index].contentKor),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          }),
     );
   }
 }

@@ -11,13 +11,25 @@ class IntroDataRepository {
   getIntroDataList({required int page, required int size}) async {
     try {
       final response = await dio.get('/intro-list?page=$page&size=$size');
-      final introData =
-          response.data.map((e) => IntroData.fromJson(e)).toList();
+      final introData = IntroDataList.fromJson(response.data);
+
       return introData;
     } catch (e) {
       print("error : $e");
     }
   }
+
+  // getWordDataList() async {
+  //   try {
+  //     final response = await dio.get('/word-list');
+  //     final List<WordDataList> wordDataList =
+  //     (response.data as List).map((e) => WordDataList.fromJson(e)).toList();
+  //     print(wordDataList);
+  //     return wordDataList;
+  //   } catch (e) {
+  //     print("error : $e");
+  //   }
+  // }
 
   addToIntroDataList(AddIntroData data) async {
     try {

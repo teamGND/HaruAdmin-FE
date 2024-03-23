@@ -16,41 +16,46 @@ class DefaultFutureBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Divider(),
-        titleRow,
-        const Divider(),
-        SizedBox(
-          height: height,
-          child: SingleChildScrollView(
-            child: FutureBuilder(
-              future: future,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: snapshot.data.length,
-                    itemBuilder: (context, index) {
-                      return childRow(snapshot.data[index]);
-                    },
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey,
+          width: 1,
+        ),
+      ),
+      margin: const EdgeInsets.all(20),
+      height: height,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          titleRow,
+          const Divider(
+            color: Colors.grey,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: FutureBuilder(
+                future: future,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return childRow(snapshot.data);
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return  Container(
+                      width: 100,
+                      height: 100,
+                      padding: const EdgeInsets.all(30),
+                      child:  const CircularProgressIndicator(color: Colors.blue),
+
                   );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
-                return const Center(
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: CircularProgressIndicator(color: Colors.blue),
-                  ),
-                );
-              },
+                },
+              ),
             ),
           ),
-        ),
-        const Divider(),
-      ],
+        ],
+      ),
     );
   }
 }

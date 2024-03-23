@@ -1,61 +1,131 @@
-class IntroData {
+class IntroDataList {
+  List<IntroListComponentData> content;
+  PageableData pageable;
+  int totalElements;
+  int totalPages;
+  bool last;
+  int size;
+  int number;
+  SortData sort;
+  int numberOfElements;
+  bool first;
+  bool empty;
+
+  IntroDataList({
+    required this.content,
+    required this.pageable,
+    required this.totalElements,
+    required this.totalPages,
+    required this.last,
+    required this.size,
+    required this.number,
+    required this.sort,
+    required this.numberOfElements,
+    required this.first,
+    required this.empty,
+  });
+
+  factory IntroDataList.fromJson(Map<String, dynamic> json) {
+    return IntroDataList(
+      content: List<IntroListComponentData>.from(json['content'].map((x) => IntroListComponentData.fromJson(x))),
+      pageable: PageableData.fromJson(json['pageable']),
+      totalElements: json['totalElements'],
+      totalPages: json['totalPages'],
+      last: json['last'],
+      size: json['size'],
+      number: json['number'],
+      sort: SortData.fromJson(json['sort']),
+      numberOfElements: json['numberOfElements'],
+      first: json['first'],
+      empty: json['empty'],
+    );
+  }
+
+}
+
+class SortData {
+  bool empty;
+  bool sorted;
+  bool unsorted;
+
+  SortData({
+    required this.empty,
+    required this.sorted,
+    required this.unsorted,
+  });
+
+  factory SortData.fromJson(Map<String, dynamic> json) {
+    return SortData(
+      empty: json['empty'],
+      sorted: json['sorted'],
+      unsorted: json['unsorted'],
+    );
+  }
+
+}
+
+class PageableData {
+  SortData sort;
+  int offset;
+  int pageNumber;
+  int pageSize;
+  bool unpaged;
+  bool paged;
+
+  PageableData({
+    required this.sort,
+    required this.offset,
+    required this.pageNumber,
+    required this.pageSize,
+    required this.unpaged,
+    required this.paged,
+  });
+
+  factory PageableData.fromJson(Map<String, dynamic> json) {
+    return PageableData(
+      sort: SortData.fromJson(json['sort']),
+      offset: json['offset'],
+      pageNumber: json['pageNumber'],
+      pageSize: json['pageSize'],
+      unpaged: json['unpaged'],
+      paged: json['paged'],
+    );
+  }
+
+}
+
+class IntroListComponentData {
   int id;
   String level;
   String category;
   int chapter;
-  int sequence;
+  int adminId;
   String titleKor;
-  String titleEng;
-  String titleVie;
-  String titleChn;
-  String titleRus;
   String contentKor;
-  String contentEng;
-  String contentVie;
-  String contentChn;
-  String contentRus;
-  int userId;
-  String status;
+  String state;
 
-  IntroData({
+  IntroListComponentData({
     required this.id,
     required this.level,
     required this.category,
     required this.chapter,
-    required this.sequence,
+    required this.adminId,
     required this.titleKor,
-    required this.titleEng,
-    required this.titleVie,
-    required this.titleChn,
-    required this.titleRus,
     required this.contentKor,
-    required this.contentEng,
-    required this.contentVie,
-    required this.contentChn,
-    required this.contentRus,
-    required this.userId,
-    required this.status,
+    required this.state,
   });
 
-  factory IntroData.fromJson(Map<String, dynamic> jsondata) {
-    return IntroData(
-        id: jsondata['id'],
-        level: jsondata['level'],
-        category: jsondata['category'],
-        chapter: jsondata['chapter'],
-        sequence: jsondata['sequence'],
-        titleKor: jsondata['titleKor'],
-        titleEng: jsondata['titleEng'],
-        titleVie: jsondata['titleVie'],
-        titleChn: jsondata['titleChn'],
-        titleRus: jsondata['titleRus'],
-        contentKor: jsondata['contentKor'],
-        contentEng: jsondata['contentEng'],
-        contentVie: jsondata['contentVie'],
-        contentChn: jsondata['contentChn'],
-        contentRus: jsondata['contentRus'],
-        userId: jsondata['userId'],
-        status: jsondata['status']);
+  factory IntroListComponentData.fromJson(Map<String, dynamic> json) {
+    return IntroListComponentData(
+      id: json['id'],
+      level: json['level'],
+      category: json['category'],
+      chapter: json['chapter'],
+      adminId: json['adminId'],
+      titleKor: json['titleKor'],
+      contentKor: json['contentKor'],
+      state: json['state'],
+    );
   }
 }
 

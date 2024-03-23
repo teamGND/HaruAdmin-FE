@@ -14,9 +14,9 @@ class _AddIntroState extends State<AddIntro> {
 
   final AddIntroData sampleData = AddIntroData(
     level: 'LEVEL1',
-    category: 1,
-    chapter: 1,
-    cycle: 1,
+    category: 2,
+    chapter: 2,
+    cycle: 2,
     state: 'COMPLETED',
     titleKor: 'Hello',
     contentKor: 'Hello',

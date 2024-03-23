@@ -24,6 +24,8 @@ import '../screens/grammer/modify_grammer_data.dart';
 import '../screens/meta/meta.dart';
 import '../screens/meta/add_meta.dart';
 
+import '../screens/add_quiz.dart';
+
 class RouteState {
   final String routepath; // path
   final Widget routepage; // 스크린 위젯
@@ -82,6 +84,8 @@ final List<RouteState> dataURL = [
       routepage: const AddMeta(),
       routepath: '/meta/add',
       routename: '메타 데이터 추가'),
+
+
 ];
 
 final List<RouteState> myURL = [

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/screens/authentication/login_page.dart';
 import 'package:haru_admin/screens/authentication/signup_page.dart';
+import '../screens/add_quiz.dart';
 import 'utils/routing_url.dart';
 import 'widgets/sidebar.dart';
 
@@ -26,10 +27,17 @@ final GoRouter router = GoRouter(
       builder: (context, state, child) {
         return SideBar(state: state, key: state.pageKey, child: child);
       },
-      routes: routingURL
+      routes: [...routingURL
           .map((url) => GoRoute(
               path: url.getPath, builder: (context, state) => url.getpage))
-          .toList(),
-    )
+          .toList()
+      ],
+    ),
+    GoRoute(
+        path: '/add-quiz/:id',
+        pageBuilder: (context, state) => NoTransitionPage(
+          child: AddQuiz(
+              id: state.pathParameters['id']!,
+            ))),
   ],
 );

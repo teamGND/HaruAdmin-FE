@@ -50,7 +50,6 @@ class _SideBarState extends State<SideBar> {
       body: Row(
         children: [
           Container(
-<<<<<<< Updated upstream
             width: 250,
             color: const Color(0xffF2F2F2),
             padding: const EdgeInsets.all(16),
@@ -92,48 +91,6 @@ class _SideBarState extends State<SideBar> {
               ),
             ),
           ),
-=======
-              width: 250,
-              color: const Color(0xffF2F2F2),
-              padding: const EdgeInsets.all(16),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Text(
-                      "HaruHangeul\nAdmin Page",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 10),
-                    sideBarComponent(manageURL),
-                    const Divider(
-                      thickness: 2,
-                    ),
-                    sideBarComponent(dataURL),
-                    const Divider(
-                      thickness: 2,
-                    ),
-                    sideBarComponent(myURL),
-                    ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text(
-                        'Logout',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                      ),
-                      onTap: () {
-                        SecureStorage().deleteAccessToken();
-                        context.go('/login');
-                      },
-                    ),
-                  ],
-                ),
-              )),
->>>>>>> Stashed changes
           Expanded(child: widget.child),
         ],
       ),

@@ -33,11 +33,7 @@ class _AddIntroState extends State<AddIntro> {
   @override
   void initState() {
     super.initState();
-    introRepository
-        .addToIntroDataList(
-      sampleData,
-    )
-        .then((value) {
+    introRepository.addToIntroDataList(sampleData).then((value) {
       setState(() {
         print(value);
       });

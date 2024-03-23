@@ -16,7 +16,7 @@ class _IntroState extends State<Intro> {
   @override
   void initState() {
     super.initState();
-    introRepository.getIntroDataList().then((value) {
+    introRepository.getIntroDataList(page: 1, size: 10).then((value) {
       setState(() {
         print(value);
       });

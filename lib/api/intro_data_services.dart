@@ -8,10 +8,9 @@ class IntroDataRepository {
   final dio = DioClient().provideDio();
   SecureStorage secureStorage = SecureStorage();
 
-  getIntroDataList() async {
+  getIntroDataList({required int page, required int size}) async {
     try {
-      final response =
-          await dio.get('/intro-list', data: {"page": 1, "size": 10});
+      final response = await dio.get('/intro-list?page=$page&size=$size');
       final introData =
           response.data.map((e) => IntroData.fromJson(e)).toList();
       return introData;

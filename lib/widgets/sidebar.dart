@@ -13,6 +13,7 @@ class SideBar extends StatefulWidget {
 
   final GoRouterState state;
   final Widget child;
+
   // final bool sidebar; // 사이드바 있없 여부
 
   @override

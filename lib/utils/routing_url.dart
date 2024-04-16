@@ -61,10 +61,14 @@ final List<RouteState> dataURL = [
       routepage: const AddIntro(),
       routepath: '/intro/add',
       routename: '인트로 데이터 추가'),
-  RouteState(routepage: const Test(), routepath: '/test', routename: '테스트 데이터'),
+  RouteState(
+    routepage: const Test(),
+    routepath: '/test',
+    routename: '테스트 데이터',
+  ),
   RouteState(
       routepage: const AddTest(),
-      routepath: '/test/add',
+      routepath: '/test/add/:id',
       routename: '테스트 데이터 추가'),
   RouteState(
       routepage: const GrammerData(),
@@ -84,8 +88,6 @@ final List<RouteState> dataURL = [
       routepage: const AddMeta(),
       routepath: '/meta/add',
       routename: '메타 데이터 추가'),
-
-
 ];
 
 final List<RouteState> myURL = [

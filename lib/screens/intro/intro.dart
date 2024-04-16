@@ -5,6 +5,22 @@ import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/utils/future_layout.dart';
 import 'package:haru_admin/utils/tap.dart';
 
+class ChapterInfoProvider extends ChangeNotifier {
+  final String level;
+  final int set_number;
+  final int chapter_number;
+  final String title;
+  final String reference_data;
+
+  ChapterInfoProvider({
+    required this.level,
+    required this.set_number,
+    required this.chapter_number,
+    required this.title,
+    required this.reference_data,
+  });
+}
+
 class Intro extends StatefulWidget {
   const Intro({Key? key}) : super(key: key);
 
@@ -14,7 +30,7 @@ class Intro extends StatefulWidget {
 
 class _IntroState extends State<Intro> {
   static const int Rows = 15;
-  final List<int> columnWidth = [50, 100, 150, 100, 100, 100, 100, 60, 60];
+  final List<int> columnWidth = [60, 60, 150, 100, 100, 220, 100, 80, 80];
   final tabletitle = [
     '',
     '레벨',
@@ -24,8 +40,7 @@ class _IntroState extends State<Intro> {
     '타이틀',
     '상태',
     '수정',
-    '퀴즈',
-    '테스트'
+    '퀴즈/테스트',
   ];
   final IntroDataRepository introRepository = IntroDataRepository();
   int currentPage = 0;
@@ -94,13 +109,9 @@ class _IntroState extends State<Intro> {
                           TextButton(
                             onPressed: () {
                               context.go(
-                                  '/add-quiz/${introData.content[index].id}');
+                                  '/test/add/${introData.content[index].id}');
                             },
                             child: const Text('퀴즈'),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text('테스트'),
                           ),
                         ][index],
                         columnWidth,

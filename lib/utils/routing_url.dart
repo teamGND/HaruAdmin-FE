@@ -54,13 +54,16 @@ final List<RouteState> authURL = [
       routepage: const SignUpPage(), routepath: '/signup', routename: '회원가입'),
 ];
 
+final sidebarDataURL = [
+  RouteState(
+      routepage: const Intro(), routepath: '/intro', routename: '인트로 & 퀴즈/테스트'),
+  RouteState(routepage: const Word(), routepath: '/word', routename: '단어 데이터'),
+  RouteState(
+      routepage: const GrammerData(),
+      routepath: '/grammer',
+      routename: '문법 데이터'),
+];
 final List<RouteState> dataURL = [
-  RouteState(
-      routepage: const Intro(), routepath: '/intro', routename: '인트로 데이터'),
-  RouteState(
-      routepage: const AddIntro(),
-      routepath: '/intro/add',
-      routename: '인트로 데이터 추가'),
   RouteState(
     routepage: const Test(),
     routepath: '/test',
@@ -71,14 +74,9 @@ final List<RouteState> dataURL = [
       routepath: '/test/add/:id',
       routename: '테스트 데이터 추가'),
   RouteState(
-      routepage: const GrammerData(),
-      routepath: '/grammer',
-      routename: '문법 데이터'),
-  RouteState(
       routepage: const AddGrammer(),
       routepath: '/grammer/add',
       routename: '문법 데이터 추가'),
-  RouteState(routepage: const Word(), routepath: '/word', routename: '단어 데이터'),
   RouteState(
       routepage: const AddWord(),
       routepath: '/word/add',
@@ -98,6 +96,7 @@ final List<RouteState> myURL = [
 final List<RouteState> routingURL = [
   ...authURL,
   ...manageURL,
+  ...sidebarDataURL,
   ...dataURL,
   ...myURL,
 ];

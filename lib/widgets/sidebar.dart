@@ -33,6 +33,7 @@ class _SideBarState extends State<SideBar> {
               color: selectedURL == url[index].getPath
                   ? Colors.blue
                   : Colors.black,
+              fontSize: 14,
             ),
           ),
           onTap: () {
@@ -52,6 +53,7 @@ class _SideBarState extends State<SideBar> {
         children: [
           Container(
             width: 250,
+            height: MediaQuery.of(context).size.height,
             color: const Color(0xffF2F2F2),
             padding: const EdgeInsets.all(16),
             child: SingleChildScrollView(
@@ -70,13 +72,15 @@ class _SideBarState extends State<SideBar> {
                   const Divider(
                     thickness: 2,
                   ),
-                  sideBarComponent(dataURL),
+                  sideBarComponent(sidebarDataURL),
                   const Divider(
                     thickness: 2,
                   ),
                   sideBarComponent(myURL),
                   ListTile(
-                    leading: const Icon(Icons.logout),
+                    leading: const Icon(
+                      Icons.logout,
+                    ),
                     title: const Text(
                       'Logout',
                       style: TextStyle(

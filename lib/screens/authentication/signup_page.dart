@@ -327,6 +327,16 @@ class _SignUpPageState extends State<SignUpPage> {
       validator: (value) {
         if (value?.isEmpty ?? true) {
           return '연락처를 입력해주세요';
+        } else {
+          for (int i = 0; i < value!.length; i++) {
+            if (value.codeUnitAt(i) < 48 ||
+                value.codeUnitAt(i) > 57 ||
+                value.length != 13 ||
+                value[3] != '-' ||
+                value[8] != '-') {
+              return '010-0000-0000 형식으로 입력해주세요';
+            }
+          }
         }
         return null;
       },

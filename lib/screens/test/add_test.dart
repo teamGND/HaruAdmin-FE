@@ -28,7 +28,7 @@ class _AddTestState extends State<AddTest> {
     (4) 중간평가 - 101 ~ 208
   */
   int dropdownValue = 101;
-  Map<int, String> dropdownTitle = {  
+  Map<int, String> dropdownTitle = {
     101: '101. 그림보고 어휘 3지선다',
     102: '102. 어휘보고 그림 3지선다',
     103: '103. 그림보고 타이핑',
@@ -66,10 +66,10 @@ class _AddTestState extends State<AddTest> {
           const SizedBox(
             height: 20,
           ),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(
+              const Flexible(
                 flex: 1,
                 child: Text(
                   '퀴즈 -> 해당 세트의 단어 활용\n테스트 -> 이전까지 배운 단어 활용',
@@ -80,7 +80,7 @@ class _AddTestState extends State<AddTest> {
                   ),
                 ),
               ),
-              Flexible(
+              const Flexible(
                 flex: 3,
                 child: Center(
                   child: Text(
@@ -90,13 +90,22 @@ class _AddTestState extends State<AddTest> {
                 ),
               ),
               Flexible(
-                  flex: 1,
-                  child: filledButton(buttonName: 'Save', color: Colors.blue)),
-              SizedBox(width: 10),
+                flex: 1,
+                child: filledButton(
+                  buttonName: 'Save',
+                  color: Colors.blue,
+                  onPressed: () => testRepository.addTestDataList(
+                      context.read<TestDataEntityProvider>().testDataList),
+                ),
+              ),
+              const SizedBox(width: 10),
               Flexible(
                   flex: 1,
                   child: filledButton(
-                      buttonName: 'Confirm', color: Color(0xFFFF7D53))),
+                    buttonName: 'Confirm',
+                    color: const Color(0xFFFF7D53),
+                    onPressed: () {},
+                  )),
             ],
           ),
           const SizedBox(height: 20),
@@ -179,7 +188,18 @@ class _AddTestState extends State<AddTest> {
                   ),
                 ),
                 const Spacer(),
-                const filledButton(buttonName: '추가', color: Colors.blue),
+                filledButton(
+                  buttonName: '추가',
+                  color: Colors.blue,
+                  onPressed: () {
+                    context
+                        .read<TestDataEntityProvider>()
+                        .addTestData(TestDataEntity(
+                          chapterNumber: 1,
+                          problemType: dropdownValue,
+                        ));
+                  },
+                )
               ],
             ),
           ),

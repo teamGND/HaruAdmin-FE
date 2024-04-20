@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:haru_admin/model/intro_data_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
+import 'package:haru_admin/screens/test/entity/test_entity.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
 
 class TestDataRepository {
@@ -17,4 +18,6 @@ class TestDataRepository {
       print("error : $e");
     }
   }
+
+  addTestDataList(List<TestDataEntity> testDataList) {}
 }

@@ -21,7 +21,7 @@ class _AdminState extends State<Admin> {
   @override
   void initState() {
     super.initState();
-    authRepository.getAdminList(1).then((value) {
+    authRepository.getAdminList(0).then((value) {
       setState(() {
         adminData = value['adminData'];
         totalPage = value['totalPage'];

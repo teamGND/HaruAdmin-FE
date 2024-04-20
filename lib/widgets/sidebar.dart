@@ -21,7 +21,7 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
-  String selectedURL = '/admin';
+  String selectedURL = '/mypage';
 
   Widget sideBarComponent(url) {
     return Column(children: [

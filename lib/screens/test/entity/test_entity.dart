@@ -24,6 +24,11 @@ class TestDataEntityProvider extends ChangeNotifier {
       answerString: '고양이',
     ),
   ];
+
+  void addTestData(TestDataEntity testDataEntity) {
+    testDataList.add(testDataEntity);
+    notifyListeners();
+  }
 }
 
 class TestDataEntity {

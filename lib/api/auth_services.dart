@@ -79,16 +79,15 @@ class AuthRepository {
     }
   }
 
-  getMyInfo() async {
+  Future<MyInfo> getMyInfo() async {
     try {
-      final response = await dio.get(
-        '/',
-      );
-      final myInfo = MyInfo.fromJson(response.data);
+      final response = await dio.get('');
+      MyInfo myInfo = MyInfo.fromJson(response.data);
       return myInfo;
     } catch (e) {
       print("error : $e");
     }
+    return MyInfo(seq: 0);
   }
 
   getAdminList(int pageNumber) async {

@@ -43,12 +43,11 @@ class DefaultFutureBuilder extends StatelessWidget {
                   } else if (snapshot.hasError) {
                     return Text("${snapshot.error}");
                   }
-                  return  Container(
-                      width: 100,
-                      height: 100,
-                      padding: const EdgeInsets.all(30),
-                      child:  const CircularProgressIndicator(color: Colors.blue),
-
+                  return Container(
+                    width: 100,
+                    height: 100,
+                    padding: const EdgeInsets.all(30),
+                    child: const CircularProgressIndicator(color: Colors.blue),
                   );
                 },
               ),

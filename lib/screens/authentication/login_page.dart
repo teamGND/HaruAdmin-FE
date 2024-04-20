@@ -85,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                                         print(response),
                                         if (response.statusCode == 200)
                                           {
-                                            context.go('/admin'),
+                                            context.go('/mypage'),
                                           }
                                       })
                                   .catchError((e) => {

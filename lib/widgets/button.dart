@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class filledButton extends StatelessWidget {
   final String buttonName;
   final Color color;
+  final void Function() onPressed;
 
   const filledButton({
     super.key,
     required this.buttonName,
     required this.color,
+    required this.onPressed,
   });
 
   @override
@@ -25,14 +27,15 @@ class filledButton extends StatelessWidget {
         style: const TextStyle(fontSize: 15),
       ),
       onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return const AlertDialog(
-              title: Text('tapped!'),
-            );
-          },
-        );
+        onPressed();
+        // showDialog(
+        //   context: context,
+        //   builder: (context) {
+        //     return const AlertDialog(
+        //       title: Text('tapped!'),
+        //     );
+        //   },
+        // );
       },
     );
   }

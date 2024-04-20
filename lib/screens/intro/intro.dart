@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/utils/future_layout.dart';
 import 'package:haru_admin/utils/tap.dart';
+import 'package:haru_admin/widgets/button.dart';
 
 class ChapterInfoProvider extends ChangeNotifier {
   final String level;
@@ -29,7 +30,6 @@ class Intro extends StatefulWidget {
 }
 
 class _IntroState extends State<Intro> {
-  static const int Rows = 15;
   final List<int> columnWidth = [60, 60, 150, 100, 100, 220, 100, 80, 80];
   final tabletitle = [
     '',
@@ -43,9 +43,10 @@ class _IntroState extends State<Intro> {
     '퀴즈/테스트',
   ];
   final IntroDataRepository introRepository = IntroDataRepository();
+  static const int Rows = 15;
   int currentPage = 0;
   final int rowsPerPage = 15;
-  List<bool> isSelected = List.generate(10, (index) => false);
+  List<bool> isSelected = List.generate(Rows, (index) => false);
 
   Future<dynamic> fetchIntroDataList =
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -93,7 +94,7 @@ class _IntroState extends State<Intro> {
                               value: isSelected[index],
                               onChanged: (value) {
                                 setState(() {
-                                  isSelected[index] = value!;
+                                  isSelected[index] = !isSelected[index];
                                 });
                               }),
                           Text(introData.content[index].id.toString()),
@@ -121,6 +122,53 @@ class _IntroState extends State<Intro> {
               },
             );
           },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '선택 삭제',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFFF05A2A),
+                  decoration: TextDecoration.underline,
+                  decorationColor: Color(0xFFF05A2A),
+                ),
+              ),
+              SizedBox(
+                child: Row(children: [
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('< 이전'),
+                  ),
+                  Container(
+                    height: 35,
+                    width: 70,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFCECECE),
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(child: Text('1')),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('다음 >'),
+                  ),
+                ]),
+              ),
+              filledButton(
+                buttonName: '회차 추가',
+                color: Color(0xFF3F99F7),
+                onPressed: () {
+                  context.go('/test/add');
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );

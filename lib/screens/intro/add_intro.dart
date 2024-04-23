@@ -11,33 +11,24 @@ class AddIntro extends StatefulWidget {
 
 class _AddIntroState extends State<AddIntro> {
   final IntroDataRepository introRepository = IntroDataRepository();
+  
 
-  final AddIntroData sampleData = AddIntroData(
-    level: 'LEVEL1',
-    category: 2,
-    chapter: 2,
-    cycle: 2,
-    state: 'COMPLETED',
-    titleKor: 'Hello',
-    contentKor: 'Hello',
-    titleEng: 'Hello',
-    contentEng: 'Hello',
-    titleVie: 'Hello',
-    contentVie: 'Hello',
-    titleChn: 'Hello',
-    contentChn: 'Hello',
-    titleRus: 'Hello',
-    contentRus: 'Hello',
-  );
+  Future<AddIntro> fetchIntroData(int id) async {
+    try {
+      introRepository.getIntroData(id).then((value) => {
+        introData = value;
+      });
+
+      return introData;
+    } catch (e) {
+      print("error : $e");
+      throw Exception(e);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    introRepository.addToIntroDataList(sampleData).then((value) {
-      setState(() {
-        print(value);
-      });
-    });
   }
 
   @override

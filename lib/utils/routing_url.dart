@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
 import 'package:flutter/material.dart';
+import 'package:haru_admin/screens/intro/intro_test.dart';
 
 import '../screens/admin.dart';
 import '../screens/authentication/login_page.dart';
@@ -56,7 +57,9 @@ final List<RouteState> authURL = [
 
 final sidebarDataURL = [
   RouteState(
-      routepage: const Intro(), routepath: '/intro', routename: '인트로 & 퀴즈/테스트'),
+      routepage: const IntroTestScreen(),
+      routepath: '/intro',
+      routename: '인트로 & 퀴즈/테스트'),
   RouteState(routepage: const Word(), routepath: '/word', routename: '단어 데이터'),
   RouteState(
       routepage: const GrammerData(),
@@ -67,6 +70,11 @@ final List<RouteState> dataURL = [
   RouteState(
     routepage: const Test(),
     routepath: '/test',
+    routename: '테스트 데이터',
+  ),
+  RouteState(
+    routepage: const AddIntro(),
+    routepath: '/test/add/:category/:id',
     routename: '테스트 데이터',
   ),
   RouteState(

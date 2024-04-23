@@ -49,7 +49,7 @@ class _IntroState extends State<Intro> {
   List<bool> isSelected = List.generate(Rows, (index) => false);
 
   Future<dynamic> fetchIntroDataList =
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 100), () {
     return IntroDataRepository().getIntroDataList(page: 0, size: Rows);
   });
 

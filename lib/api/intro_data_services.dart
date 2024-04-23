@@ -8,7 +8,8 @@ class IntroDataRepository {
   final dio = DioClient().provideDio();
   SecureStorage secureStorage = SecureStorage();
 
-  getIntroDataList({required int page, required int size}) async {
+  Future<IntroDataList> getIntroDataList(
+      {required int page, required int size}) async {
     try {
       final response = await dio.get('/intro-list?page=$page&size=$size');
       final introData = IntroDataList.fromJson(response.data);
@@ -16,6 +17,19 @@ class IntroDataRepository {
       return introData;
     } catch (e) {
       print("error : $e");
+      throw Exception(e);
+    }
+  }
+
+  Future<AddIntroData> getIntroData({required int id}) async {
+    try {
+      final response = await dio.get('/intro/$id');
+      final introData = AddIntroData.fromJson(response.data);
+
+      return introData;
+    } catch (e) {
+      print("error : $e");
+      throw Exception(e);
     }
   }
 
@@ -23,7 +37,7 @@ class IntroDataRepository {
   //   try {
   //     final response = await dio.get('/word-list');
   //     final List<WordDataList> wordDataList =
-  //     (response.data as List).map((e) => WordDataList.fromJson(e)).toList();
+  //         (response.data as List).map((e) => WordDataList.fromJson(e)).toList();
   //     print(wordDataList);
   //     return wordDataList;
   //   } catch (e) {

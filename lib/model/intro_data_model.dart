@@ -27,7 +27,8 @@ class IntroDataList {
 
   factory IntroDataList.fromJson(Map<String, dynamic> json) {
     return IntroDataList(
-      content: List<IntroListComponentData>.from(json['content'].map((x) => IntroListComponentData.fromJson(x))),
+      content: List<IntroListComponentData>.from(
+          json['content'].map((x) => IntroListComponentData.fromJson(x))),
       pageable: PageableData.fromJson(json['pageable']),
       totalElements: json['totalElements'],
       totalPages: json['totalPages'],
@@ -40,7 +41,6 @@ class IntroDataList {
       empty: json['empty'],
     );
   }
-
 }
 
 class SortData {
@@ -61,7 +61,6 @@ class SortData {
       unsorted: json['unsorted'],
     );
   }
-
 }
 
 class PageableData {
@@ -91,7 +90,6 @@ class PageableData {
       paged: json['paged'],
     );
   }
-
 }
 
 class IntroListComponentData {
@@ -129,39 +127,64 @@ class IntroListComponentData {
   }
 }
 
+class WordData {
+  int id;
+  int order;
+  String title;
+  String description;
+  String english;
+  String chinese;
+  String russian;
+  String vietnam;
+  String imgUrl;
+  String voiceUrl;
+
+  WordData({
+    required this.id,
+    required this.order,
+    required this.title,
+    required this.description,
+    required this.english,
+    required this.chinese,
+    required this.russian,
+    required this.vietnam,
+    required this.imgUrl,
+    required this.voiceUrl,
+  });
+
+  factory WordData.fromJson(Map<String, dynamic> json) {
+    return WordData(
+      id: json['id'],
+      order: json['order'],
+      title: json['title'],
+      description: json['description'],
+      english: json['english'],
+      chinese: json['chinese'],
+      russian: json['russian'],
+      vietnam: json['vietnam'],
+      imgUrl: json['imgUrl'],
+      voiceUrl: json['voiceUrl'],
+    );
+  }
+}
+
 class AddIntroData {
   String level;
   int category;
   int chapter;
   int cycle;
-  String state;
-  String titleKor;
-  String contentKor;
-  String titleEng;
-  String contentEng;
-  String titleVie;
-  String contentVie;
-  String titleChn;
-  String contentChn;
-  String titleRus;
-  String contentRus;
+  String title;
+  String wordTag;
+  List<WordData> wordDatas;
 
   AddIntroData({
     required this.level,
     required this.category,
     required this.chapter,
     required this.cycle,
-    required this.state,
-    required this.titleKor,
-    required this.contentKor,
-    required this.titleEng,
-    required this.contentEng,
-    required this.titleVie,
-    required this.contentVie,
-    required this.titleChn,
-    required this.contentChn,
-    required this.titleRus,
-    required this.contentRus,
+    required this.title,
+    required this.wordTag,
+    required this.wordDatas,
   });
 
   Map<String, dynamic> toJson() {
@@ -170,17 +193,22 @@ class AddIntroData {
       "category": category,
       "chapter": chapter,
       "cycle": cycle,
-      "state": state,
-      "titleKor": titleKor,
-      "contentKor": contentKor,
-      "titleEng": titleEng,
-      "contentEng": contentEng,
-      "titleVie": titleVie,
-      "contentVie": contentVie,
-      "titleChn": titleChn,
-      "contentChn": contentChn,
-      "titleRus": titleRus,
-      "contentRus": contentRus,
+      "title": title,
+      "wordTag": wordTag,
+      "wordDatas": wordDatas,
     };
+  }
+
+  factory AddIntroData.fromJson(Map<String, dynamic> json) {
+    return AddIntroData(
+      level: json['level'],
+      category: json['category'],
+      chapter: json['chapter'],
+      cycle: json['cycle'],
+      title: json['title'],
+      wordTag: json['wordTag'],
+      wordDatas: List<WordData>.from(
+          json['wordDatas'].map((x) => WordData.fromJson(x))),
+    );
   }
 }

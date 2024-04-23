@@ -27,16 +27,17 @@ final GoRouter router = GoRouter(
       builder: (context, state, child) {
         return SideBar(state: state, key: state.pageKey, child: child);
       },
-      routes: [...routingURL
-          .map((url) => GoRoute(
-              path: url.getPath, builder: (context, state) => url.getpage))
-          .toList()
+      routes: [
+        ...routingURL
+            .map((url) => GoRoute(
+                path: url.getPath, builder: (context, state) => url.getpage))
+            .toList()
       ],
     ),
     GoRoute(
         path: '/add-quiz/:id',
         pageBuilder: (context, state) => NoTransitionPage(
-          child: AddQuiz(
+                child: AddQuiz(
               id: state.pathParameters['id']!,
             ))),
   ],

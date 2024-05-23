@@ -17,8 +17,16 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => TestDataEntityProvider()),
       ],
       child: MaterialApp.router(
-        routerConfig: router,
-      ),
+          routerConfig: router,
+          theme: ThemeData(
+            useMaterial3: true,
+            dataTableTheme: DataTableThemeData(
+              headingRowColor: MaterialStateColor.resolveWith(
+                  (states) => const Color(0xFFB9B9B9)), // 테이블 헤더 색상
+              dataTextStyle: const TextStyle(fontSize: 14),
+              headingTextStyle: const TextStyle(fontSize: 14),
+            ),
+          )),
     );
   }
 }

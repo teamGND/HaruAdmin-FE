@@ -43,6 +43,7 @@ dependencies:
   http_parser: ^4.0.2
   web: ^0.1.4-beta
   provider: ^6.1.2
+  dartz: ^0.10.1
 
 dev_dependencies:
   flutter_test:

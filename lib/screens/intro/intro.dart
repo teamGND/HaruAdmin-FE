@@ -45,7 +45,6 @@ class _IntroState extends State<Intro> {
   final IntroDataRepository introRepository = IntroDataRepository();
   static const int Rows = 15;
   int currentPage = 0;
-  final int rowsPerPage = 15;
   List<bool> isSelected = List.generate(Rows, (index) => false);
 
   Future<dynamic> fetchIntroDataList =

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/model/intro_data_model.dart';
@@ -13,87 +14,44 @@ class IntroTestScreen extends StatefulWidget {
 class _IntroTestScreenState extends State<IntroTestScreen> {
   late IntroDataList introData;
   late List<IntroListComponentData> datas;
-  List<DataRow> rows = [];
-  Map<int, bool> selectedRows = {};
+  // 페이지 번호
+  final int _pageSize = 10;
+  final int _currentPage = 0;
+  bool _isLoading = false;
+  List<IntroListComponentData> _data = [];
 
   @override
   void initState() {
     super.initState();
-    fetchData().then((value) {
-      setState(() {
-        rows = value;
-      });
-    });
+    fetchData();
   }
 
   final tabletitle = [
     '레벨',
     '유형',
     '회차',
-    // '사이클',
+    '사이클',
     '타이틀',
     '상태',
-    '수정',
     '퀴즈/테스트',
   ];
 
-  updateIntroData({
-    required String dataCategory,
-    required int dataId,
-  }) {
-    context.go('/test/add/$dataCategory/$dataId');
-  }
-
-  Future<List<DataRow>> fetchData() async {
+  Future<void> fetchData() async {
     try {
-      await IntroDataRepository()
-          .getIntroDataList(page: 0, size: 10)
-          .then((value) {
-        introData = value;
-        datas = value.content;
+      setState(() {
+        _isLoading = true;
       });
-      List<DataRow> rows = [];
 
-      for (var i = 0; i < datas.length; i++) {
-        var data = datas[i];
-        rows.add(DataRow(
-          cells: <DataCell>[
-            DataCell(
-              Text(data.level.toString()),
-            ),
-            DataCell(
-              Text(data.category.toString()),
-            ),
-            DataCell(
-              Text(data.chapter.toString()),
-            ),
-            DataCell(
-              Text(data.titleKor.toString()),
-            ),
-            DataCell(
-              Text(data.state.toString()),
-            ),
-            DataCell(const Text('수정'),
-                onTap: updateIntroData(
-                  dataCategory: data.category,
-                  dataId: data.id,
-                )),
-            DataCell(
-              GestureDetector(
-                  onTap: () => print("tapped"), child: const Text('추가')),
-            ),
-          ],
-          selected: selectedRows[i] ?? false,
-          onSelectChanged: (isSelected) {
-            setState(() {
-              selectedRows[i] = isSelected!;
-            });
-          },
-        ));
-      }
-      return rows;
+      await IntroDataRepository()
+          .getIntroDataList(page: _currentPage, size: _pageSize)
+          .then((value) {
+        _data = value.content;
+      });
+
+      setState(() {
+        _isLoading = false;
+      });
     } catch (e) {
-      print("error : $e");
       throw Exception(e);
     }
   }
@@ -105,59 +63,138 @@ class _IntroTestScreenState extends State<IntroTestScreen> {
           width: MediaQuery.of(context).size.width * 0.8,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                const Text(
-                  '인트로 & 퀴즈/테스트 데이터',
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700,
-                  ),
+            child: Column(children: [
+              const Text(
+                '인트로 & 퀴즈/테스트 데이터',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w700,
                 ),
-                const SizedBox(height: 20),
-                FutureBuilder(
-                  future: fetchData(),
-                  builder: ((context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return const Center(child: Text('Error'));
-                    } else {
-                      return DataTable(
-                        headingTextStyle: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        headingRowColor: MaterialStatePropertyAll(
-                            const Color(0xFFB9B9B9).withOpacity(0.2)),
-                        border: TableBorder.all(
-                          color: const Color(0xFFB9B9B9),
-                          width: 1,
-                          style: BorderStyle.solid,
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        horizontalMargin: 20.0,
-                        showCheckboxColumn: true,
-                        columnSpacing: 40.0,
-                        columns: List.generate(
-                          tabletitle.length,
-                          (index) => DataColumn(
-                            label: Text(
-                              tabletitle[index],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: PaginatedDataTable(
+                          showCheckboxColumn: true,
+                          showFirstLastButtons: true,
+                          headingRowColor:
+                              Theme.of(context).dataTableTheme.headingRowColor,
+                          rowsPerPage: _pageSize,
+                          source: _DataSource(
+                            datas: _data,
+                            context: context,
+                          ),
+                          columns: List.generate(
+                            tabletitle.length,
+                            growable: false,
+                            (index) => DataColumn(
+                              label: Center(
+                                child: Text(
+                                  tabletitle[index],
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
+                          columnSpacing: 20,
                         ),
-                        rows: snapshot.data as List<DataRow>,
-                      );
-                    }
-                  }),
-                ),
-              ],
-            ),
+                      ),
+                    )
+            ]),
           )),
     );
   }
+}
+
+class _DataSource extends DataTableSource {
+  final List<IntroListComponentData> datas;
+  final Map<int, bool> _selectedRows = {};
+  final BuildContext context;
+
+  _DataSource({
+    required this.datas,
+    required this.context,
+  });
+
+  static const Map<String, String> category_map = {
+    'WORD': '단어',
+    'EXPRESSION': '문법',
+    'TEST': '테스트',
+  };
+
+  updateIntroData({
+    required String dataCategory,
+    required int dataId,
+  }) {
+    context.go('/test/add/$dataCategory/$dataId');
+  }
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= datas.length) {
+      return null;
+    }
+
+    final data = datas[index];
+
+    return DataRow(
+      color: MaterialStateColor.resolveWith((states) => Colors.white),
+      mouseCursor: MaterialStateMouseCursor.clickable,
+      cells: <DataCell>[
+        DataCell(Text(
+          data.level.toString(),
+        )),
+        DataCell(
+          Text(
+            category_map[data.category.toString()]!,
+            style: TextStyle(
+              color: data.category == 'WORD'
+                  ? Colors.blue
+                  : data.category == 'EXPRESSION'
+                      ? Colors.green
+                      : Colors.red,
+            ),
+          ),
+        ),
+        DataCell(
+          Text(data.chapter.toString()),
+        ),
+        const DataCell(Text('1')),
+        DataCell(
+          SizedBox(
+            width: 240,
+            child: Text(data.titleKor.toString()),
+          ),
+          onTap: () {
+            updateIntroData(
+                dataCategory: data.category.toString(), dataId: data.id);
+          },
+        ),
+        DataCell(Text(data.state.toString())),
+        DataCell(
+          const Center(child: Text('추가')),
+          onTap: () {
+            print("tapped");
+          },
+        ),
+      ],
+      selected: _selectedRows[index] ?? false,
+      onSelectChanged: (isSelected) {
+        _selectedRows[index] = isSelected!;
+        notifyListeners();
+      },
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => datas.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

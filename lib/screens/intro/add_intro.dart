@@ -11,19 +11,18 @@ class AddIntro extends StatefulWidget {
 
 class _AddIntroState extends State<AddIntro> {
   final IntroDataRepository introRepository = IntroDataRepository();
-  
 
-  Future<AddIntro> fetchIntroData(int id) async {
+  Future<AddIntroData?> fetchIntroData(int id) async {
     try {
-      introRepository.getIntroData(id).then((value) => {
-        introData = value;
+      introRepository.getIntroData(id: id).then((value) {
+        return value;
       });
-
-      return introData;
     } catch (e) {
       print("error : $e");
       throw Exception(e);
     }
+
+    return null;
   }
 
   @override
@@ -33,6 +32,8 @@ class _AddIntroState extends State<AddIntro> {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Center(
+      child: Text('Add Intro'),
+    );
   }
 }

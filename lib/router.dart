@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/screens/authentication/login_page.dart';
 import 'package:haru_admin/screens/authentication/signup_page.dart';
+import 'package:haru_admin/screens/intro/add_intro.dart';
+import 'package:haru_admin/screens/intro/intro_test.dart';
 import '../screens/add_quiz.dart';
 import 'utils/routing_url.dart';
 import 'widgets/sidebar.dart';
@@ -31,7 +33,7 @@ final GoRouter router = GoRouter(
         ...routingURL
             .map((url) => GoRoute(
                 path: url.getPath, builder: (context, state) => url.getpage))
-            .toList()
+            .toList(),
       ],
     ),
     GoRoute(

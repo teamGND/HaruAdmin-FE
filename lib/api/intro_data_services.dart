@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:haru_admin/model/intro_data_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
@@ -21,10 +19,11 @@ class IntroDataRepository {
     }
   }
 
-  Future<AddIntroData> getIntroData({required int id}) async {
+  Future<IntroModel> getIntroData({required int id}) async {
     try {
       final response = await dio.get('/intro/$id');
-      final introData = AddIntroData.fromJson(response.data);
+      print(response);
+      final introData = IntroModel.fromJson(response.data);
 
       return introData;
     } catch (e) {
@@ -32,18 +31,6 @@ class IntroDataRepository {
       throw Exception(e);
     }
   }
-
-  // getWordDataList() async {
-  //   try {
-  //     final response = await dio.get('/word-list');
-  //     final List<WordDataList> wordDataList =
-  //         (response.data as List).map((e) => WordDataList.fromJson(e)).toList();
-  //     print(wordDataList);
-  //     return wordDataList;
-  //   } catch (e) {
-  //     print("error : $e");
-  //   }
-  // }
 
   addToIntroDataList(AddIntroData data) async {
     try {

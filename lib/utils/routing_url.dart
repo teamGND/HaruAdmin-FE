@@ -7,7 +7,6 @@ import '../screens/admin.dart';
 import '../screens/authentication/login_page.dart';
 import '../screens/authentication/signup_page.dart';
 
-import '../screens/intro/intro.dart';
 import '../screens/intro/add_intro.dart';
 
 import '../screens/mypage.dart';
@@ -20,12 +19,9 @@ import '../screens/word/add_word.dart';
 
 import '../screens/grammer/grammer.dart';
 import '../screens/grammer/add_grammer.dart';
-import '../screens/grammer/modify_grammer_data.dart';
 
 import '../screens/meta/meta.dart';
 import '../screens/meta/add_meta.dart';
-
-import '../screens/add_quiz.dart';
 
 class RouteState {
   final String routepath; // path
@@ -68,18 +64,18 @@ final sidebarDataURL = [
 ];
 final List<RouteState> dataURL = [
   RouteState(
+    routepage: const AddIntro(),
+    routepath: '/intro/add/:category/:id',
+    routename: '인트로 데이터 수정/추가',
+  ),
+  RouteState(
     routepage: const Test(),
     routepath: '/test',
     routename: '테스트 데이터',
   ),
   RouteState(
-    routepage: const AddIntro(),
-    routepath: '/test/add/:category/:id',
-    routename: '테스트 데이터',
-  ),
-  RouteState(
-      routepage: const AddTest(),
-      routepath: '/test/add/:id',
+      routepage: AddTest(),
+      routepath: '/test/add/:category/:id',
       routename: '테스트 데이터 추가'),
   RouteState(
       routepage: const AddGrammer(),
@@ -87,7 +83,7 @@ final List<RouteState> dataURL = [
       routename: '문법 데이터 추가'),
   RouteState(
       routepage: const AddWord(),
-      routepath: '/word/add',
+      routepath: '/word/add/:id',
       routename: '단어 데이터 추가'),
   RouteState(routepage: const Meta(), routepath: '/meta', routename: '메타 데이터'),
   RouteState(

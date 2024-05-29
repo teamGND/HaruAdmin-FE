@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:haru_admin/api/test_data_services.dart';
 import 'package:haru_admin/screens/test/entity/test_entity.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
-import 'package:provider/provider.dart';
 import 'package:haru_admin/widgets/button.dart';
 
 class AddTest extends StatefulWidget {
@@ -13,21 +12,22 @@ class AddTest extends StatefulWidget {
 }
 
 class _AddTestState extends State<AddTest> {
-  final TestDataRepository testRepository = TestDataRepository();
-
-  Future<dynamic> fetchTestDataInfo =
-      Future.delayed(const Duration(milliseconds: 500), () {
-    return TestDataRepository().getTestDataList();
-  });
+  final TestDataRepository testDataRepository = TestDataRepository();
+  bool _isLoading = false;
+  final String _level = '';
+  final int _cycle = 0;
+  final int _chapter = 0;
+  final String _title = '';
+  final List<String> _exampleList = [];
+  final List<ProblemDataModel> _problemList = [];
 
   /*
-    문제 타입
-    (1) 단어 퀴즈 - 101 ~ 104
-    (2) 문법 퀴즈 - 201 ~ 208
-    (3) 테스트 - 101 ~ 208
-    (4) 중간평가 - 101 ~ 208
+  * 문제 타입
+  * (1) 단어 퀴즈 - 101 ~ 104
+  * (2) 문법 퀴즈 - 201 ~ 208
+  * (3) 테스트 - 101 ~ 208
+  * (4) 중간평가 - 101 ~ 208
   */
-  int dropdownValue = 101;
   Map<int, String> dropdownTitle = {
     101: '101. 그림보고 어휘 3지선다',
     102: '102. 어휘보고 그림 3지선다',
@@ -42,19 +42,59 @@ class _AddTestState extends State<AddTest> {
     207: '207. 그림보고 타이핑',
     208: '208. OX 퀴즈',
   };
+  int dropdownValue = 101;
+
+  Future<void> fetchTestData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      List<String> urlParam = Uri.base.toString().split('/');
+      int len = urlParam.length;
+      int chapterId = int.parse(urlParam[len - 1]);
+      // String category = urlParam[len - 2];
+
+      // await testDataRepository.getTestData(id: chapterId).then((value) {
+      //   _level = value.level;
+      //   _cycle = value.cycle;
+      //   _chapter = value.chapter;
+      //   _title = value.title;
+      //   _exampleList = value.exampleList;
+      //   _problemList = value.problemList!;
+      // });
+
+      await testDataRepository.getTestData(id: chapterId);
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  addNewWord() {
+    setState(() {
+      _problemList.add(ProblemDataModel(
+        problemType: dropdownValue,
+        sequence: _problemList.length + 1,
+      ));
+    });
+  }
+
+  save() async {
+    try {
+      await testDataRepository.addTestDataList(_problemList);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    // testRepository
-    //     .addToIntroDataList(
-    //   sampleData,
-    // )
-    //     .then((value) {
-    //   setState(() {
-    //     print(value);
-    //   });
-    // });
+    fetchTestData();
   }
 
   @override
@@ -94,8 +134,9 @@ class _AddTestState extends State<AddTest> {
                 child: filledButton(
                   buttonName: 'Save',
                   color: Colors.blue,
-                  onPressed: () => testRepository.addTestDataList(
-                      context.read<TestDataEntityProvider>().testDataList),
+                  onPressed: () {
+                    save();
+                  },
                 ),
               ),
               const SizedBox(width: 10),
@@ -110,47 +151,38 @@ class _AddTestState extends State<AddTest> {
           ),
           const SizedBox(height: 20),
           const UpperTable(),
-          SizedBox(
-            height: 350,
-            child: ReorderableListView(
-              header: const TestTableHeader(),
-              onReorder: (int oldIndex, int newIndex) {
-                setState(() {
-                  if (oldIndex < newIndex) {
-                    newIndex -= 1;
-                  }
-                  final testDataEntityProvider =
-                      context.read<TestDataEntityProvider>();
-                  final testDataList = testDataEntityProvider.testDataList;
-
-                  // Remove the item from the list at the old index
-                  final item = testDataList.removeAt(oldIndex);
-                  // Insert the item into the list at the new index
-                  testDataList.insert(newIndex, item);
-                });
-              },
-              children: List.generate(
-                context.watch<TestDataEntityProvider>().testDataList.length,
-                (index) => ListTile(
-                  key: ValueKey(index),
-                  title: TestTableElement(
-                    orderedNumber: index + 1,
-                    problemType: context
-                        .watch<TestDataEntityProvider>()
-                        .testDataList[index]
-                        .problemType,
-                    problemWidget: ProblemTable(
-                      problemType: context
-                          .watch<TestDataEntityProvider>()
-                          .testDataList[index]
-                          .problemType,
-                      writeMode: false,
+          _isLoading
+              ? const CircularProgressIndicator()
+              : SizedBox(
+                  height: 350,
+                  child: ReorderableListView(
+                    header: const TestTableHeader(),
+                    onReorder: (int oldIndex, int newIndex) {
+                      setState(() {
+                        if (oldIndex < newIndex) {
+                          newIndex -= 1;
+                        }
+                        final ProblemDataModel item =
+                            _problemList.removeAt(oldIndex);
+                        _problemList.insert(newIndex, item);
+                      });
+                    },
+                    children: List.generate(
+                      _problemList.length,
+                      (index) => ListTile(
+                        key: ValueKey(index),
+                        title: TestTableElement(
+                          orderedNumber: index + 1,
+                          problemType: _problemList[index].problemType,
+                          problemWidget: ProblemTable(
+                            problemType: _problemList[index].problemType,
+                            writeMode: false,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ),
           const Divider(
             color: Colors.black,
             height: 3,
@@ -192,12 +224,7 @@ class _AddTestState extends State<AddTest> {
                   buttonName: '추가',
                   color: Colors.blue,
                   onPressed: () {
-                    context
-                        .read<TestDataEntityProvider>()
-                        .addTestData(TestDataEntity(
-                          chapterNumber: 1,
-                          problemType: dropdownValue,
-                        ));
+                    addNewWord();
                   },
                 )
               ],
@@ -256,7 +283,10 @@ class TestTableHeader extends StatelessWidget {
               child: Center(
                 child: Text(
                   '타입',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

@@ -2,51 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/data_search_area.dart';
 
 class ChapterCatalogTable extends StatelessWidget {
-  const ChapterCatalogTable({super.key});
+  final String level;
+  final int cycle;
+  final int chapter;
+  final String title;
+
+  const ChapterCatalogTable({
+    super.key,
+    required this.level,
+    required this.cycle,
+    required this.chapter,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.6,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return SizedBox(
+      width: 500,
+      height: 100,
+      child: Column(
+        children: [
+          Row(
             children: [
               RequiredInfoName('레벨'),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                  )),
+              DataField(level),
               InfoName('사이클'),
-              SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                  )),
+              DataField(cycle.toString()),
             ],
           ),
-        ),
-        const SizedBox(height: 5),
-        SizedBox(
-            width: MediaQuery.of(context).size.width * 0.6,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                RequiredInfoName(
-                  '타이틀',
-                ),
-                const textformfield(),
-                InfoName('회차'),
-                const textformfield(),
-              ],
-            )),
-      ],
+          const SizedBox(height: 5),
+          Row(
+            children: [
+              RequiredInfoName('타이틀'),
+              DataField(title),
+              InfoName('회차'),
+              DataField(chapter.toString()),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

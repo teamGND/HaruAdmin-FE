@@ -1,19 +1,71 @@
+import 'package:haru_admin/model/intro_data_model.dart';
+
 class WordDataList {
-  int chapter;
-  String content;
-  int cycle;
-  int id;
-  String level;
-  String quizStatus;
-  String state;
-  String title;
-  int wordCount;
-  String wordTag;
+  final List<WordDataListComponent> content;
+  final bool empty;
+  final bool first;
+  final bool last;
+  final int number;
+  final int numberOfElements;
+  final PageableData pageable;
+  final int size;
+  final SortData sort;
+  final int totalElements;
+  final int totalPages;
 
   WordDataList({
+    required this.content,
+    required this.empty,
+    required this.first,
+    required this.last,
+    required this.number,
+    required this.numberOfElements,
+    required this.pageable,
+    required this.size,
+    required this.sort,
+    required this.totalElements,
+    required this.totalPages,
+  });
+
+  factory WordDataList.fromJson(Map<String, dynamic> json) {
+    var contentJson = json['content'] as List;
+    List<WordDataListComponent> contentList =
+        contentJson.map((i) => WordDataListComponent.fromJson(i)).toList();
+
+    return WordDataList(
+      content: contentList,
+      empty: json['empty'],
+      first: json['first'],
+      last: json['last'],
+      number: json['number'],
+      numberOfElements: json['numberOfElements'],
+      pageable: PageableData.fromJson(json['pageable']),
+      size: json['size'],
+      sort: SortData.fromJson(json['sort']),
+      totalElements: json['totalElements'],
+      totalPages: json['totalPages'],
+    );
+  }
+}
+
+class WordDataListComponent {
+  final int id;
+  final int chapter;
+  final String content;
+  final int cycle;
+//  final int sets;
+  final String level;
+  final String quizStatus;
+  final String state;
+  final String title;
+  final int wordCount;
+  final String wordTag;
+
+  WordDataListComponent({
     required this.chapter,
     required this.content,
     required this.cycle,
+    // required this.sets,
     required this.id,
     required this.level,
     required this.quizStatus,
@@ -23,11 +75,12 @@ class WordDataList {
     required this.wordTag,
   });
 
-  factory WordDataList.fromJson(Map<String, dynamic> jsondata) {
-    return WordDataList(
+  factory WordDataListComponent.fromJson(Map<String, dynamic> jsondata) {
+    return WordDataListComponent(
       chapter: jsondata['chapter'],
       content: jsondata['content'],
       cycle: jsondata['cycle'],
+      // sets: jsondata['sets'],
       id: jsondata['id'],
       level: jsondata['level'],
       quizStatus: jsondata['quizStatus'],
@@ -43,6 +96,7 @@ class WordDataList {
       'chapter': chapter,
       'content': content,
       'cycle': cycle,
+      // 'sets': sets,
       'id': id,
       'level': level,
       'quizStatus': quizStatus,
@@ -54,102 +108,97 @@ class WordDataList {
   }
 }
 
-class WordData {
-  String level;
-  int chapter;
-  int cycle;
-  String quizStatus;
-  String state;
-  String title;
-  List<Word> word;
-  String wordTag;
+class WordChapterDataList {
+  final int id;
+  final String level;
+  final int cycle;
+//  final int sets;
+  final int chapter;
+  final String title;
+  final List<WordChapterData> wordDataList;
+  final String wordTag;
 
-  WordData({
+  WordChapterDataList({
+    required this.id,
     required this.level,
-    required this.chapter,
     required this.cycle,
-    required this.quizStatus,
-    required this.state,
+    // required this.sets,
+    required this.chapter,
     required this.title,
-    required this.word,
+    required this.wordDataList,
     required this.wordTag,
   });
 
-  factory WordData.fromJson(Map<String, dynamic> jsondata) {
-    return WordData(
+  factory WordChapterDataList.fromJson(Map<String, dynamic> jsondata) {
+    var wordDataListJson = jsondata['wordDataList'] as List;
+    List<WordChapterData> wordDataList =
+        wordDataListJson.map((i) => WordChapterData.fromJson(i)).toList();
+
+    return WordChapterDataList(
+      id: jsondata['id'],
       level: jsondata['level'],
-      chapter: jsondata['chapter'],
-      cycle: jsondata['cycle'],
-      quizStatus: jsondata['quizStatus'],
-      state: jsondata['state'],
       title: jsondata['title'],
-      word: jsondata['word'].map<Word>((word) => Word.fromJson(word)).toList(),
+      cycle: jsondata['cycle'],
+      // sets: jsondata['sets'],
+      chapter: jsondata['chapter'],
+      wordDataList: wordDataList,
       wordTag: jsondata['wordTag'],
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'level': level,
-      'chapter': chapter,
-      'cycle': cycle,
-      'quizStatus': quizStatus,
-      'state': state,
-      'title': title,
-      'word': word.map((word) => word.toJson()).toList(),
-      'wordTag': wordTag,
-    };
-  }
 }
 
-class Word {
-  String chinese;
-  String description;
-  String english;
-  String imageUrl;
-  int order;
-  String russian;
-  String title;
-  String vietnam;
-  String voiceUrl;
+class WordChapterData {
+  final int id;
+  final int order;
+  final String title;
+  final String? imgUrl;
+  final String? voiceUrl;
+  final String? english;
+  final String? chinese;
+  final String? vietnam;
+  final String? russian;
+  final String? description;
 
-  Word({
-    required this.chinese,
-    required this.description,
-    required this.english,
-    required this.imageUrl,
+  WordChapterData({
+    required this.id,
     required this.order,
-    required this.russian,
     required this.title,
-    required this.vietnam,
-    required this.voiceUrl,
+    this.imgUrl,
+    this.voiceUrl,
+    this.english,
+    this.chinese,
+    this.vietnam,
+    this.russian,
+    this.description,
   });
 
-  factory Word.fromJson(Map<String, dynamic> jsondata) {
-    return Word(
-      chinese: jsondata['chinese'],
-      description: jsondata['description'],
-      english: jsondata['english'],
-      imageUrl: jsondata['imageUrl'],
-      order: jsondata['order'],
-      russian: jsondata['russian'],
-      title: jsondata['title'],
-      vietnam: jsondata['vietnam'],
-      voiceUrl: jsondata['voiceUrl'],
+  factory WordChapterData.fromJson(Map<String, dynamic> json) {
+    return WordChapterData(
+      id: json['id'],
+      order: json['order'],
+      title: json['title'],
+      imgUrl: json['imgUrl'],
+      voiceUrl: json['voiceUrl'],
+      english: json['english'],
+      chinese: json['chinese'],
+      vietnam: json['vietnam'],
+      russian: json['russian'],
+      description: json['description'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'chinese': chinese,
-      'description': description,
-      'english': english,
-      'imageUrl': imageUrl,
+      'id': id,
       'order': order,
-      'russian': russian,
       'title': title,
-      'vietnam': vietnam,
+      'imgUrl': imgUrl,
       'voiceUrl': voiceUrl,
+      'english': english,
+      'chinese': chinese,
+      'vietnam': vietnam,
+      'russian': russian,
+      'description': description,
     };
   }
 }

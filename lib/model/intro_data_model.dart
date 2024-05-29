@@ -93,24 +93,28 @@ class PageableData {
 }
 
 class IntroListComponentData {
-  int id;
-  String level;
-  String category;
-  int chapter;
-  int adminId;
-  String titleKor;
-  String contentKor;
-  String state;
+  final int id;
+  final String level;
+  final String category;
+  final int cycle;
+  final int sets;
+  final int chapter;
+  final int? adminId;
+  final String? titleKor;
+  final String? contentKor;
+  final String? state;
 
   IntroListComponentData({
     required this.id,
     required this.level,
     required this.category,
+    required this.cycle,
+    required this.sets,
     required this.chapter,
-    required this.adminId,
-    required this.titleKor,
-    required this.contentKor,
-    required this.state,
+    this.adminId,
+    this.titleKor,
+    this.contentKor,
+    this.state,
   });
 
   factory IntroListComponentData.fromJson(Map<String, dynamic> json) {
@@ -118,6 +122,8 @@ class IntroListComponentData {
       id: json['id'],
       level: json['level'],
       category: json['category'],
+      cycle: json['cycle'],
+      sets: json['sets'],
       chapter: json['chapter'],
       adminId: json['adminId'],
       titleKor: json['titleKor'],
@@ -168,23 +174,81 @@ class WordData {
   }
 }
 
-class AddIntroData {
-  String level;
-  int category;
+class IntroModel {
+  int id;
   int chapter;
   int cycle;
+  int sets;
+  String category;
+  String level;
   String title;
-  String wordTag;
-  List<WordData> wordDatas;
+  List<WordData>? wordDatas;
+
+  IntroModel({
+    required this.id,
+    required this.chapter,
+    required this.cycle,
+    required this.sets,
+    required this.category,
+    required this.level,
+    required this.title,
+    this.wordDatas,
+  });
+
+  factory IntroModel.fromJson(Map<String, dynamic> json) {
+    return IntroModel(
+      cycle: json['cycle'],
+      sets: json['sets'],
+      category: 'NONE',
+      id: json['id'],
+      chapter: json['chapter'],
+      level: json['level'],
+      title: json['title'],
+      wordDatas: List<WordData>.from(
+          json['wordDataList'].map((x) => WordData.fromJson(x))),
+    );
+  }
+
+  IntroModel copyWith({
+    int? id,
+    int? chapter,
+    int? cycle,
+    int? sets,
+    String? category,
+    String? level,
+    String? title,
+    List<WordData>? wordDatas,
+  }) {
+    return IntroModel(
+      id: id ?? this.id,
+      chapter: chapter ?? this.chapter,
+      cycle: cycle ?? this.cycle,
+      sets: sets ?? this.sets,
+      category: category ?? this.category,
+      level: level ?? this.level,
+      title: title ?? this.title,
+      wordDatas: wordDatas ?? this.wordDatas,
+    );
+  }
+}
+
+class AddIntroData {
+  String level;
+  String category;
+  int chapter;
+  int cycle;
+  String? title;
+  String? wordTag;
+  List<WordData>? wordDatas;
 
   AddIntroData({
     required this.level,
     required this.category,
     required this.chapter,
     required this.cycle,
-    required this.title,
-    required this.wordTag,
-    required this.wordDatas,
+    this.title,
+    this.wordTag,
+    this.wordDatas,
   });
 
   Map<String, dynamic> toJson() {
@@ -209,6 +273,26 @@ class AddIntroData {
       wordTag: json['wordTag'],
       wordDatas: List<WordData>.from(
           json['wordDatas'].map((x) => WordData.fromJson(x))),
+    );
+  }
+
+  AddIntroData copyWith({
+    String? level,
+    String? category,
+    int? chapter,
+    int? cycle,
+    String? title,
+    String? wordTag,
+    List<WordData>? wordDatas,
+  }) {
+    return AddIntroData(
+      level: level ?? this.level,
+      category: category ?? this.category,
+      chapter: chapter ?? this.chapter,
+      cycle: cycle ?? this.cycle,
+      title: title ?? this.title,
+      wordTag: wordTag ?? this.wordTag,
+      wordDatas: wordDatas ?? this.wordDatas,
     );
   }
 }

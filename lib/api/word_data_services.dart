@@ -8,24 +8,33 @@ class WordDataRepository {
   final dio = DioClient().provideDio();
   SecureStorage secureStorage = SecureStorage();
 
-  getWordDataList() async {
+  getWordDataList({required int page, required int size}) async {
     try {
       final response = await dio.get('/word-list');
-      final List<WordDataList> wordDataList =
-          (response.data as List).map((e) => WordDataList.fromJson(e)).toList();
-      print(wordDataList);
+      final WordDataList wordDataList = WordDataList.fromJson(response.data);
+
       return wordDataList;
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  addToWordDataList({required WordDataListComponent wordData}) async {
+    try {
+      final response = await dio.post('/word', data: wordData.toJson());
     } catch (e) {
       print("error : $e");
     }
   }
 
-  addToWordDataList({required WordData wordData}) async {
+  getWordData({required int id}) async {
     try {
-      final response = await dio.post('/word', data: wordData.toJson());
-      print(response.data);
+      final response = await dio.get('/word/$id');
+      final wordChapterDataList = WordChapterDataList.fromJson(response.data);
+
+      return wordChapterDataList;
     } catch (e) {
-      print("error : $e");
+      throw Exception(e);
     }
   }
 

@@ -63,35 +63,7 @@ class _GrammerDataState extends State<GrammerData> {
             ),
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                '레벨',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              const SizedBox(
-                width: 20.0,
-              ),
-              DropdownMenu<String>(
-                width: 300,
-                initialSelection: levelType[1],
-                onSelected: (String? value) {
-                  setState(() {
-                    dropdownvalue = value!;
-                  });
-                  value != null ? dataLevelFilter(value) : null;
-                },
-                dropdownMenuEntries:
-                    levelType.map<DropdownMenuEntry<String>>((String value) {
-                  return DropdownMenuEntry<String>(value: value, label: value);
-                }).toList(),
-              )
-            ],
-          ),
+          LevelSelectDropdown(),
           const SizedBox(height: 20),
           getDataTable(datas: datas),
           const SizedBox(height: 30),
@@ -142,9 +114,7 @@ class _GrammerDataState extends State<GrammerData> {
                 ),
               ),
               FilledButton(
-                  onPressed: () {
-                    print('tapped');
-                  },
+                  onPressed: () {},
                   style: const ButtonStyle(
                     backgroundColor:
                         MaterialStatePropertyAll(Color(0xFF3F99F7)),
@@ -155,6 +125,49 @@ class _GrammerDataState extends State<GrammerData> {
         ]),
       ),
     ));
+  }
+
+  Row LevelSelectDropdown() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          '레벨',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        const SizedBox(
+          width: 20.0,
+        ),
+        DropdownMenu<String>(
+          inputDecorationTheme: InputDecorationTheme(
+            fillColor: Colors.white,
+            focusColor: Colors.blue,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(
+                color: Colors.black,
+                width: 1,
+              ),
+            ),
+          ),
+          width: 300,
+          initialSelection: levelType[1],
+          onSelected: (String? value) {
+            setState(() {
+              dropdownvalue = value!;
+            });
+            value != null ? dataLevelFilter(value) : null;
+          },
+          dropdownMenuEntries:
+              levelType.map<DropdownMenuEntry<String>>((String value) {
+            return DropdownMenuEntry<String>(value: value, label: value);
+          }).toList(),
+        ),
+      ],
+    );
   }
 
   Widget getDataTable({List<VocabularyData> datas = const []}) {

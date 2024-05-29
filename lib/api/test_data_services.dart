@@ -19,5 +19,28 @@ class TestDataRepository {
     }
   }
 
-  addTestDataList(List<TestDataEntity> testDataList) {}
+  getTestData({required id}) async {
+    try {
+      final response = await dio.get(
+        '/test/$id',
+      );
+
+      if (response.statusCode == 200) {
+        return TestDataEntity.fromJson(jsonDecode(response.data));
+      }
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  addTestDataList(List<ProblemDataModel>? testDataList) {
+    try {
+      dio.post(
+        '/test-list',
+        data: testDataList,
+      );
+    } catch (e) {
+      print("error : $e");
+    }
+  }
 }

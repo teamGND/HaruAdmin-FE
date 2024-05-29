@@ -8,17 +8,12 @@ import 'package:haru_admin/widgets/button.dart';
 
 class ChapterInfoProvider extends ChangeNotifier {
   final String level;
-  final int set_number;
-  final int chapter_number;
+
   final String title;
-  final String reference_data;
 
   ChapterInfoProvider({
     required this.level,
-    required this.set_number,
-    required this.chapter_number,
     required this.title,
-    required this.reference_data,
   });
 }
 
@@ -67,16 +62,16 @@ class _IntroState extends State<Intro> {
           titleRow: Row(
             children: List.generate(
               tabletitle.length,
-              (index) => buildTableColumn(
-                  Text(
-                    tabletitle[index],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+              (index) => SizedBox(
+                width: columnWidth[index].toDouble(),
+                child: Text(
+                  tabletitle[index],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
                   ),
-                  columnWidth,
-                  index),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ),
           childRow: (dynamic introData) {
@@ -161,7 +156,7 @@ class _IntroState extends State<Intro> {
               ),
               filledButton(
                 buttonName: '회차 추가',
-                color: Color(0xFF3F99F7),
+                color: const Color(0xFF3F99F7),
                 onPressed: () {
                   context.go('/test/add');
                 },

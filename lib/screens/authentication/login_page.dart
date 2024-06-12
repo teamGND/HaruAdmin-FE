@@ -83,7 +83,8 @@ class _LoginPageState extends State<LoginPage> {
                                       passwordController.text)
                                   .then((response) => {
                                         print(response),
-                                        if (response.statusCode == 200)
+                                        if (response.statusCode ==
+                                            200) // 로그인 성공
                                           {
                                             context.go('/mypage'),
                                           }

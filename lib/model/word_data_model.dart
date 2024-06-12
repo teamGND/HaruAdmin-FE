@@ -51,9 +51,9 @@ class WordDataList {
 class WordDataListComponent {
   final int id;
   final int chapter;
-  final String content;
+  final String content; // 띄어쓰기 없이 ,로 연결되어 있음 (ex. "1,2,3")
   final int cycle;
-//  final int sets;
+  final int sets;
   final String level;
   final String quizStatus;
   final String state;
@@ -65,7 +65,7 @@ class WordDataListComponent {
     required this.chapter,
     required this.content,
     required this.cycle,
-    // required this.sets,
+    required this.sets,
     required this.id,
     required this.level,
     required this.quizStatus,
@@ -80,7 +80,7 @@ class WordDataListComponent {
       chapter: jsondata['chapter'],
       content: jsondata['content'],
       cycle: jsondata['cycle'],
-      // sets: jsondata['sets'],
+      sets: jsondata['sets'],
       id: jsondata['id'],
       level: jsondata['level'],
       quizStatus: jsondata['quizStatus'],
@@ -96,7 +96,7 @@ class WordDataListComponent {
       'chapter': chapter,
       'content': content,
       'cycle': cycle,
-      // 'sets': sets,
+      'sets': sets,
       'id': id,
       'level': level,
       'quizStatus': quizStatus,
@@ -112,7 +112,7 @@ class WordChapterDataList {
   final int id;
   final String level;
   final int cycle;
-//  final int sets;
+  final int sets;
   final int chapter;
   final String title;
   final List<WordChapterData> wordDataList;
@@ -122,7 +122,7 @@ class WordChapterDataList {
     required this.id,
     required this.level,
     required this.cycle,
-    // required this.sets,
+    required this.sets,
     required this.chapter,
     required this.title,
     required this.wordDataList,
@@ -139,7 +139,7 @@ class WordChapterDataList {
       level: jsondata['level'],
       title: jsondata['title'],
       cycle: jsondata['cycle'],
-      // sets: jsondata['sets'],
+      sets: jsondata['sets'],
       chapter: jsondata['chapter'],
       wordDataList: wordDataList,
       wordTag: jsondata['wordTag'],
@@ -148,19 +148,19 @@ class WordChapterDataList {
 }
 
 class WordChapterData {
-  final int id;
-  final int order;
-  final String title;
-  final String? imgUrl;
-  final String? voiceUrl;
-  final String? english;
-  final String? chinese;
-  final String? vietnam;
-  final String? russian;
-  final String? description;
+  int? id;
+  int order;
+  String title;
+  String? imgUrl;
+  String? voiceUrl;
+  String? english;
+  String? chinese;
+  String? vietnam;
+  String? russian;
+  String? description;
 
   WordChapterData({
-    required this.id,
+    this.id,
     required this.order,
     required this.title,
     this.imgUrl,

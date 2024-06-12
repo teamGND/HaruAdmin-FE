@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/api/test_data_services.dart';
 import 'package:haru_admin/screens/test/entity/test_entity.dart';
+import 'package:haru_admin/utils/add_chapter_model.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
 import 'package:haru_admin/widgets/button.dart';
 
 class AddTest extends StatefulWidget {
-  const AddTest({super.key});
+  final AddChatperClass info;
+
+  const AddTest({
+    required this.info,
+    super.key,
+  });
 
   @override
   State<AddTest> createState() => _AddTestState();
@@ -50,9 +56,9 @@ class _AddTestState extends State<AddTest> {
         _isLoading = true;
       });
 
-      List<String> urlParam = Uri.base.toString().split('/');
-      int len = urlParam.length;
-      int chapterId = int.parse(urlParam[len - 1]);
+      // List<String> urlParam = Uri.base.toString().split('/');
+      // int len = urlParam.length;
+      // int chapterId = int.parse(urlParam[len - 1]);
       // String category = urlParam[len - 2];
 
       // await testDataRepository.getTestData(id: chapterId).then((value) {
@@ -64,7 +70,7 @@ class _AddTestState extends State<AddTest> {
       //   _problemList = value.problemList!;
       // });
 
-      await testDataRepository.getTestData(id: chapterId);
+      // await testDataRepository.getTestData(id: chapterId);
 
       setState(() {
         _isLoading = false;

@@ -3,11 +3,15 @@ import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_picker_for_web/image_picker_for_web.dart';
+import 'package:haru_admin/utils/add_chapter_model.dart';
 
 class AddGrammer extends StatefulWidget {
-  const AddGrammer({super.key});
+  final AddChatperClass info;
+
+  const AddGrammer({
+    required this.info,
+    super.key,
+  });
 
   @override
   State<AddGrammer> createState() => _AddGrammerState();

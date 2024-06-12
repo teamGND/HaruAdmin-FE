@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/model/intro_data_model.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
+import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 
-class IntroTestScreen extends StatefulWidget {
+class IntroTestScreen extends ConsumerStatefulWidget {
   const IntroTestScreen({super.key});
 
   @override
   _IntroTestScreenState createState() => _IntroTestScreenState();
 }
 
-class _IntroTestScreenState extends State<IntroTestScreen> {
+class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   late IntroDataList introData;
-  late List<IntroListComponentData> datas;
   // 페이지 번호
-  final int _pageSize = 8;
-  final int _currentPage = 0;
-  bool _isLoading = false;
-  List<IntroListComponentData> _data = [];
+  static int _pageSize = 8;
+  /* TODO 현재페이지 쿠키에 저장 */
+  int _currentPage = 0;
+  bool _isLoading = true;
   LEVEL dropdownValue = LEVEL.ALPHABET;
 
   @override
@@ -29,15 +30,125 @@ class _IntroTestScreenState extends State<IntroTestScreen> {
   }
 
   final tabletitle = [
-    '레벨',
+    ' ',
     '유형',
-    '회차',
     '사이클',
     '세트',
+    '회차',
     '타이틀',
     '상태',
     '퀴즈/테스트',
   ];
+
+  List<bool> _selected = List.generate(_pageSize, (index) => false);
+
+  void goToPage(int page) {
+    if (page < 0 || page >= introData.totalPages) {
+      return;
+    } else {
+      setState(() {
+        _currentPage = page;
+      });
+    }
+    fetchData();
+  }
+
+  void addChapter(IntroListComponentData? data) {
+    String category;
+    String level;
+    int cycle;
+    int sets;
+    int chapter;
+    String? title;
+    List<String> wordList = [];
+    if (data == null) {
+      // 새로 추가
+      category = introData.content.last.category;
+      level = introData.content.last.level;
+      cycle = introData.content.last.cycle;
+      sets = introData.content.last.sets;
+      chapter = introData.content.last.chapter + 1;
+
+      if (category == 'MIDTERM') {
+        cycle += 1;
+        sets += 1;
+      } else if (category == 'TEST') {
+        sets += 1;
+      }
+    } else {
+      category = data.category;
+      level = data.level;
+      cycle = data.cycle;
+      sets = data.sets;
+      chapter = data.chapter;
+
+      if (data.category == 'WORD' && data.titleKor != null) {
+        wordList = convertWordStringToList(title: data.titleKor!);
+        title = convertWordStringToTitle(title: data.titleKor!);
+      }
+    }
+    ref.watch(introProvider.notifier).update(
+        dataId: data?.id,
+        chapter: chapter,
+        cycle: cycle,
+        sets: sets,
+        category: CATEGORY.WORD,
+        level: LEVEL.LEVEL1,
+        title: title,
+        wordDatas: wordList);
+
+    context.go('/intro/add');
+  }
+
+  void deleteSelected() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text(
+              '선택한 데이터를 삭제하시겠습니까?',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            content: SizedBox(
+              width: 400,
+              height: 100,
+              child: SingleChildScrollView(
+                child: Text(
+                  introData.content.fold(
+                      "",
+                      (previousValue, element) =>
+                          previousValue +
+                          (_selected[introData.content.indexOf(element)]
+                              ? "챕터 ${element.chapter.toString()}. ${element.titleKor.toString()} \n"
+                              : '')),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  List<int> ids = introData.content
+                      .asMap()
+                      .entries
+                      .where((element) => _selected[element.key])
+                      .map((e) => e.value.id)
+                      .toList();
+                  await IntroDataRepository().deleteIntroData(ids);
+                  fetchData();
+                },
+                child: const Text('확인'),
+              ),
+            ],
+          );
+        });
+  }
 
   Future<void> fetchData() async {
     try {
@@ -48,7 +159,7 @@ class _IntroTestScreenState extends State<IntroTestScreen> {
       await IntroDataRepository()
           .getIntroDataList(page: _currentPage, size: _pageSize)
           .then((value) {
-        _data = value.content;
+        introData = value;
       });
 
       setState(() {
@@ -63,10 +174,11 @@ class _IntroTestScreenState extends State<IntroTestScreen> {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(children: [
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
               Text(
                 '인트로 & 퀴즈/테스트 데이터',
                 style: Theme.of(context).textTheme.titleLarge,
@@ -86,6 +198,7 @@ class _IntroTestScreenState extends State<IntroTestScreen> {
                     width: 20.0,
                   ),
                   DropdownMenu<String>(
+                    enableSearch: false,
                     inputDecorationTheme: InputDecorationTheme(
                       fillColor: Colors.white,
                       focusColor: Colors.blue,
@@ -116,150 +229,194 @@ class _IntroTestScreenState extends State<IntroTestScreen> {
               const SizedBox(height: 20),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: PaginatedDataTable(
-                          showCheckboxColumn: true,
-                          showFirstLastButtons: true,
-                          headingRowColor:
-                              Theme.of(context).dataTableTheme.headingRowColor,
-                          rowsPerPage: _pageSize,
-                          source: _DataSource(
-                            datas: _data,
-                            context: context,
+                  : introData.content.isEmpty
+                      ? const Center(child: Text('데이터가 없습니다.'))
+                      : Table(
+                          border: TableBorder.all(
+                            color: Color(0xFFB9B9B9),
+                            width: 1,
                           ),
-                          columns: List.generate(
-                            tabletitle.length,
-                            growable: false,
-                            (index) => DataColumn(
-                              label: Center(
-                                child: Text(
-                                  tabletitle[index],
-                                  textAlign: TextAlign.center,
-                                ),
+                          columnWidths: const {
+                            0: FlexColumnWidth(1),
+                            1: FlexColumnWidth(2),
+                            2: FlexColumnWidth(1),
+                            3: FlexColumnWidth(1),
+                            4: FlexColumnWidth(1),
+                            5: FlexColumnWidth(6), // title
+                            6: FlexColumnWidth(2),
+                            7: FlexColumnWidth(2),
+                          },
+                          children: [
+                            TableRow(
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF0F0F0),
+                              ),
+                              children: List.generate(
+                                tabletitle.length,
+                                (index) => SizedBox(
+                                    height: 40,
+                                    child:
+                                        Center(child: Text(tabletitle[index]))),
                               ),
                             ),
-                          ),
-                          columnSpacing: 20,
+                            ...List.generate(introData.content.length, (index) {
+                              IntroListComponentData data =
+                                  introData.content[index];
+                              return TableRow(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                ),
+                                children: [
+                                  SizedBox(
+                                    height: 35,
+                                    child: Center(
+                                      child: Checkbox(
+                                        value: _selected[index],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _selected[index] = value!;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                    child: Center(
+                                      child: Text(data.category),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                    child: Center(
+                                      child: Text(data.cycle.toString()),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                    child: Center(
+                                      child: Text(data.sets.toString()),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                    child: Center(
+                                      child: Text(data.chapter.toString()),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                    child: (data.category == 'WORD' ||
+                                            data.category == 'GRAMMAR')
+                                        ? TextButton(
+                                            onPressed: () {
+                                              addChapter(data);
+                                            },
+                                            child: Text(
+                                              data.titleKor ?? '',
+                                            ))
+                                        : Center(
+                                            child: Text(data.titleKor ?? ''),
+                                          ),
+                                  ),
+                                  SizedBox(
+                                    height: 35,
+                                    child: Center(
+                                      child: Text(data.state ?? 'EMPTY'),
+                                    ),
+                                  ),
+                                  Center(
+                                    child: TextButton(
+                                        onPressed: () {
+                                          context.go('/test/add');
+                                        },
+                                        child: const Text(
+                                          '퀴즈',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                          ),
+                                        )),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ],
                         ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      deleteSelected();
+                    },
+                    child: const Text(
+                      '선택 삭제',
+                      style: TextStyle(
+                        color: Colors.red,
                       ),
-                    )
-            ]),
-          )),
-    );
-  }
-}
-
-class _DataSource extends DataTableSource {
-  final List<IntroListComponentData> datas;
-  final Map<int, bool> _selectedRows = {};
-  final BuildContext context;
-
-  _DataSource({
-    required this.datas,
-    required this.context,
-  });
-
-  static const Map<String, String> categoryMap = {
-    'WORD': '단어',
-    'GRAMMAR': '문법',
-    'TEST': '테스트',
-    'MIDTERM': '중간평가',
-  };
-
-  updateQuizData({
-    required String dataCategory,
-    required int dataId,
-  }) {
-    context.go('/test/add/$dataCategory/$dataId');
-  }
-
-  // 인트로 수정 or 추가
-  updateIntroData({
-    required int dataId,
-    required Level level,
-    required Category category,
-    required int cycle,
-    required int sets,
-    required int chapter,
-    String? title,
-  }) {
-    context.go('/intro/add/$category/$dataId');
-  }
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= datas.length) {
-      return null;
-    }
-
-    final data = datas[index];
-
-    return DataRow(
-      color: MaterialStateColor.resolveWith((states) => Colors.white),
-      mouseCursor: MaterialStateMouseCursor.clickable,
-      cells: <DataCell>[
-        DataCell(Text(data.level.toString())),
-        DataCell(
-          Text(
-            categoryMap[data.category.toString()]!,
-            style: TextStyle(
-              color: data.category == 'WORD'
-                  ? Colors.blue
-                  : data.category == 'GRAMMAR'
-                      ? Colors.green
-                      : Colors.red,
-            ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.2,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _currentPage != 0
+                            ? GestureDetector(
+                                onTap: () {
+                                  goToPage(_currentPage - 1);
+                                },
+                                child: const SizedBox(
+                                    width: 50, child: Text('< 이전')))
+                            : const SizedBox(width: 50),
+                        Container(
+                          padding: const EdgeInsets.all(5),
+                          width: 50,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1,
+                              )),
+                          child: Text(
+                            (_currentPage + 1).toString(),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        _currentPage != introData.totalPages
+                            ? GestureDetector(
+                                onTap: () {
+                                  goToPage(_currentPage + 1);
+                                },
+                                child: SizedBox(
+                                    width: 50, child: const Text('다음 >')),
+                              )
+                            : SizedBox(width: 50),
+                        GestureDetector(
+                          onTap: () {
+                            goToPage(introData.totalPages - 1);
+                          },
+                          child: const Text('맨뒤로 >>'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: () {
+                      addChapter(null);
+                    },
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(Colors.blue)),
+                    child: const Text('회차추가'),
+                  )
+                ],
+              ),
+            ],
           ),
         ),
-        DataCell(Text(data.chapter.toString())),
-        DataCell(Text(data.cycle.toString())),
-        DataCell(Text(data.sets.toString())),
-        DataCell(
-          SizedBox(
-            width: 300,
-            child: Text(data.titleKor.toString()),
-          ),
-          onTap: () {
-            updateIntroData(
-              category: Category.values.firstWhere(
-                  (e) => e.toString() == 'CATEGORY.${data.category}'),
-              dataId: data.id,
-              level: Level.values
-                  .firstWhere((e) => e.toString() == 'LEVEL.${data.level}'),
-              cycle: data.cycle,
-              sets: data.sets,
-              chapter: data.chapter,
-              title: data.titleKor.toString(),
-            );
-          },
-        ),
-        DataCell(Text(data.state.toString())),
-        DataCell(
-          const Center(child: Text('추가')),
-          onTap: () {
-            updateQuizData(
-              dataCategory: data.category,
-              dataId: data.id,
-            );
-          },
-        ),
-      ],
-      selected: _selectedRows[index] ?? false,
-      onSelectChanged: (isSelected) {
-        _selectedRows[index] = isSelected!;
-        notifyListeners();
-      },
+      ),
     );
   }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => datas.length;
-
-  @override
-  int get selectedRowCount => 0;
 }

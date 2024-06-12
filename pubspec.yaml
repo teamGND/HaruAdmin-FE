@@ -38,12 +38,11 @@ dependencies:
   dio: ^5.4.0
   flutter_secure_storage: ^9.0.0
   flutter_feather_icons: ^2.0.0+1
-  image_picker_for_web: ^3.0.2
-  image_picker: ^1.0.7
   http_parser: ^4.0.2
   web: ^0.1.4-beta
   dartz: ^0.10.1
   flutter_riverpod: ^2.5.1
+  file_picker: ^8.0.0+1
 
 dev_dependencies:
   flutter_test:

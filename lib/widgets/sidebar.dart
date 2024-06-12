@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:haru_admin/utils/routing_url.dart';
+import 'package:haru_admin/router.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
 
 class SideBar extends StatefulWidget {
@@ -21,26 +21,31 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
-  String selectedURL = '/mypage';
+  String? selectedURL;
 
-  Widget sideBarComponent(url) {
+  @override
+  void initState() {
+    super.initState();
+    selectedURL = widget.state.fullPath;
+  }
+
+  Widget sideBarComponent(List<GoRoute> url) {
     return Column(children: [
       for (var index = 0; index < url.length; index++)
         ListTile(
           title: Text(
-            url[index].getName,
+            url[index].name!,
             style: TextStyle(
-              color: selectedURL == url[index].getPath
-                  ? Colors.blue
-                  : Colors.black,
+              color:
+                  selectedURL == url[index].path ? Colors.blue : Colors.black,
               fontSize: 14,
             ),
           ),
           onTap: () {
             setState(() {
-              selectedURL = url[index].getPath;
+              selectedURL = url[index].path;
             });
-            context.go(url[index].getPath);
+            context.go(url[index].path);
           },
         ),
     ]);
@@ -68,15 +73,15 @@ class _SideBarState extends State<SideBar> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-                  sideBarComponent(manageURL),
+                  sideBarComponent(sidebarRoutes['account']!),
                   const Divider(
                     thickness: 2,
                   ),
-                  sideBarComponent(sidebarDataURL),
+                  sideBarComponent(sidebarRoutes['data']!),
                   const Divider(
                     thickness: 2,
                   ),
-                  sideBarComponent(myURL),
+                  sideBarComponent(sidebarRoutes['my']!),
                   ListTile(
                     leading: const Icon(
                       Icons.logout,

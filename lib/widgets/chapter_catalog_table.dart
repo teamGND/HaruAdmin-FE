@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/data_search_area.dart';
 
 class ChapterCatalogTable extends StatelessWidget {
-  final String level;
-  final int cycle;
-  final int chapter;
-  final String title;
+  final String? level;
+  final int? cycle;
+  final int? chapter;
+  final String? title;
 
   const ChapterCatalogTable({
     super.key,
@@ -25,18 +25,18 @@ class ChapterCatalogTable extends StatelessWidget {
           Row(
             children: [
               RequiredInfoName('레벨'),
-              DataField(level),
+              DataField(level ?? '?'),
               InfoName('사이클'),
-              DataField(cycle.toString()),
+              DataField(cycle != null ? cycle.toString() : ''),
             ],
           ),
           const SizedBox(height: 5),
           Row(
             children: [
               RequiredInfoName('타이틀'),
-              DataField(title),
+              DataField(title ?? ''),
               InfoName('회차'),
-              DataField(chapter.toString()),
+              DataField(chapter != null ? chapter.toString() : ''),
             ],
           ),
         ],

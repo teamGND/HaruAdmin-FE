@@ -22,7 +22,6 @@ class IntroDataRepository {
   Future<IntroModel> getIntroData({required int id}) async {
     try {
       final response = await dio.get('/intro/$id');
-      print(response);
       final introData = IntroModel.fromJson(response.data);
 
       return introData;
@@ -35,6 +34,17 @@ class IntroDataRepository {
   addToIntroDataList(AddIntroData data) async {
     try {
       final response = await dio.post('/intro', data: data.toJson());
+
+      return response;
+    } catch (e) {
+      print("error : $e");
+      throw Exception(e);
+    }
+  }
+
+  deleteIntroData(List<int> ids) async {
+    try {
+      final response = await dio.delete('/intro', data: ids);
 
       return response;
     } catch (e) {

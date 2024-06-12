@@ -175,23 +175,23 @@ class WordData {
 }
 
 class IntroModel {
-  int id;
+  int? id;
   int chapter;
   int cycle;
   int sets;
   String category;
   String level;
-  String title;
+  String? title;
   List<WordData>? wordDatas;
 
   IntroModel({
-    required this.id,
+    this.id,
     required this.chapter,
     required this.cycle,
     required this.sets,
     required this.category,
     required this.level,
-    required this.title,
+    this.title,
     this.wordDatas,
   });
 
@@ -233,46 +233,45 @@ class IntroModel {
 }
 
 class AddIntroData {
+  int? id;
   String level;
   String category;
   int chapter;
   int cycle;
-  String? title;
-  String? wordTag;
-  List<WordData>? wordDatas;
+  int sets;
+  String? titleKor;
 
   AddIntroData({
+    this.id,
     required this.level,
     required this.category,
     required this.chapter,
     required this.cycle,
-    this.title,
-    this.wordTag,
-    this.wordDatas,
+    required this.sets,
+    this.titleKor,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      "level": level,
-      "category": category,
-      "chapter": chapter,
-      "cycle": cycle,
-      "title": title,
-      "wordTag": wordTag,
-      "wordDatas": wordDatas,
+      'id': id,
+      'level': level,
+      'category': category,
+      'chapter': chapter,
+      'cycle': cycle,
+      'sets': sets,
+      'titleKor': titleKor,
     };
   }
 
   factory AddIntroData.fromJson(Map<String, dynamic> json) {
     return AddIntroData(
+      id: json['id'],
       level: json['level'],
       category: json['category'],
       chapter: json['chapter'],
       cycle: json['cycle'],
-      title: json['title'],
-      wordTag: json['wordTag'],
-      wordDatas: List<WordData>.from(
-          json['wordDatas'].map((x) => WordData.fromJson(x))),
+      sets: json['sets'],
+      titleKor: json['titleKor'],
     );
   }
 
@@ -281,18 +280,16 @@ class AddIntroData {
     String? category,
     int? chapter,
     int? cycle,
+    int? sets,
     String? title,
-    String? wordTag,
-    List<WordData>? wordDatas,
   }) {
     return AddIntroData(
       level: level ?? this.level,
       category: category ?? this.category,
       chapter: chapter ?? this.chapter,
       cycle: cycle ?? this.cycle,
-      title: title ?? this.title,
-      wordTag: wordTag ?? this.wordTag,
-      wordDatas: wordDatas ?? this.wordDatas,
+      sets: sets ?? this.sets,
+      titleKor: title ?? this.titleKor,
     );
   }
 }

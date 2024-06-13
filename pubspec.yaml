@@ -43,6 +43,7 @@ dependencies:
   dartz: ^0.10.1
   flutter_riverpod: ^2.5.1
   file_picker: ^8.0.0+1
+  just_audio: ^0.9.37
 
 dev_dependencies:
   flutter_test:

@@ -202,3 +202,33 @@ class WordChapterData {
     };
   }
 }
+
+class PatchWordChapterData {
+  String level;
+  String? title;
+  int? chapter;
+  int? sets;
+  int? cycle;
+  List<WordChapterData> word;
+
+  PatchWordChapterData({
+    required this.level,
+    required this.title,
+    required this.chapter,
+    required this.sets,
+    required this.cycle,
+    required this.word,
+  });
+
+  Map<String, dynamic> toJson() {
+    List<Map<String, dynamic>> wordList = word.map((e) => e.toJson()).toList();
+    return {
+      'level': level,
+      'title': title,
+      'chapter': chapter,
+      'sets': sets,
+      'cycle': cycle,
+      'word': wordList,
+    };
+  }
+}

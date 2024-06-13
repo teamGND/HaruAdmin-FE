@@ -36,9 +36,9 @@ Widget RequiredInfoName(String requiredCategory) {
   );
 }
 
-Widget DataField(String data) {
+Widget DataField(String data, {bool isDoubled = false}) {
   return Container(
-    width: 150,
+    width: isDoubled ? 285 : 100,
     height: 43,
     padding: const EdgeInsets.symmetric(horizontal: 10),
     margin: const EdgeInsets.symmetric(horizontal: 5),

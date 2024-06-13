@@ -6,6 +6,7 @@ import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
+import 'package:just_audio/just_audio.dart';
 
 class AddWordScreen extends ConsumerStatefulWidget {
   const AddWordScreen({
@@ -67,8 +68,75 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     });
   }
 
+  void save() async {
+    if (_isLoading) {
+      return;
+    }
+
+    if (_datas.isNotEmpty) {
+      bool isWordFilled = _datas.every((element) {
+        if (element.title.isEmpty || element.title == '') {
+          return false;
+        }
+        return true;
+      });
+
+      if (!isWordFilled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(child: Text('단어를 입력해주세요')),
+            showCloseIcon: true,
+            closeIconColor: Colors.white,
+          ),
+        );
+        return;
+      }
+    }
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      if (info.dataId != null) {
+        for (int i = 0; i < _datas.length; i++) {
+          _datas[i].order = i + 1;
+        }
+        await wordRepository
+            .saveWordData(
+          id: info.dataId!,
+          data: PatchWordChapterData(
+            level: info.level.toString().split('.').last,
+            title: info.title,
+            chapter: info.chapter,
+            sets: info.sets,
+            cycle: info.cycle,
+            word: _datas,
+          ),
+        )
+            .then((value) {
+          if (value != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Center(child: Text(value)),
+                showCloseIcon: true,
+                closeIconColor: Colors.white,
+              ),
+            );
+          }
+        });
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
   void translate() {}
-  void save() {}
+
   void confirm() {}
   void getImageUrl(int index) async {
     if (_datas[index].title.isEmpty) {
@@ -91,7 +159,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
         PlatformFile file = result.files.first;
 
         await wordRepository
-            .uploadImage(
+            .uploadFile(
           fileBytes: file.bytes!,
           fileName: _datas[index].title,
         )
@@ -103,6 +171,56 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
       } else {
         // User canceled the picker
       }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  void getAudioUrl(int index) async {
+    if (_datas[index].title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('음성 업로드 전, 단어를 입력해주세요.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['mp3']);
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        await wordRepository
+            .uploadFile(
+          fileBytes: file.bytes!,
+          fileName: _datas[index].title,
+        )
+            .then((value) {
+          setState(() {
+            _datas[index].voiceUrl = value;
+          });
+        });
+      } else {
+        // User canceled the picker
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  playAudio(int index) async {
+    try {
+      final player = AudioPlayer();
+      await player.setUrl(_datas[index].voiceUrl!);
+      await player.setVolume(0.5);
+      await player.pause();
+      await player.stop();
+      player.play();
     } catch (e) {
       throw Exception(e);
     }
@@ -150,14 +268,17 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 20),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : ChapterCatalogTable(
-                      level: info.level.toString().split('.').last,
-                      cycle: info.cycle,
-                      chapter: info.chapter,
-                      title: info.title,
-                    ),
+              Center(
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : ChapterCatalogTable(
+                        level: info.level.toString().split('.').last,
+                        cycle: info.cycle,
+                        sets: info.sets,
+                        chapter: info.chapter,
+                        title: info.title,
+                      ),
+              ),
               const SizedBox(height: 20),
               Expanded(
                 child: SizedBox(
@@ -209,86 +330,169 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                 value: _isChecked[index],
                               ),
                             ),
-                            TableTextComponent(
-                              tabletitle: (index + 1).toString(),
+                            TableComponent(
                               width: tabletitle[1].values.first,
+                              child: Text(
+                                _datas[index].order.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                            TableTextComponent(
-                              tabletitle: _datas[index].title,
+                            TableComponent(
                               width: tabletitle[2].values.first,
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                controller: TextEditingController(
+                                  text: _datas[index].title,
+                                ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                             TableComponent(
                               width: tabletitle[3].values.first,
-                              child: Image.network(
-                                'https://haru-hangeul.s3.ap-northeast-2.amazonaws.com/hello.png',
-                                fit: BoxFit.cover,
+                              child: _datas[index].imgUrl != null
+                                  ? Image.network(
+                                      _datas[index].imgUrl!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : TextButton(
+                                      onPressed: () {
+                                        // 이미지 불러오기
+                                        getImageUrl(index);
+                                      },
+                                      child: const Text(
+                                        '불러오기',
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                            TableComponent(
+                              width: tabletitle[4].values.first,
+                              child: _datas[index].voiceUrl != null
+                                  ? IconButton(
+                                      onPressed: () {
+                                        playAudio(index);
+                                      },
+                                      icon: Icon(Icons.volume_up_rounded),
+                                    )
+                                  : TextButton(
+                                      onPressed: () {
+                                        // 오디오 불러오기
+                                        getAudioUrl(index);
+                                      },
+                                      child: const Text(
+                                        '불러오기',
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                            TableComponent(
+                              width: tabletitle[5].values.first,
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                controller: TextEditingController(
+                                  text: _datas[index].description ?? '',
+                                ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
-                            // TableComponent(
-                            //   width: tabletitle[3].values.first,
-                            //   child: _datas[index].imgUrl != null
-                            //       ? Image.network(
-                            //           '_datas[index].imgUrl!',
-                            //           fit: BoxFit.cover,
-                            //         )
-                            //       : TextButton(
-                            //           onPressed: () {
-                            //             // 이미지 불러오기
-                            //             getImageUrl(index);
-                            //           },
-                            //           child: const Text(
-                            //             '불러오기',
-                            //             style: const TextStyle(
-                            //               color: Colors.blue,
-                            //               fontWeight: FontWeight.bold,
-                            //               fontSize: 10,
-                            //             ),
-                            //           ),
-                            //         ),
-                            // ),
-                            TableTextComponent(
-                              tabletitle: _datas[index].voiceUrl ?? '소리없음',
-                              width: tabletitle[4].values.first,
-                              isEditable: false,
-                            ),
-                            TableTextComponent(
-                              tabletitle: _datas[index].english ?? '',
-                              width: tabletitle[5].values.first,
-                            ),
-                            TableTextComponent(
-                              tabletitle: _datas[index].chinese ?? '',
+                            TableComponent(
                               width: tabletitle[6].values.first,
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                controller: TextEditingController(
+                                  text: _datas[index].chinese ?? '',
+                                ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                            TableTextComponent(
-                              tabletitle: _datas[index].vietnam ?? '',
+                            TableComponent(
                               width: tabletitle[7].values.first,
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                controller: TextEditingController(
+                                  text: _datas[index].vietnam ?? '',
+                                ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                            TableTextComponent(
-                              tabletitle: _datas[index].russian ?? '',
+                            TableComponent(
                               width: tabletitle[8].values.first,
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                controller: TextEditingController(
+                                  text: _datas[index].russian ?? '',
+                                ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                            TableTextComponent(
-                              tabletitle: _datas[index].description ?? '',
+                            TableComponent(
                               width: tabletitle[9].values.first,
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                controller: TextEditingController(
+                                  text: _datas[index].description ?? '',
+                                ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
                       onReorder: (int oldIndex, int newIndex) {
-                        // setState(() {
-                        //   if (oldIndex < newIndex) {
-                        //     newIndex -= 1;
-                        //   }
-                        //   final testDataEntityProvider =
-                        //       context.read<TestDataEntityProvider>();
-                        //   final testDataList =
-                        //       testDataEntityProvider.testDataList;
-
-                        //   // Remove the item from the list at the old index
-                        //   final item = testDataList.removeAt(oldIndex);
-                        //   // Insert the item into the list at the new index
-                        //   testDataList.insert(newIndex, item);
-                        // });
+                        setState(() {
+                          if (oldIndex < newIndex) {
+                            newIndex -= 1;
+                          }
+                          final item = _datas.removeAt(oldIndex);
+                          _datas.insert(newIndex, item);
+                        });
                       },
                     ),
                   ),
@@ -317,19 +521,25 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                     filledButton(
                       buttonName: 'Confirm',
                       color: const Color(0xFFFF7D53),
-                      onPressed: addNewWord,
+                      onPressed: () {
+                        confirm();
+                      },
                     ),
                     const SizedBox(width: 10),
                     filledButton(
                       buttonName: '번역 불러오기',
                       color: const Color(0xFF484848),
-                      onPressed: addNewWord,
+                      onPressed: () {
+                        translate();
+                      },
                     ),
                     const SizedBox(width: 10),
                     filledButton(
                       buttonName: '저장하기',
                       color: const Color(0xFF3F99F7),
-                      onPressed: addNewWord,
+                      onPressed: () {
+                        save();
+                      },
                     ),
                   ],
                 ),
@@ -338,58 +548,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class TableTextComponent extends StatelessWidget {
-  const TableTextComponent({
-    super.key,
-    required this.tabletitle,
-    required this.width,
-    this.isEditable = true,
-  });
-
-  final String tabletitle;
-  final double width;
-  final bool isEditable;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.grey,
-          width: 0.5,
-        ),
-        color: Colors.white,
-      ),
-      width: width,
-      height: 100,
-      child: Center(
-          child: isEditable
-              ? TextField(
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                  ),
-                  controller: TextEditingController(
-                    text: tabletitle ?? '',
-                  ),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 12,
-                  ),
-                )
-              : Text(
-                  tabletitle,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.normal,
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
-                )),
     );
   }
 }

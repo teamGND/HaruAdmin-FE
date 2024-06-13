@@ -15,15 +15,6 @@ void main() {
               fontWeight: FontWeight.w700,
             ),
           ),
-          dataTableTheme: DataTableThemeData(
-            headingRowColor: MaterialStateColor.resolveWith(
-                (states) => const Color(0xFFB9B9B9)), // 테이블 헤더 색상
-            headingTextStyle: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-            dataTextStyle: const TextStyle(fontSize: 14),
-          ),
         ),
       ),
     ),

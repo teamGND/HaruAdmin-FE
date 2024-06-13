@@ -46,7 +46,22 @@ class WordDataRepository {
     }
   }
 
-  Future<String?> uploadImage(
+  saveWordData({required int id, required PatchWordChapterData data}) async {
+    try {
+      final response = await dio.patch(
+        '/word/$id',
+        data: data.toJson(),
+      );
+      if (response.statusCode == 409) {
+        String errorMessage = response.data['message'];
+        return errorMessage;
+      }
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  Future<String?> uploadFile(
       {required Uint8List fileBytes, required String fileName}) async {
     try {
       FormData formData = FormData.fromMap({
@@ -66,18 +81,15 @@ class WordDataRepository {
       if (response.statusCode == 200) {
         String? fileUrl = response.data['fileUrl'];
         if (fileUrl != null) {
-          print(fileUrl);
           return fileUrl;
         } else {
-          print('fileUrl is not present in the response');
           return null;
         }
-        // return fileUrl;
       } else {
         print('File upload failed with status: ${response.statusCode}');
       }
     } catch (e) {
-      print("error : $e");
+      throw Exception(e);
     }
   }
 }

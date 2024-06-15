@@ -12,7 +12,8 @@ class WordDataRepository {
   final dio4File = DioClient().provideDioForFile();
   SecureStorage secureStorage = SecureStorage();
 
-  getWordDataList({required int page, required int size}) async {
+  Future<WordDataList> getWordDataList(
+      {required int page, required int size}) async {
     try {
       final response = await dio.get('/word-list');
       final WordDataList wordDataList = WordDataList.fromJson(response.data);
@@ -35,7 +36,7 @@ class WordDataRepository {
     }
   }
 
-  getWordData({required int id}) async {
+  Future<WordChapterDataList> getWordData({required int id}) async {
     try {
       final response = await dio.get('/word/$id');
       final wordChapterDataList = WordChapterDataList.fromJson(response.data);

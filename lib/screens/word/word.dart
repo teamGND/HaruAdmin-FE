@@ -56,7 +56,7 @@ class _WordState extends ConsumerState<Word> {
             category: CATEGORY.WORD,
             level: dropdownValue,
             title: wordData.content[index].title,
-            wordDatas: wordData.content[index].content.split(','),
+            wordDatas: wordData.content[index].content?.split(','),
           );
     }
 
@@ -224,7 +224,7 @@ class _WordState extends ConsumerState<Word> {
                                     // 단어 리스트
                                     height: 35,
                                     child: Center(
-                                      child: Text(data.title),
+                                      child: Text(data.title!),
                                     ),
                                   ),
                                   SizedBox(
@@ -236,7 +236,7 @@ class _WordState extends ConsumerState<Word> {
                                       },
                                       child: Center(
                                         child: data.content != ''
-                                            ? Text(data.content)
+                                            ? Text(data.content!)
                                             : const Text(
                                                 '데이터 입력하기',
                                                 style: TextStyle(

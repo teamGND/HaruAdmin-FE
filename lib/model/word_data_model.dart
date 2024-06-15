@@ -49,17 +49,17 @@ class WordDataList {
 }
 
 class WordDataListComponent {
-  final int id;
-  final int chapter;
-  final String content; // 띄어쓰기 없이 ,로 연결되어 있음 (ex. "1,2,3")
-  final int cycle;
-  final int sets;
-  final String level;
-  final String quizStatus;
-  final String state;
-  final String title;
-  final int wordCount;
-  final String wordTag;
+  int id;
+  int chapter;
+  String? content; // 띄어쓰기 없이 ,로 연결되어 있음 (ex. "1,2,3,")
+  int cycle;
+  int sets;
+  String level;
+  String? quizStatus;
+  String? state;
+  String? title;
+  int wordCount;
+  String? wordTag;
 
   WordDataListComponent({
     required this.chapter,
@@ -114,9 +114,9 @@ class WordChapterDataList {
   final int cycle;
   final int sets;
   final int chapter;
-  final String title;
+  final String? title;
   final List<WordChapterData> wordDataList;
-  final String wordTag;
+  final String? wordTag;
 
   WordChapterDataList({
     required this.id,

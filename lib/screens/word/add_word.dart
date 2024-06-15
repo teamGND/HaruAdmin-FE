@@ -9,9 +9,7 @@ import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 import 'package:just_audio/just_audio.dart';
 
 class AddWordScreen extends ConsumerStatefulWidget {
-  const AddWordScreen({
-    super.key,
-  });
+  const AddWordScreen({super.key});
 
   @override
   ConsumerState<AddWordScreen> createState() => _AddWordScreenState();
@@ -19,10 +17,16 @@ class AddWordScreen extends ConsumerStatefulWidget {
 
 class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   final WordDataRepository wordRepository = WordDataRepository();
+  late List<TextEditingController> titleControllers;
+  late List<TextEditingController> englishControllers;
+  late List<TextEditingController> chineseControllers;
+  late List<TextEditingController> vietnamControllers;
+  late List<TextEditingController> russianControllers;
+  late List<TextEditingController> descriptionControllers;
 
   // 회차 데이터 가져오기
-  bool _isLoading = false;
-  late IntroInfo info;
+  bool _isLoading = true;
+  IntroInfo info = IntroInfo();
   List<WordChapterData> _datas = [];
   List<bool> _isChecked = List<bool>.filled(10, false);
 
@@ -102,6 +106,15 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
         for (int i = 0; i < _datas.length; i++) {
           _datas[i].order = i + 1;
         }
+        for (int i = 0; i < _datas.length; i++) {
+          _datas[i].title = titleControllers[i].text;
+          _datas[i].english = englishControllers[i].text;
+          _datas[i].chinese = chineseControllers[i].text;
+          _datas[i].vietnam = vietnamControllers[i].text;
+          _datas[i].russian = russianControllers[i].text;
+          _datas[i].description = descriptionControllers[i].text;
+        }
+
         await wordRepository
             .saveWordData(
           id: info.dataId!,
@@ -231,11 +244,30 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
       setState(() {
         _isLoading = true;
       });
-
       if (info.dataId != null) {
         await wordRepository.getWordData(id: info.dataId!).then((value) {
+          print(value.wordDataList);
           _datas = value.wordDataList;
         });
+
+        titleControllers = _datas
+            .map((data) => TextEditingController(text: data.title))
+            .toList();
+        englishControllers = _datas
+            .map((data) => TextEditingController(text: data.english))
+            .toList();
+        chineseControllers = _datas
+            .map((data) => TextEditingController(text: data.chinese))
+            .toList();
+        vietnamControllers = _datas
+            .map((data) => TextEditingController(text: data.vietnam))
+            .toList();
+        russianControllers = _datas
+            .map((data) => TextEditingController(text: data.russian))
+            .toList();
+        descriptionControllers = _datas
+            .map((data) => TextEditingController(text: data.description))
+            .toList();
       }
 
       setState(() {
@@ -254,6 +286,17 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   }
 
   @override
+  void dispose() {
+    titleControllers.forEach((controller) => controller.dispose());
+    englishControllers.forEach((controller) => controller.dispose());
+    chineseControllers.forEach((controller) => controller.dispose());
+    vietnamControllers.forEach((controller) => controller.dispose());
+    russianControllers.forEach((controller) => controller.dispose());
+    descriptionControllers.forEach((controller) => controller.dispose());
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
@@ -269,234 +312,241 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
               ),
               const SizedBox(height: 20),
               Center(
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : ChapterCatalogTable(
-                        level: info.level.toString().split('.').last,
-                        cycle: info.cycle,
-                        sets: info.sets,
-                        chapter: info.chapter,
-                        title: info.title,
-                      ),
+                child: ChapterCatalogTable(
+                  level: info.level.toString().split('.').last,
+                  cycle: info.cycle,
+                  sets: info.sets,
+                  chapter: info.chapter,
+                  title: info.title,
+                ),
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: SizedBox(
-                    child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    child: ReorderableListView(
-                      scrollDirection: Axis.vertical,
-                      header: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: List.generate(
-                          tabletitle.length,
-                          (index) => Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 0.5,
-                              ),
-                              color: Colors.grey[200],
-                            ),
-                            width: tabletitle[index].values.first,
-                            height: 40,
-                            child: Center(
-                              child: Text(
-                                tabletitle[index].keys.first,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : SizedBox(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            child: ReorderableListView(
+                              scrollDirection: Axis.vertical,
+                              header: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: List.generate(
+                                  tabletitle.length,
+                                  (index) => Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey,
+                                        width: 0.5,
+                                      ),
+                                      color: Colors.grey[200],
+                                    ),
+                                    width: tabletitle[index].values.first,
+                                    height: 40,
+                                    child: Center(
+                                      child: Text(
+                                        tabletitle[index].keys.first,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                textAlign: TextAlign.center,
                               ),
+                              children: List.generate(
+                                _datas.length,
+                                (index) => Row(
+                                  key: ValueKey(index),
+                                  children: [
+                                    // 1. 체크박스
+                                    TableComponent(
+                                      width: tabletitle[0].values.first,
+                                      child: Checkbox(
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _isChecked[index] = value!;
+                                          });
+                                        },
+                                        value: _isChecked[index],
+                                      ),
+                                    ),
+                                    // 2. 순서
+                                    TableComponent(
+                                      width: tabletitle[1].values.first,
+                                      child: Text(
+                                        _datas[index].order.toString(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    // 3. 단어
+                                    TableComponent(
+                                      width: tabletitle[2].values.first,
+                                      child: TextField(
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        controller: titleControllers[index],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    // 4. 이미지
+                                    TableComponent(
+                                      width: tabletitle[3].values.first,
+                                      child: _datas[index].imgUrl != null
+                                          ? Image.network(
+                                              _datas[index].imgUrl!,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : TextButton(
+                                              onPressed: () {
+                                                // 이미지 불러오기
+                                                getImageUrl(index);
+                                              },
+                                              child: const Text(
+                                                '불러오기',
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            ),
+                                    ),
+                                    // 5. 음성
+                                    TableComponent(
+                                        width: tabletitle[4].values.first,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            _datas[index].voiceUrl != null
+                                                ? IconButton(
+                                                    onPressed: () {
+                                                      playAudio(index);
+                                                    },
+                                                    icon: const Icon(Icons
+                                                        .volume_up_rounded),
+                                                  )
+                                                : const SizedBox(),
+                                            TextButton(
+                                              onPressed: () {
+                                                // 오디오 불러오기
+                                                getAudioUrl(index);
+                                              },
+                                              child: const Text(
+                                                '불러오기',
+                                                style: TextStyle(
+                                                  color: Colors.blue,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                    // 6. ENG
+                                    TableComponent(
+                                      width: tabletitle[5].values.first,
+                                      child: TextField(
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        controller: englishControllers[index],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    // 7. CHN
+                                    TableComponent(
+                                      width: tabletitle[6].values.first,
+                                      child: TextField(
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        controller: chineseControllers[index],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    // 8. VIE
+                                    TableComponent(
+                                      width: tabletitle[7].values.first,
+                                      child: TextField(
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        controller: vietnamControllers[index],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    // 9. RUS
+                                    TableComponent(
+                                      width: tabletitle[8].values.first,
+                                      child: TextField(
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        controller: russianControllers[index],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    // 10. 추가 설명
+                                    TableComponent(
+                                      width: tabletitle[9].values.first,
+                                      child: TextField(
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                        ),
+                                        controller:
+                                            descriptionControllers[index],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onReorder: (int oldIndex, int newIndex) {
+                                setState(() {
+                                  if (oldIndex < newIndex) {
+                                    newIndex -= 1;
+                                  }
+                                  final item = _datas.removeAt(oldIndex);
+                                  _datas.insert(newIndex, item);
+                                });
+                              },
                             ),
                           ),
                         ),
                       ),
-                      children: List.generate(
-                        _datas.length,
-                        (index) => Row(
-                          key: ValueKey(index),
-                          children: [
-                            TableComponent(
-                              width: tabletitle[0].values.first,
-                              child: Checkbox(
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isChecked[index] = value!;
-                                  });
-                                },
-                                value: _isChecked[index],
-                              ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[1].values.first,
-                              child: Text(
-                                _datas[index].order.toString(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[2].values.first,
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                ),
-                                controller: TextEditingController(
-                                  text: _datas[index].title,
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[3].values.first,
-                              child: _datas[index].imgUrl != null
-                                  ? Image.network(
-                                      _datas[index].imgUrl!,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : TextButton(
-                                      onPressed: () {
-                                        // 이미지 불러오기
-                                        getImageUrl(index);
-                                      },
-                                      child: const Text(
-                                        '불러오기',
-                                        style: const TextStyle(
-                                          color: Colors.blue,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                    ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[4].values.first,
-                              child: _datas[index].voiceUrl != null
-                                  ? IconButton(
-                                      onPressed: () {
-                                        playAudio(index);
-                                      },
-                                      icon: Icon(Icons.volume_up_rounded),
-                                    )
-                                  : TextButton(
-                                      onPressed: () {
-                                        // 오디오 불러오기
-                                        getAudioUrl(index);
-                                      },
-                                      child: const Text(
-                                        '불러오기',
-                                        style: const TextStyle(
-                                          color: Colors.blue,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 10,
-                                        ),
-                                      ),
-                                    ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[5].values.first,
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                ),
-                                controller: TextEditingController(
-                                  text: _datas[index].description ?? '',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[6].values.first,
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                ),
-                                controller: TextEditingController(
-                                  text: _datas[index].chinese ?? '',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[7].values.first,
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                ),
-                                controller: TextEditingController(
-                                  text: _datas[index].vietnam ?? '',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[8].values.first,
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                ),
-                                controller: TextEditingController(
-                                  text: _datas[index].russian ?? '',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            TableComponent(
-                              width: tabletitle[9].values.first,
-                              child: TextField(
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                ),
-                                controller: TextEditingController(
-                                  text: _datas[index].description ?? '',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      onReorder: (int oldIndex, int newIndex) {
-                        setState(() {
-                          if (oldIndex < newIndex) {
-                            newIndex -= 1;
-                          }
-                          final item = _datas.removeAt(oldIndex);
-                          _datas.insert(newIndex, item);
-                        });
-                      },
-                    ),
-                  ),
-                )),
               ),
               const SizedBox(height: 20),
               SizedBox(

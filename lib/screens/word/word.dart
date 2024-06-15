@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haru_admin/model/intro_data_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/utils/add_chapter_model.dart';
+import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 
 class Word extends ConsumerStatefulWidget {
@@ -29,7 +31,7 @@ class _WordState extends ConsumerState<Word> {
     '타이틀',
     '학습 내용',
     '단어수',
-    '퀴즈',
+    // '퀴즈',
   ];
 
   @override
@@ -62,6 +64,25 @@ class _WordState extends ConsumerState<Word> {
 
     context.go('/word/add');
   }
+
+  // void addTest(int index) {
+  //   try {
+  //     ref.watch(introProvider.notifier).update(
+  //           dataId: wordData.content[index].id,
+  //           chapter: wordData.content[index].chapter,
+  //           cycle: wordData.content[index].cycle,
+  //           sets: wordData.content[index].sets,
+  //           category: CATEGORY.WORD,
+  //           level: dropdownValue,
+  //           title: wordData.content[index].title,
+  //           wordDatas: wordData.content[index].content?.split(','),
+  //         );
+
+  //     context.go('/test/add');
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   Future<void> fetchData() async {
     try {
@@ -156,7 +177,7 @@ class _WordState extends ConsumerState<Word> {
                       ? const Center(child: Text('데이터가 없습니다.'))
                       : Table(
                           border: TableBorder.all(
-                            color: Color(0xFFB9B9B9),
+                            color: const Color(0xFFB9B9B9),
                             width: 1,
                           ),
                           columnWidths: const {
@@ -186,7 +207,7 @@ class _WordState extends ConsumerState<Word> {
                               WordDataListComponent data =
                                   wordData.content[index];
                               return TableRow(
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                 ),
                                 children: [
@@ -255,38 +276,31 @@ class _WordState extends ConsumerState<Word> {
                                       child: Text(data.wordCount.toString()),
                                     ),
                                   ),
-                                  Center(
-                                    // 퀴즈
-                                    child: TextButton(
-                                        onPressed: () {
-                                          context.go('/test/add',
-                                              extra: AddChatperClass(
-                                                isExisting: true,
-                                                id: data.id,
-                                                category: CATEGORY.WORD,
-                                                level: dropdownValue,
-                                                cycle: data.cycle,
-                                                sets: data.sets,
-                                                chapter: data.chapter,
-                                              ));
-                                        },
-                                        child: const Text(
-                                          '퀴즈',
-                                          style: TextStyle(
-                                            color: Colors.blue,
-                                          ),
-                                        )),
-                                  ),
+                                  // Center(
+                                  //   // 퀴즈
+                                  //   child: TextButton(
+                                  //       onPressed: () {
+                                  //         addTest(
+                                  //           index,
+                                  //         );
+                                  //       },
+                                  //       child: const Text(
+                                  //         '퀴즈',
+                                  //         style: TextStyle(
+                                  //           color: Colors.blue,
+                                  //         ),
+                                  //       )),
+                                  // ),
                                 ],
                               );
                             }),
                           ],
                         ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 10,
                   ),
                   SizedBox(
@@ -322,10 +336,10 @@ class _WordState extends ConsumerState<Word> {
                                 onTap: () {
                                   goToPage(_currentPage + 1);
                                 },
-                                child: SizedBox(
-                                    width: 50, child: const Text('다음 >')),
+                                child: const SizedBox(
+                                    width: 50, child: Text('다음 >')),
                               )
-                            : SizedBox(width: 50),
+                            : const SizedBox(width: 50),
                         GestureDetector(
                           onTap: () {
                             goToPage(wordData.totalPages - 1);

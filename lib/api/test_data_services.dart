@@ -24,7 +24,7 @@ class TestDataRepository {
       );
 
       if (response.statusCode == 200) {
-        return TestDataEntity.fromJson(jsonDecode(response.data));
+        return TestDataEntity.fromJson(response.data);
       }
     } catch (e) {
       print("error : $e");

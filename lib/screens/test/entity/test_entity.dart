@@ -3,9 +3,9 @@ class TestDataEntity {
   int cycle;
   // int sets;
   int chapter;
-  String title;
-  // List<String> exampleList;
-  // List<ProblemDataModel>? problemList;
+  String? title;
+  List<String>? exampleList;
+  List<ProblemDataModel>? problemList;
 
   TestDataEntity({
     required this.level,
@@ -13,8 +13,8 @@ class TestDataEntity {
     // required this.sets,
     required this.chapter,
     required this.title,
-    // required this.exampleList,
-    // required this.problemList,
+    required this.exampleList,
+    required this.problemList,
   });
 
   factory TestDataEntity.fromJson(Map<String, dynamic> json) {
@@ -24,12 +24,13 @@ class TestDataEntity {
       // sets: json['sets'],
       chapter: json['chapter'],
       title: json['title'],
-      // exampleList: List<String>.from(json['exampleList']),
-      // problemList: json['problemList'] != null
-      //     ? (json['problemList'] as List)
-      //         .map((e) => ProblemDataModel.fromJson(e))
-      //         .toList()
-      //     : [],
+      exampleList: json['exampleList'] != null
+          ? List<String>.from(json['exampleList'])
+          : [],
+      problemList: json['problemList'] != null
+          ? List<ProblemDataModel>.from(
+              json['problemList'].map((e) => ProblemDataModel.fromJson(e)))
+          : [],
     );
   }
 
@@ -40,8 +41,8 @@ class TestDataEntity {
       // 'sets': sets,
       'chapter': chapter,
       'title': title,
-      // 'exampleList': exampleList,
-      // 'problemList': problemList!.map((e) => e.toJson()).toList(),
+      'exampleList': exampleList,
+      'problemList': problemList!.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -60,8 +61,8 @@ class TestDataEntity {
       // sets: sets ?? this.sets,
       chapter: chapter ?? this.chapter,
       title: title ?? this.title,
-      // exampleList: exampleList ?? this.exampleList,
-      // problemList: problemList ?? this.problemList,
+      exampleList: exampleList ?? this.exampleList,
+      problemList: problemList ?? this.problemList,
     );
   }
 }

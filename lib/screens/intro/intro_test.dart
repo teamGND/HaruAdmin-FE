@@ -17,7 +17,7 @@ class IntroTestScreen extends ConsumerStatefulWidget {
 class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   late IntroDataList introData;
   // 페이지 번호
-  static int _pageSize = 8;
+  static const int _pageSize = 8;
   /* TODO 현재페이지 쿠키에 저장 */
   int _currentPage = 0;
   bool _isLoading = true;
@@ -40,7 +40,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     '퀴즈/테스트',
   ];
 
-  List<bool> _selected = List.generate(_pageSize, (index) => false);
+  final List<bool> _selected = List.generate(_pageSize, (index) => false);
 
   void goToPage(int page) {
     if (page < 0 || page >= introData.totalPages) {
@@ -98,6 +98,31 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
         wordDatas: wordList);
 
     context.go('/intro/add');
+  }
+
+  void addTest(IntroListComponentData data) {
+    String? title = data.titleKor;
+    List<String> wordList = [];
+    try {
+      if (data.category == 'WORD' && data.titleKor != null) {
+        wordList = convertWordStringToList(title: data.titleKor!);
+        title = convertWordStringToTitle(title: data.titleKor!);
+      }
+      ref.watch(introProvider.notifier).update(
+          dataId: data.id,
+          chapter: data.chapter,
+          cycle: data.cycle,
+          sets: data.sets,
+          category: CATEGORY.values.firstWhere(
+              (element) => element.toString().split('.').last == data.category),
+          level: dropdownValue,
+          title: title,
+          wordDatas: wordList);
+
+      context.go('/test/add');
+    } catch (e) {
+      print(e);
+    }
   }
 
   void deleteSelected() {
@@ -233,7 +258,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                       ? const Center(child: Text('데이터가 없습니다.'))
                       : Table(
                           border: TableBorder.all(
-                            color: Color(0xFFB9B9B9),
+                            color: const Color(0xFFB9B9B9),
                             width: 1,
                           ),
                           columnWidths: const {
@@ -263,7 +288,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                               IntroListComponentData data =
                                   introData.content[index];
                               return TableRow(
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.white,
                                 ),
                                 children: [
@@ -328,7 +353,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                   Center(
                                     child: TextButton(
                                         onPressed: () {
-                                          context.go('/test/add');
+                                          addTest(data);
                                         },
                                         child: const Text(
                                           '퀴즈',
@@ -342,7 +367,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                             }),
                           ],
                         ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -390,10 +415,10 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                 onTap: () {
                                   goToPage(_currentPage + 1);
                                 },
-                                child: SizedBox(
-                                    width: 50, child: const Text('다음 >')),
+                                child: const SizedBox(
+                                    width: 50, child: Text('다음 >')),
                               )
-                            : SizedBox(width: 50),
+                            : const SizedBox(width: 50),
                         GestureDetector(
                           onTap: () {
                             goToPage(introData.totalPages - 1);

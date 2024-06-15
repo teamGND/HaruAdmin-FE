@@ -5,19 +5,14 @@ import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/utils/add_chapter_model.dart';
 
-class AddGrammer extends StatefulWidget {
-  final AddChatperClass info;
-
-  const AddGrammer({
-    required this.info,
-    super.key,
-  });
+class AddGrammerScreen extends StatefulWidget {
+  const AddGrammerScreen({super.key});
 
   @override
-  State<AddGrammer> createState() => _AddGrammerState();
+  State<AddGrammerScreen> createState() => _AddGrammerScreenState();
 }
 
-class _AddGrammerState extends State<AddGrammer> {
+class _AddGrammerScreenState extends State<AddGrammerScreen> {
   final GrammerDataRepository grammerRepository = GrammerDataRepository();
 
   String? _imageDataUrl;

@@ -49,14 +49,12 @@ final GoRouter router = GoRouter(
         GoRoute(
           name: '테스트 데이터 추가',
           path: '/test/add',
-          builder: (context, state) =>
-              AddTest(info: state.extra as AddChatperClass),
+          builder: (context, state) => AddTestScreen(),
         ),
         GoRoute(
           name: '문법 데이터 추가',
           path: '/grammer/add',
-          builder: (context, state) =>
-              AddGrammer(info: state.extra as AddChatperClass),
+          builder: (context, state) => AddGrammerScreen(),
         ),
         GoRoute(
           name: '단어 데이터 추가',

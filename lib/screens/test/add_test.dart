@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/test_data_services.dart';
+import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/screens/test/entity/test_entity.dart';
-import 'package:haru_admin/utils/add_chapter_model.dart';
+import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
 import 'package:haru_admin/widgets/button.dart';
 
-class AddTest extends StatefulWidget {
-  final AddChatperClass info;
-
-  const AddTest({
-    required this.info,
-    super.key,
-  });
+class AddTestScreen extends ConsumerStatefulWidget {
+  const AddTestScreen({super.key});
 
   @override
-  State<AddTest> createState() => _AddTestState();
+  ConsumerState<AddTestScreen> createState() => _AddTestScreenState();
 }
 
-class _AddTestState extends State<AddTest> {
+class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   final TestDataRepository testDataRepository = TestDataRepository();
+
+  IntroInfo infoData = const IntroInfo(
+    dataId: 0,
+    level: LEVEL.LEVEL1,
+    cycle: 0,
+    sets: 0,
+    chapter: 0,
+    title: '',
+  );
   bool _isLoading = false;
-  final String _level = '';
-  final int _cycle = 0;
-  final int _chapter = 0;
-  final String _title = '';
-  final List<String> _exampleList = [];
-  final List<ProblemDataModel> _problemList = [];
+  List<String> _exampleData = [];
+  List<ProblemDataModel> _problemList = [];
 
   /*
   * 문제 타입
@@ -50,27 +52,18 @@ class _AddTestState extends State<AddTest> {
   };
   int dropdownValue = 101;
 
-  Future<void> fetchTestData() async {
+  Future<void> fetchTestData(int id) async {
     try {
       setState(() {
         _isLoading = true;
       });
 
-      // List<String> urlParam = Uri.base.toString().split('/');
-      // int len = urlParam.length;
-      // int chapterId = int.parse(urlParam[len - 1]);
-      // String category = urlParam[len - 2];
-
-      // await testDataRepository.getTestData(id: chapterId).then((value) {
-      //   _level = value.level;
-      //   _cycle = value.cycle;
-      //   _chapter = value.chapter;
-      //   _title = value.title;
-      //   _exampleList = value.exampleList;
-      //   _problemList = value.problemList!;
-      // });
-
-      // await testDataRepository.getTestData(id: chapterId);
+      await testDataRepository.getTestData(id: id).then((value) {
+        setState(() {
+          _exampleData = value.exampleList;
+          _problemList = value.problemList;
+        });
+      });
 
       setState(() {
         _isLoading = false;
@@ -80,7 +73,7 @@ class _AddTestState extends State<AddTest> {
     }
   }
 
-  addNewWord() {
+  addNewProblem() {
     setState(() {
       _problemList.add(ProblemDataModel(
         problemType: dropdownValue,
@@ -100,7 +93,8 @@ class _AddTestState extends State<AddTest> {
   @override
   void initState() {
     super.initState();
-    fetchTestData();
+    infoData = ref.read(introProvider);
+    fetchTestData(infoData.dataId!);
   }
 
   @override
@@ -156,7 +150,9 @@ class _AddTestState extends State<AddTest> {
             ],
           ),
           const SizedBox(height: 20),
-          const UpperTable(),
+          UpperTable(
+            info: infoData,
+          ),
           _isLoading
               ? const CircularProgressIndicator()
               : SizedBox(
@@ -230,7 +226,7 @@ class _AddTestState extends State<AddTest> {
                   buttonName: '추가',
                   color: Colors.blue,
                   onPressed: () {
-                    addNewWord();
+                    addNewProblem();
                   },
                 )
               ],
@@ -385,22 +381,24 @@ class TestTableElement extends StatelessWidget {
 class UpperTable extends StatelessWidget {
   const UpperTable({
     super.key,
+    required this.info,
   });
+  final IntroInfo info;
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 120,
       width: 700,
       child: Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.only(bottom: 3),
+              padding: const EdgeInsets.only(bottom: 3),
               child: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 50,
                     height: 30,
                     child: DecoratedBox(
@@ -421,11 +419,11 @@ class UpperTable extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: SizedBox(
                         child: Text(
-                          '1급',
-                          style: TextStyle(
+                          info.level.toString().split('.').last,
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -433,7 +431,7 @@ class UpperTable extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 50,
                     height: 30,
                     child: DecoratedBox(
@@ -454,11 +452,11 @@ class UpperTable extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: SizedBox(
                         child: Text(
-                          '1',
-                          style: TextStyle(
+                          info.cycle.toString(),
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -470,10 +468,10 @@ class UpperTable extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(bottom: 3),
+              padding: const EdgeInsets.only(bottom: 3),
               child: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 50,
                     height: 30,
                     child: DecoratedBox(
@@ -482,7 +480,7 @@ class UpperTable extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          '타이틀',
+                          '세트',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -494,11 +492,11 @@ class UpperTable extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: SizedBox(
                         child: Text(
-                          '1',
-                          style: TextStyle(
+                          info.sets.toString(),
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -506,7 +504,7 @@ class UpperTable extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 50,
                     height: 30,
                     child: DecoratedBox(
@@ -527,11 +525,11 @@ class UpperTable extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: SizedBox(
                         child: Text(
-                          '1',
-                          style: TextStyle(
+                          info.chapter.toString(),
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -543,7 +541,7 @@ class UpperTable extends StatelessWidget {
               ),
             ),
             Row(children: [
-              SizedBox(
+              const SizedBox(
                 width: 50,
                 height: 30,
                 child: DecoratedBox(
@@ -552,7 +550,7 @@ class UpperTable extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      '단어',
+                      '타이틀',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -564,11 +562,11 @@ class UpperTable extends StatelessWidget {
               Expanded(
                 flex: 1,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: SizedBox(
                     child: Text(
-                      '1급',
-                      style: TextStyle(
+                      info.title ?? '',
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),

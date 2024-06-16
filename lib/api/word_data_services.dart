@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -15,7 +14,8 @@ class WordDataRepository {
   Future<WordDataList> getWordDataList(
       {required int page, required int size}) async {
     try {
-      final response = await dio.get('/word-list');
+      final response =
+          await dio.get('/word-list?pageNumber=$page&pageSize=$size');
       final WordDataList wordDataList = WordDataList.fromJson(response.data);
 
       return wordDataList;
@@ -74,7 +74,6 @@ class WordDataRepository {
             'png',
           ),
         ),
-        'description': 'A file to upload with Korean filename',
       });
 
       final response = await dio4File.post('/word/file', data: formData);

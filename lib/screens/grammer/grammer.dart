@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
+import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 
 class GrammerData extends StatefulWidget {
@@ -14,14 +15,8 @@ class _GrammerDataState extends State<GrammerData> {
   final int _pageSize = 8;
   int _currentPage = 0;
   bool _isLoading = true;
-  var grammarData;
+  late GrammarDataList grammarData;
   LEVEL dropdownValue = LEVEL.ALPHABET;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
 
   Future<void> fetchData() async {
     try {
@@ -29,8 +24,13 @@ class _GrammerDataState extends State<GrammerData> {
         _isLoading = true;
       });
 
-      // await GrammerDataRepository()
-      //     .getGrammerDataList().then()
+      await GrammerDataRepository()
+          .getGrammerDataList(page: _currentPage, size: _pageSize)
+          .then((value) {
+        setState(() {
+          grammarData = value;
+        });
+      });
 
       setState(() {
         _isLoading = false;
@@ -52,7 +52,13 @@ class _GrammerDataState extends State<GrammerData> {
   }
 
   void addChapter(int? id) {
-    context.go('/word/add');
+    context.go('/grammar/add');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
   }
 
   @override
@@ -70,7 +76,7 @@ class _GrammerDataState extends State<GrammerData> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -113,12 +119,11 @@ class _GrammerDataState extends State<GrammerData> {
             ],
           ),
           const SizedBox(height: 20),
-          Table(),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               SizedBox(
@@ -155,9 +160,9 @@ class _GrammerDataState extends State<GrammerData> {
                               goToPage(_currentPage + 1);
                             },
                             child:
-                                SizedBox(width: 50, child: const Text('다음 >')),
+                                const SizedBox(width: 50, child: Text('다음 >')),
                           )
-                        : SizedBox(width: 50),
+                        : const SizedBox(width: 50),
                     GestureDetector(
                       onTap: () {
                         goToPage(grammarData.totalPages - 1);

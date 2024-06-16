@@ -1,20 +1,25 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
+import 'package:http_parser/http_parser.dart';
 
 class GrammerDataRepository {
   final dio = DioClient().provideDio();
-  final dioFile = DioClient().provideDioForFile();
+  final dio4File = DioClient().provideDioForFile();
   SecureStorage secureStorage = SecureStorage();
 
-  getGrammerDataList() async {
+  getGrammerDataList({
+    required int page,
+    required int size,
+  }) async {
     try {
       final response = await dio.get(
-        '/grammer-list',
+        '/grammar-list?pageNumber=$page&pageSize=$size',
       );
-      // final GrammerDataList grammerDataList =
-      //     GrammerDataList.fromJson(response.data);
-      return response;
+      return GrammarDataList.fromJson(response.data);
     } catch (e) {
       print("error : $e");
     }
@@ -30,24 +35,35 @@ class GrammerDataRepository {
     }
   }
 
-  addToGrammerFile(String imageURL) async {
+  Future<String?> uploadFile(
+      {required Uint8List fileBytes, required String fileName}) async {
     try {
-      // final bytes = await http
-      //     .get(Uri.parse(imageURL))
-      //     .then((response) => response.bodyBytes);
+      FormData formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(
+          fileBytes,
+          filename: fileName,
+          contentType: MediaType(
+            'image',
+            'png',
+          ),
+        ),
+      });
 
-      // var formData = FormData.fromMap({
-      //   'f': MultipartFile.fromBytes(bytes,
-      //       filename: imageURL.split('/').last,
-      //       contentType: MediaType('image', 'png')),
-      // });
+      final response = await dio4File.post('/grammar/file', data: formData);
 
-      // final response =
-      //     await dio.post('/grammer/file', data: {'file': formData});
-
-      // return response;
+      if (response.statusCode == 200) {
+        String? fileUrl = response.data['fileUrl'];
+        if (fileUrl != null) {
+          return fileUrl;
+        } else {
+          return null;
+        }
+      } else {
+        print('File upload failed with status: ${response.statusCode}');
+      }
     } catch (e) {
-      print("error : $e");
+      throw Exception(e);
     }
+    return null;
   }
 }

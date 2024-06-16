@@ -1,9 +1,6 @@
-import 'dart:io';
-import 'dart:html' as html;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
-import 'package:haru_admin/model/grammer_data_model.dart';
-import 'package:haru_admin/utils/add_chapter_model.dart';
 
 class AddGrammerScreen extends StatefulWidget {
   const AddGrammerScreen({super.key});
@@ -17,23 +14,44 @@ class _AddGrammerScreenState extends State<AddGrammerScreen> {
 
   String? _imageDataUrl;
 
-  Future<void> _getImage() async {
-    final html.FileUploadInputElement input = html.FileUploadInputElement();
-    input.accept = 'image/*';
-    input.click();
+  final List<dynamic> _datas = [];
 
-    input.onChange.listen((e) {
-      final html.File file = input.files!.first;
-      final reader = html.FileReader();
+  void getImageUrl(int index) async {
+    if (_datas[index].title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('이미지 업로드 전, 단어를 입력해주세요.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
 
-      reader.onLoadEnd.listen((e) {
-        setState(() {
-          _imageDataUrl = reader.result as String?;
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['png', 'jpg', 'svg', 'jpeg']);
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        await grammerRepository
+            .uploadFile(
+          fileBytes: file.bytes!,
+          fileName: _datas[index].title,
+        )
+            .then((value) {
+          setState(() {
+            _datas[index].imgUrl = value;
+          });
         });
-      });
-
-      reader.readAsDataUrl(file);
-    });
+      } else {
+        // User canceled the picker
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   @override
@@ -48,12 +66,6 @@ class _AddGrammerScreenState extends State<AddGrammerScreen> {
     //     print(value);
     //   });
     // });
-
-    grammerRepository.getGrammerDataList().then((value) {
-      setState(() {
-        print(value);
-      });
-    });
   }
 
   @override
@@ -63,25 +75,21 @@ class _AddGrammerScreenState extends State<AddGrammerScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           _imageDataUrl == null
-              ? Text('No image selected.')
+              ? const Text('No image selected.')
               : Image.network(_imageDataUrl!, height: 150, width: 150),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _imageDataUrl == null
               ? ElevatedButton(
-                  onPressed: _getImage,
-                  child: Text('Choose Image'),
+                  onPressed: () {
+                    getImageUrl(0);
+                  },
+                  child: const Text('Choose Image'),
                 )
               : ElevatedButton(
-                  onPressed: () async {
-                    grammerRepository
-                        .addToGrammerFile(_imageDataUrl!)
-                        .then((value) {
-                      setState(() {
-                        print(value);
-                      });
-                    });
+                  onPressed: () {
+                    getImageUrl(0);
                   },
-                  child: Text('Upload Image'),
+                  child: const Text('Upload Image'),
                 ),
         ],
       ),

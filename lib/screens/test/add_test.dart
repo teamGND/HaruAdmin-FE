@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/test_data_services.dart';
+import 'package:haru_admin/model/test_data_model.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
-import 'package:haru_admin/screens/test/entity/test_entity.dart';
 import 'package:haru_admin/utils/enum_type.dart';
-import 'package:haru_admin/widgets/problem_table.dart';
+import 'package:haru_admin/widgets/problem_provider.dart';
 import 'package:haru_admin/widgets/button.dart';
+import 'package:haru_admin/widgets/problem_table.dart';
 
 class AddTestScreen extends ConsumerStatefulWidget {
   const AddTestScreen({super.key});
@@ -16,6 +17,7 @@ class AddTestScreen extends ConsumerStatefulWidget {
 
 class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   final TestDataRepository testDataRepository = TestDataRepository();
+  static const int MAXIMUM_PROBLEM_CNT = 100;
 
   IntroInfo infoData = const IntroInfo(
     dataId: 0,
@@ -28,6 +30,8 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   bool _isLoading = false;
   List<String> _exampleData = [];
   List<ProblemDataModel> _problemList = [];
+  final List<bool> _selected =
+      List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
 
   /*
   * 문제 타입
@@ -65,6 +69,25 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
         });
       });
 
+      ref.read(problemContentsProvider.notifier).setContentsList(_problemList
+          .map((e) => ProblemContents(
+                problemType: e.problemType,
+                choice1: e.choice1,
+                choice2: e.choice2,
+                choice3: e.choice3,
+                choice4: e.choice4,
+                answerNumber: e.answerNumber,
+                answerString: e.answerString,
+                picture: e.picture,
+                pictureDescription: e.pictureDescription,
+                questionString: e.questionString,
+                exampleOriginal: e.exampleOriginal,
+                exampleChanged: e.exampleChanged,
+                directionKor: e.directionKor,
+                audio: e.audio,
+              ))
+          .toList());
+
       setState(() {
         _isLoading = false;
       });
@@ -88,6 +111,55 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
     } catch (e) {
       throw Exception(e);
     }
+  }
+
+  void deleteSelected() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text(
+              '선택한 데이터를 삭제하시겠습니까?',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            content: SizedBox(
+              width: 400,
+              height: 100,
+              child: SingleChildScrollView(
+                child: Text(
+                  _problemList.fold(
+                      "",
+                      (previousValue, element) =>
+                          previousValue +
+                          (_selected[_problemList.indexOf(element)]
+                              ? '${element.id}\n'
+                              : '')),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    for (int i = 0; i < _selected.length; i++) {
+                      if (_selected[i]) {
+                        _problemList.removeAt(i);
+                      }
+                    }
+                  });
+                },
+                child: const Text('확인'),
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -149,14 +221,28 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                   )),
             ],
           ),
-          const SizedBox(height: 20),
           UpperTable(
             info: infoData,
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              TextButton(
+                onPressed: () {
+                  deleteSelected();
+                },
+                child: const Text(
+                  '선택 삭제',
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
           _isLoading
               ? const CircularProgressIndicator()
-              : SizedBox(
-                  height: 350,
+              : Expanded(
                   child: ReorderableListView(
                     header: const TestTableHeader(),
                     onReorder: (int oldIndex, int newIndex) {
@@ -173,12 +259,20 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                       _problemList.length,
                       (index) => ListTile(
                         key: ValueKey(index),
+                        leading: Checkbox(
+                          value: _selected[index],
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _selected[index] = value!;
+                            });
+                          },
+                        ),
                         title: TestTableElement(
                           orderedNumber: index + 1,
                           problemType: _problemList[index].problemType,
                           problemWidget: ProblemTable(
                             problemType: _problemList[index].problemType,
-                            writeMode: false,
+                            index: index,
                           ),
                         ),
                       ),
@@ -187,31 +281,46 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                 ),
           const Divider(
             color: Colors.black,
-            height: 3,
+            height: 2,
             indent: 10,
             endIndent: 10,
           ),
           SizedBox(
-            height: 100,
+            height: 80,
             width: 1000,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(
-                  width: 60,
-                  child: Text('타입 선택', style: TextStyle(fontSize: 14)),
+                const Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: SizedBox(
+                    width: 60,
+                    child: Text('타입 선택',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold)),
+                  ),
                 ),
                 SizedBox(
                   height: 50,
-                  width: 300,
+                  width: 200,
                   child: DropdownButton(
+                    value: dropdownValue,
                     items: dropdownTitle.entries
                         .map((e) => DropdownMenuItem(
                               value: e.key,
-                              child: Text(
-                                e.value,
-                                style: const TextStyle(fontSize: 14),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: Text(
+                                  e.value,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
                               ),
+                              onTap: () {
+                                setState(() {
+                                  dropdownValue = e.key;
+                                });
+                              },
                             ))
                         .toList(),
                     onChanged: (int? value) {
@@ -222,12 +331,15 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                   ),
                 ),
                 const Spacer(),
-                filledButton(
-                  buttonName: '추가',
-                  color: Colors.blue,
-                  onPressed: () {
-                    addNewProblem();
-                  },
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: filledButton(
+                    buttonName: '추가',
+                    color: Colors.blue,
+                    onPressed: () {
+                      addNewProblem();
+                    },
+                  ),
                 )
               ],
             ),
@@ -236,8 +348,9 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
             padding: const EdgeInsets.symmetric(
               horizontal: 10,
             ),
-            child: ProblemTable(problemType: dropdownValue, writeMode: true),
+            child: ProblemTable(problemType: dropdownValue),
           ),
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -255,6 +368,24 @@ class TestTableHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        Padding(
+          padding: EdgeInsets.only(left: 2, right: 1),
+          child: SizedBox(
+            width: 50,
+            height: 30,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Color(0xFFD9D9D9),
+              ),
+              child: Center(
+                child: Text(
+                  '',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
+        ),
         Padding(
           padding: EdgeInsets.only(left: 2, right: 1),
           child: SizedBox(
@@ -389,7 +520,7 @@ class UpperTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 120,
-      width: 700,
+      width: 600,
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -464,13 +595,6 @@ class UpperTable extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 3),
-              child: Row(
-                children: [
                   const SizedBox(
                     width: 50,
                     height: 30,
@@ -504,43 +628,41 @@ class UpperTable extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    width: 50,
-                    height: 30,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '회차',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
-                        child: Text(
-                          info.chapter.toString(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
             Row(children: [
+              const SizedBox(
+                width: 50,
+                height: 30,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Color(0xFFD9D9D9),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '회차',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 50,
+                height: 30,
+                child: Center(
+                  child: Text(
+                    info.chapter.toString(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(
                 width: 50,
                 height: 30,

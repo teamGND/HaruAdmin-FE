@@ -1,3 +1,88 @@
+import 'package:haru_admin/model/intro_data_model.dart';
+
+class GrammarDataList {
+  final List<GrammarDataListComponent> content;
+  final bool empty;
+  final bool first;
+  final bool last;
+  final int number;
+  final int numberOfElements;
+  final PageableData pageable;
+  final int size;
+  final SortData sort;
+  final int totalElements;
+  final int totalPages;
+
+  GrammarDataList({
+    required this.content,
+    required this.empty,
+    required this.first,
+    required this.last,
+    required this.number,
+    required this.numberOfElements,
+    required this.pageable,
+    required this.size,
+    required this.sort,
+    required this.totalElements,
+    required this.totalPages,
+  });
+
+  factory GrammarDataList.fromJson(Map<String, dynamic> json) {
+    var contentJson = json['content'] as List;
+    List<GrammarDataListComponent> contentList =
+        contentJson.map((i) => GrammarDataListComponent.fromJson(i)).toList();
+
+    return GrammarDataList(
+      content: contentList,
+      empty: json['empty'],
+      first: json['first'],
+      last: json['last'],
+      number: json['number'],
+      numberOfElements: json['numberOfElements'],
+      pageable: PageableData.fromJson(json['pageable']),
+      size: json['size'],
+      sort: SortData.fromJson(json['sort']),
+      totalElements: json['totalElements'],
+      totalPages: json['totalPages'],
+    );
+  }
+}
+
+class GrammarDataListComponent {
+  int id;
+  int chapter;
+  String level;
+  String? title;
+  String? representSentences;
+  int exampleSentenceNumber;
+  String? status;
+  String? quizStatue;
+
+  GrammarDataListComponent({
+    required this.id,
+    required this.chapter,
+    required this.level,
+    required this.title,
+    required this.representSentences,
+    required this.exampleSentenceNumber,
+    required this.status,
+    required this.quizStatue,
+  });
+
+  factory GrammarDataListComponent.fromJson(Map<String, dynamic> json) {
+    return GrammarDataListComponent(
+      id: json['id'],
+      chapter: json['chapter'],
+      level: json['level'],
+      title: json['title'],
+      representSentences: json['representSentences'],
+      exampleSentenceNumber: json['exampleSentenceNumber'],
+      status: json['status'],
+      quizStatue: json['quizStatue'],
+    );
+  }
+}
+
 class AddGrammerData {
   String level;
   int cycle;

@@ -13,7 +13,6 @@ import 'package:haru_admin/screens/mypage.dart';
 import 'package:haru_admin/screens/test/add_test.dart';
 import 'package:haru_admin/screens/word/add_word.dart';
 import 'package:haru_admin/screens/word/word.dart';
-import 'package:haru_admin/utils/add_chapter_model.dart';
 import 'widgets/sidebar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -49,12 +48,12 @@ final GoRouter router = GoRouter(
         GoRoute(
           name: '테스트 데이터 추가',
           path: '/test/add',
-          builder: (context, state) => AddTestScreen(),
+          builder: (context, state) => const AddTestScreen(),
         ),
         GoRoute(
           name: '문법 데이터 추가',
-          path: '/grammer/add',
-          builder: (context, state) => AddGrammerScreen(),
+          path: '/grammar/add',
+          builder: (context, state) => const AddGrammerScreen(),
         ),
         GoRoute(
           name: '단어 데이터 추가',

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:haru_admin/model/intro_data_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
-import 'package:haru_admin/utils/add_chapter_model.dart';
-import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 
 class Word extends ConsumerStatefulWidget {
@@ -19,7 +16,6 @@ class Word extends ConsumerStatefulWidget {
 class _WordState extends ConsumerState<Word> {
   final int _pageSize = 8;
   int _currentPage = 0;
-  bool _isLoading = true;
   late WordDataList wordData;
   LEVEL dropdownValue = LEVEL.LEVEL1;
 
@@ -31,13 +27,14 @@ class _WordState extends ConsumerState<Word> {
     '타이틀',
     '학습 내용',
     '단어수',
-    // '퀴즈',
   ];
+
+  late Future<void> _wordListDataFuture;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    _wordListDataFuture = fetchData();
   }
 
   void addChapter(int? index) {
@@ -65,39 +62,12 @@ class _WordState extends ConsumerState<Word> {
     context.go('/word/add');
   }
 
-  // void addTest(int index) {
-  //   try {
-  //     ref.watch(introProvider.notifier).update(
-  //           dataId: wordData.content[index].id,
-  //           chapter: wordData.content[index].chapter,
-  //           cycle: wordData.content[index].cycle,
-  //           sets: wordData.content[index].sets,
-  //           category: CATEGORY.WORD,
-  //           level: dropdownValue,
-  //           title: wordData.content[index].title,
-  //           wordDatas: wordData.content[index].content?.split(','),
-  //         );
-
-  //     context.go('/test/add');
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
   Future<void> fetchData() async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       await WordDataRepository()
           .getWordDataList(page: _currentPage, size: _pageSize)
           .then((value) {
         wordData = value;
-      });
-
-      setState(() {
-        _isLoading = false;
       });
     } catch (e) {
       throw Exception(e);
@@ -155,7 +125,7 @@ class _WordState extends ConsumerState<Word> {
                       ),
                     ),
                     width: 300,
-                    initialSelection: LEVEL.ALPHABET.toString(),
+                    initialSelection: dropdownValue.toString(),
                     onSelected: (value) {
                       setState(() {
                         dropdownValue = value as LEVEL;
@@ -171,194 +141,193 @@ class _WordState extends ConsumerState<Word> {
                 ],
               ),
               const SizedBox(height: 20),
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : wordData.content.isEmpty
-                      ? const Center(child: Text('데이터가 없습니다.'))
-                      : Table(
-                          border: TableBorder.all(
-                            color: const Color(0xFFB9B9B9),
-                            width: 1,
-                          ),
-                          columnWidths: const {
-                            0: FlexColumnWidth(1),
-                            1: FlexColumnWidth(1),
-                            2: FlexColumnWidth(1),
-                            3: FlexColumnWidth(1),
-                            4: FlexColumnWidth(3), // 타이틀
-                            5: FlexColumnWidth(7), // 단어 리스트
-                            6: FlexColumnWidth(1),
-                            7: FlexColumnWidth(2),
-                          },
-                          children: [
-                            TableRow(
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF0F0F0),
-                              ),
-                              children: List.generate(
-                                tabletitle.length,
-                                (index) => SizedBox(
-                                    height: 40,
-                                    child:
-                                        Center(child: Text(tabletitle[index]))),
-                              ),
+              FutureBuilder(
+                  future: _wordListDataFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (wordData.content.isEmpty) {
+                      return const Center(child: Text('데이터가 없습니다.'));
+                    } else {
+                      return Column(
+                        children: [
+                          Table(
+                            border: TableBorder.all(
+                              color: const Color(0xFFB9B9B9),
+                              width: 1,
                             ),
-                            ...List.generate(wordData.content.length, (index) {
-                              WordDataListComponent data =
-                                  wordData.content[index];
-                              return TableRow(
+                            columnWidths: const {
+                              0: FlexColumnWidth(1),
+                              1: FlexColumnWidth(1),
+                              2: FlexColumnWidth(1),
+                              3: FlexColumnWidth(1),
+                              4: FlexColumnWidth(3), // 타이틀
+                              5: FlexColumnWidth(7), // 단어 리스트
+                              6: FlexColumnWidth(1),
+                              7: FlexColumnWidth(2),
+                            },
+                            children: [
+                              TableRow(
                                 decoration: const BoxDecoration(
-                                  color: Colors.white,
+                                  color: Color(0xFFF0F0F0),
                                 ),
-                                children: [
-                                  SizedBox(
-                                    // No.
-                                    height: 35,
-                                    child: Center(
-                                      child: Text(
-                                        (index + 1).toString(),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    // 사이클
-                                    height: 35,
-                                    child: Center(
-                                      child: Text(data.cycle.toString()),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    // 세트
-                                    height: 35,
-                                    child: Center(
-                                      child: Text(data.sets.toString()),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    // 회차
-                                    height: 35,
-                                    child: Center(
-                                      child: Text(data.chapter.toString()),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    // 단어 리스트
-                                    height: 35,
-                                    child: Center(
-                                      child: Text(data.title!),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    // 타이틀
-                                    height: 35,
-                                    child: TextButton(
-                                      onPressed: () {
-                                        addChapter(index);
-                                      },
+                                children: List.generate(
+                                  tabletitle.length,
+                                  (index) => SizedBox(
+                                      height: 40,
                                       child: Center(
-                                        child: data.content != ''
-                                            ? Text(data.content!)
-                                            : const Text(
-                                                '데이터 입력하기',
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                  decoration:
-                                                      TextDecoration.underline,
-                                                ),
-                                              ),
+                                          child: Text(tabletitle[index]))),
+                                ),
+                              ),
+                              ...List.generate(wordData.content.length,
+                                  (index) {
+                                WordDataListComponent data =
+                                    wordData.content[index];
+                                return TableRow(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                  ),
+                                  children: [
+                                    SizedBox(
+                                      // No.
+                                      height: 35,
+                                      child: Center(
+                                        child: Text(
+                                          (index + 1).toString(),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    // 단어 개수
-                                    height: 35,
-                                    child: Center(
-                                      child: Text(data.wordCount.toString()),
+                                    SizedBox(
+                                      // 사이클
+                                      height: 35,
+                                      child: Center(
+                                        child: Text(data.cycle.toString()),
+                                      ),
                                     ),
-                                  ),
-                                  // Center(
-                                  //   // 퀴즈
-                                  //   child: TextButton(
-                                  //       onPressed: () {
-                                  //         addTest(
-                                  //           index,
-                                  //         );
-                                  //       },
-                                  //       child: const Text(
-                                  //         '퀴즈',
-                                  //         style: TextStyle(
-                                  //           color: Colors.blue,
-                                  //         ),
-                                  //       )),
-                                  // ),
-                                ],
-                              );
-                            }),
-                          ],
-                        ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _currentPage != 0
-                            ? GestureDetector(
-                                onTap: () {
-                                  goToPage(_currentPage - 1);
-                                },
-                                child: const SizedBox(
-                                    width: 50, child: Text('< 이전')))
-                            : const SizedBox(width: 50),
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          width: 50,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1,
-                              )),
-                          child: Text(
-                            (_currentPage + 1).toString(),
-                            textAlign: TextAlign.center,
+                                    SizedBox(
+                                      // 세트
+                                      height: 35,
+                                      child: Center(
+                                        child: Text(data.sets.toString()),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      // 회차
+                                      height: 35,
+                                      child: Center(
+                                        child: Text(data.chapter.toString()),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      // 단어 리스트
+                                      height: 35,
+                                      child: Center(
+                                        child: Text(data.title!),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      // 타이틀
+                                      height: 35,
+                                      child: TextButton(
+                                        onPressed: () {
+                                          addChapter(index);
+                                        },
+                                        child: Center(
+                                          child: data.content != ''
+                                              ? Text(data.content!)
+                                              : const Text(
+                                                  '데이터 입력하기',
+                                                  style: TextStyle(
+                                                    color: Colors.grey,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      // 단어 개수
+                                      height: 35,
+                                      child: Center(
+                                        child: Text(data.wordCount.toString()),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
+                            ],
                           ),
-                        ),
-                        _currentPage != wordData.totalPages
-                            ? GestureDetector(
-                                onTap: () {
-                                  goToPage(_currentPage + 1);
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.2,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    _currentPage != 0
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              goToPage(_currentPage - 1);
+                                            },
+                                            child: const SizedBox(
+                                                width: 50, child: Text('< 이전')))
+                                        : const SizedBox(width: 50),
+                                    Container(
+                                      padding: const EdgeInsets.all(5),
+                                      width: 50,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                            color: Colors.black,
+                                            width: 1,
+                                          )),
+                                      child: Text(
+                                        (_currentPage + 1).toString(),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    _currentPage != wordData.totalPages
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              goToPage(_currentPage + 1);
+                                            },
+                                            child: const SizedBox(
+                                                width: 50, child: Text('다음 >')),
+                                          )
+                                        : const SizedBox(width: 50),
+                                    GestureDetector(
+                                      onTap: () {
+                                        goToPage(wordData.totalPages - 1);
+                                      },
+                                      child: const Text('맨뒤로 >>'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  addChapter(null);
                                 },
-                                child: const SizedBox(
-                                    width: 50, child: Text('다음 >')),
+                                style: const ButtonStyle(
+                                    backgroundColor:
+                                        WidgetStatePropertyAll(Colors.blue)),
+                                child: const Text('회차추가'),
                               )
-                            : const SizedBox(width: 50),
-                        GestureDetector(
-                          onTap: () {
-                            goToPage(wordData.totalPages - 1);
-                          },
-                          child: const Text('맨뒤로 >>'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  FilledButton(
-                    onPressed: () {
-                      addChapter(null);
-                    },
-                    style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.blue)),
-                    child: const Text('회차추가'),
-                  )
-                ],
-              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                  }),
             ]),
           )),
     );

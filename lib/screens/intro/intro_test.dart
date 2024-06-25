@@ -18,15 +18,17 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   late IntroDataList introData;
   // 페이지 번호
   static const int _pageSize = 8;
+  static const double _rowHeight = 50;
   /* TODO 현재페이지 쿠키에 저장 */
   int _currentPage = 0;
-  bool _isLoading = true;
-  LEVEL dropdownValue = LEVEL.ALPHABET;
+  LEVEL dropdownValue = LEVEL.LEVEL1;
+
+  late Future<void> _introDataFuture;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    _introDataFuture = fetchData();
   }
 
   final tabletitle = [
@@ -68,6 +70,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
       cycle = introData.content.last.cycle;
       sets = introData.content.last.sets;
       chapter = introData.content.last.chapter + 1;
+      title = '';
 
       if (category == 'MIDTERM') {
         cycle += 1;
@@ -83,7 +86,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
       chapter = data.chapter;
 
       if (data.category == 'WORD' && data.titleKor != null) {
-        wordList = convertWordStringToList(title: data.titleKor!);
+        wordList = convertWordStringToList(title: data.titleKor!) ?? [];
         title = convertWordStringToTitle(title: data.titleKor!);
       }
     }
@@ -105,7 +108,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     List<String> wordList = [];
     try {
       if (data.category == 'WORD' && data.titleKor != null) {
-        wordList = convertWordStringToList(title: data.titleKor!);
+        wordList = convertWordStringToList(title: data.titleKor!) ?? [];
         title = convertWordStringToTitle(title: data.titleKor!);
       }
       ref.watch(introProvider.notifier).update(
@@ -177,18 +180,10 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
 
   Future<void> fetchData() async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       await IntroDataRepository()
           .getIntroDataList(page: _currentPage, size: _pageSize)
           .then((value) {
         introData = value;
-      });
-
-      setState(() {
-        _isLoading = false;
       });
     } catch (e) {
       throw Exception(e);
@@ -236,7 +231,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                       ),
                     ),
                     width: 300,
-                    initialSelection: LEVEL.ALPHABET.toString(),
+                    initialSelection: dropdownValue.toString(),
                     onSelected: (value) {
                       setState(() {
                         dropdownValue = value as LEVEL;
@@ -252,11 +247,17 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : introData.content.isEmpty
-                      ? const Center(child: Text('데이터가 없습니다.'))
-                      : Table(
+              FutureBuilder(
+                future: _introDataFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (introData.content.isEmpty) {
+                    return const Center(child: Text('데이터가 없습니다.'));
+                  } else {
+                    return Column(
+                      children: [
+                        Table(
                           border: TableBorder.all(
                             color: const Color(0xFFB9B9B9),
                             width: 1,
@@ -267,7 +268,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                             2: FlexColumnWidth(1),
                             3: FlexColumnWidth(1),
                             4: FlexColumnWidth(1),
-                            5: FlexColumnWidth(6), // title
+                            5: FlexColumnWidth(10), // title
                             6: FlexColumnWidth(2),
                             7: FlexColumnWidth(2),
                           },
@@ -293,7 +294,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                 ),
                                 children: [
                                   SizedBox(
-                                    height: 35,
+                                    height: _rowHeight,
                                     child: Center(
                                       child: Checkbox(
                                         value: _selected[index],
@@ -306,31 +307,31 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 35,
+                                    height: _rowHeight,
                                     child: Center(
                                       child: Text(data.category),
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 35,
+                                    height: _rowHeight,
                                     child: Center(
                                       child: Text(data.cycle.toString()),
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 35,
+                                    height: _rowHeight,
                                     child: Center(
                                       child: Text(data.sets.toString()),
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 35,
+                                    height: _rowHeight,
                                     child: Center(
                                       child: Text(data.chapter.toString()),
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 35,
+                                    height: _rowHeight,
                                     child: (data.category == 'WORD' ||
                                             data.category == 'GRAMMAR')
                                         ? TextButton(
@@ -345,98 +346,108 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                           ),
                                   ),
                                   SizedBox(
-                                    height: 35,
+                                    height: _rowHeight,
                                     child: Center(
                                       child: Text(data.state ?? 'EMPTY'),
                                     ),
                                   ),
-                                  Center(
-                                    child: TextButton(
-                                        onPressed: () {
-                                          addTest(data);
-                                        },
-                                        child: const Text(
-                                          '퀴즈',
-                                          style: TextStyle(
-                                            color: Colors.blue,
-                                          ),
-                                        )),
+                                  SizedBox(
+                                    height: _rowHeight,
+                                    child: Center(
+                                      child: TextButton(
+                                          onPressed: () {
+                                            addTest(data);
+                                          },
+                                          child: const Text(
+                                            '퀴즈',
+                                            style: TextStyle(
+                                              color: Colors.blue,
+                                            ),
+                                          )),
+                                    ),
                                   ),
                                 ],
                               );
                             }),
                           ],
                         ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      deleteSelected();
-                    },
-                    child: const Text(
-                      '선택 삭제',
-                      style: TextStyle(
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _currentPage != 0
-                            ? GestureDetector(
-                                onTap: () {
-                                  goToPage(_currentPage - 1);
-                                },
-                                child: const SizedBox(
-                                    width: 50, child: Text('< 이전')))
-                            : const SizedBox(width: 50),
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          width: 50,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1,
-                              )),
-                          child: Text(
-                            (_currentPage + 1).toString(),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        _currentPage != introData.totalPages
-                            ? GestureDetector(
-                                onTap: () {
-                                  goToPage(_currentPage + 1);
-                                },
-                                child: const SizedBox(
-                                    width: 50, child: Text('다음 >')),
-                              )
-                            : const SizedBox(width: 50),
-                        GestureDetector(
-                          onTap: () {
-                            goToPage(introData.totalPages - 1);
-                          },
-                          child: const Text('맨뒤로 >>'),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                deleteSelected();
+                              },
+                              child: const Text(
+                                '선택 삭제',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.2,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _currentPage != 0
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            goToPage(_currentPage - 1);
+                                          },
+                                          child: const SizedBox(
+                                              width: 50, child: Text('< 이전')))
+                                      : const SizedBox(width: 50),
+                                  Container(
+                                    padding: const EdgeInsets.all(5),
+                                    width: 50,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        border: Border.all(
+                                          color: Colors.black,
+                                          width: 1,
+                                        )),
+                                    child: Text(
+                                      (_currentPage + 1).toString(),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  _currentPage != introData.totalPages
+                                      ? GestureDetector(
+                                          onTap: () {
+                                            goToPage(_currentPage + 1);
+                                          },
+                                          child: const SizedBox(
+                                              width: 50, child: Text('다음 >')),
+                                        )
+                                      : const SizedBox(width: 50),
+                                  GestureDetector(
+                                    onTap: () {
+                                      goToPage(introData.totalPages - 1);
+                                    },
+                                    child: const Text('맨뒤로 >>'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                addChapter(null);
+                              },
+                              style: const ButtonStyle(
+                                  backgroundColor:
+                                      WidgetStatePropertyAll(Colors.blue)),
+                              child: const Text('회차추가'),
+                            )
+                          ],
                         ),
                       ],
-                    ),
-                  ),
-                  FilledButton(
-                    onPressed: () {
-                      addChapter(null);
-                    },
-                    style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.blue)),
-                    child: const Text('회차추가'),
-                  )
-                ],
+                    );
+                  }
+                },
               ),
             ],
           ),

@@ -31,9 +31,23 @@ class IntroDataRepository {
     }
   }
 
-  addToIntroDataList(AddIntroData data) async {
+  addToIntroData({required AddIntroData data}) async {
     try {
       final response = await dio.post('/intro', data: data.toJson());
+
+      return response;
+    } catch (e) {
+      print("error : $e");
+      throw Exception(e);
+    }
+  }
+
+  updateIntroData({required int id, required UpdateIntroData data}) async {
+    try {
+      final response = await dio.patch(
+        '/intro/$id',
+        data: data.toJson(),
+      );
 
       return response;
     } catch (e) {

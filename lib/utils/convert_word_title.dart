@@ -3,7 +3,7 @@ String convertWordListToString({
   required List<String>? words,
 }) {
   String result = title.trim() + ' [';
-  if( words != null ){
+  if (words != null) {
     for (var i = 0; i < words.length; i++) {
       result += words[i];
       if (i < words.length - 1) {
@@ -15,12 +15,13 @@ String convertWordListToString({
   return result;
 }
 
-List<String> convertWordStringToList({
+List<String>? convertWordStringToList({
   required String title,
 }) {
   final start = title.indexOf('[');
   final end = title.indexOf(']');
-  final wordList = title.substring(start + 1, end).split(', ');
+  final wordList =
+      (start + 1 == end) ? null : title.substring(start + 1, end).split(', ');
   return wordList;
 }
 

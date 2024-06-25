@@ -1,39 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
+import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 
-class GrammerData extends StatefulWidget {
+class GrammerData extends ConsumerStatefulWidget {
   const GrammerData({super.key});
 
   @override
-  State<GrammerData> createState() => _GrammerDataState();
+  ConsumerState<GrammerData> createState() => _GrammerDataState();
 }
 
-class _GrammerDataState extends State<GrammerData> {
+class _GrammerDataState extends ConsumerState<GrammerData> {
   final int _pageSize = 8;
   int _currentPage = 0;
-  bool _isLoading = true;
   late GrammarDataList grammarData;
-  LEVEL dropdownValue = LEVEL.ALPHABET;
+  LEVEL dropdownValue = LEVEL.LEVEL1;
+
+  final tableTitle = [
+    'No.',
+    '사이클',
+    '세트',
+    '회차',
+    '타이틀',
+    '대표 문장',
+    '예시 개수',
+  ];
+
+  final descriptionTitle = [
+    '한국어',
+    'ENG',
+    'CHN',
+    'VIE',
+    'RUS',
+  ];
+
+  late Future<void> _grammarListDataFuture;
 
   Future<void> fetchData() async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       await GrammerDataRepository()
           .getGrammerDataList(page: _currentPage, size: _pageSize)
           .then((value) {
         setState(() {
           grammarData = value;
         });
-      });
-
-      setState(() {
-        _isLoading = false;
       });
     } catch (e) {
       throw Exception(e);
@@ -51,14 +64,32 @@ class _GrammerDataState extends State<GrammerData> {
     fetchData();
   }
 
-  void addChapter(int? id) {
+  void addChapter(int? index) {
+    if (index == null && grammarData.content != null) {
+      ref.watch(introProvider.notifier).update(
+            chapter: grammarData.content!.last.chapter + 1,
+          );
+    } else if (index == null) {
+      ref.watch(introProvider.notifier).update(
+            chapter: 1,
+          );
+    } else {
+      ref.watch(introProvider.notifier).update(
+            dataId: grammarData.content![index].id,
+            cycle: grammarData.content![index].cycle,
+            sets: grammarData.content![index].sets,
+            chapter: grammarData.content![index].chapter,
+            title: grammarData.content![index].title,
+          );
+    }
+
     context.go('/grammar/add');
   }
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    _grammarListDataFuture = fetchData();
   }
 
   @override
@@ -103,7 +134,7 @@ class _GrammerDataState extends State<GrammerData> {
                   ),
                 ),
                 width: 300,
-                initialSelection: LEVEL.ALPHABET.toString(),
+                initialSelection: dropdownValue.toString(),
                 onSelected: (value) {
                   setState(() {
                     dropdownValue = value as LEVEL;
@@ -119,71 +150,216 @@ class _GrammerDataState extends State<GrammerData> {
             ],
           ),
           const SizedBox(height: 20),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(
-                width: 10,
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.2,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          FutureBuilder(
+            future: _grammarListDataFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (grammarData.content == null) {
+                return const Center(child: Text('데이터가 없습니다.'));
+              } else {
+                return Column(
                   children: [
-                    _currentPage != 0
-                        ? GestureDetector(
-                            onTap: () {
-                              goToPage(_currentPage - 1);
-                            },
-                            child:
-                                const SizedBox(width: 50, child: Text('< 이전')))
-                        : const SizedBox(width: 50),
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      width: 50,
-                      height: 30,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.black,
-                            width: 1,
-                          )),
-                      child: Text(
-                        (_currentPage + 1).toString(),
-                        textAlign: TextAlign.center,
+                    Table(
+                      border: TableBorder.all(
+                        color: const Color(0xFFB9B9B9),
+                        width: 1,
                       ),
-                    ),
-                    _currentPage != grammarData.totalPages
-                        ? GestureDetector(
-                            onTap: () {
-                              goToPage(_currentPage + 1);
-                            },
-                            child:
-                                const SizedBox(width: 50, child: Text('다음 >')),
-                          )
-                        : const SizedBox(width: 50),
-                    GestureDetector(
-                      onTap: () {
-                        goToPage(grammarData.totalPages - 1);
+                      columnWidths: const {
+                        0: FlexColumnWidth(1),
+                        1: FlexColumnWidth(1), // 사이클
+                        2: FlexColumnWidth(1), // 세트
+                        3: FlexColumnWidth(1), // 회차
+                        4: FlexColumnWidth(3), // 타이틀
+                        5: FlexColumnWidth(7), // 대표 문장
+                        6: FlexColumnWidth(1), //  예시 개수
                       },
-                      child: const Text('맨뒤로 >>'),
+                      children: _buildTableRows(),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.2,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _currentPage != 0
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        goToPage(_currentPage - 1);
+                                      },
+                                      child: const SizedBox(
+                                          width: 50, child: Text('< 이전')))
+                                  : const SizedBox(width: 50),
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                width: 50,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: 1,
+                                    )),
+                                child: Text(
+                                  (_currentPage + 1).toString(),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              _currentPage != grammarData.totalPages
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        goToPage(_currentPage + 1);
+                                      },
+                                      child: const SizedBox(
+                                          width: 50, child: Text('다음 >')),
+                                    )
+                                  : const SizedBox(width: 50),
+                              GestureDetector(
+                                onTap: () {
+                                  goToPage(grammarData.totalPages - 1);
+                                },
+                                child: const Text('맨뒤로 >>'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            addChapter(null);
+                          },
+                          style: const ButtonStyle(
+                              backgroundColor:
+                                  WidgetStatePropertyAll(Colors.blue)),
+                          child: const Text('회차추가'),
+                        )
+                      ],
                     ),
                   ],
-                ),
-              ),
-              FilledButton(
-                onPressed: () {
-                  addChapter(null);
-                },
-                style: const ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(Colors.blue)),
-                child: const Text('회차추가'),
-              )
-            ],
+                );
+              }
+            },
           ),
         ]),
       ),
     ));
+  }
+
+  List<TableRow> _buildTableRows() {
+    List<TableRow> rows = [];
+
+    rows.add(
+      TableRow(
+        children: List.generate(tableTitle.length, (index) {
+          return Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey,
+                width: 0.5,
+              ),
+              color: Colors.grey[200],
+            ),
+            height: 40,
+            child: Center(
+              child: Text(
+                tableTitle[index],
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+
+    if (grammarData.content == []) {
+      return rows;
+    }
+
+    for (int i = 0; i < grammarData.content!.length; i++) {
+      rows.add(
+        TableRow(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
+          children: [
+            SizedBox(
+              // 1. No.
+              height: 35,
+              child: Center(
+                child: Text(
+                  (i + 1).toString(),
+                ),
+              ),
+            ),
+            SizedBox(
+              // 2. 사이클
+              height: 35,
+              child: Center(
+                child: Text(grammarData.content![i].cycle.toString()),
+              ),
+            ),
+            SizedBox(
+              // 3. 세트
+              height: 35,
+              child: Center(
+                child: Text(grammarData.content![i].sets.toString()),
+              ),
+            ),
+            SizedBox(
+              // 4. 회차
+              height: 35,
+              child: Center(
+                child: Text(grammarData.content![i].chapter.toString()),
+              ),
+            ),
+            SizedBox(
+              // 5. 타이틀
+              height: 35,
+              child: Center(
+                child: Text(grammarData.content![i].title!),
+              ),
+            ),
+            SizedBox(
+              // 6. 대표 문장
+              height: 35,
+              child: TextButton(
+                onPressed: () {
+                  addChapter(i);
+                },
+                child: Center(
+                  child: grammarData.content![i].representSentences != ''
+                      ? Text(grammarData.content![i].representSentences!)
+                      : const Text(
+                          '입력하기',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+            SizedBox(
+              // 단어 개수
+              height: 35,
+              child: Center(
+                child: Text(
+                    grammarData.content![i].exampleSentenceNumber.toString()),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return rows;
   }
 }

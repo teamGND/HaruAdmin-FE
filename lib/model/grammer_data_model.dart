@@ -1,7 +1,7 @@
 import 'package:haru_admin/model/intro_data_model.dart';
 
 class GrammarDataList {
-  final List<GrammarDataListComponent> content;
+  final List<GrammarDataListComponent>? content;
   final bool empty;
   final bool first;
   final bool last;
@@ -51,6 +51,8 @@ class GrammarDataList {
 class GrammarDataListComponent {
   int id;
   int chapter;
+  int cycle;
+  int sets;
   String level;
   String? title;
   String? representSentences;
@@ -62,6 +64,8 @@ class GrammarDataListComponent {
     required this.id,
     required this.chapter,
     required this.level,
+    required this.cycle,
+    required this.sets,
     required this.title,
     required this.representSentences,
     required this.exampleSentenceNumber,
@@ -74,6 +78,8 @@ class GrammarDataListComponent {
       id: json['id'],
       chapter: json['chapter'],
       level: json['level'],
+      cycle: json['cycle'],
+      sets: json['sets'],
       title: json['title'],
       representSentences: json['representSentences'],
       exampleSentenceNumber: json['exampleSentenceNumber'],
@@ -195,4 +201,177 @@ class Sentence {
       'voiceUrl': voiceUrl,
     };
   }
+}
+
+class GrammarChapterDataList {
+  String level;
+  int cycle;
+  int sets;
+  int chapter;
+  String? title;
+  String? sentence;
+  String? imageUrl;
+  String? description;
+  String? descriptionEng;
+  String? descriptionChn;
+  String? descriptionVie;
+  String? descriptionRus;
+  List<MetaGrammar>? metaGrammars;
+  List<ExampleSentence>? representSentences;
+  List<ExampleSentence>? exampleSentences;
+
+  GrammarChapterDataList({
+    required this.level,
+    required this.cycle,
+    required this.sets,
+    required this.chapter,
+    this.title,
+    this.sentence,
+    this.imageUrl,
+    this.description,
+    this.descriptionEng,
+    this.descriptionChn,
+    this.descriptionVie,
+    this.descriptionRus,
+    this.metaGrammars,
+    this.representSentences,
+    this.exampleSentences,
+  });
+
+  factory GrammarChapterDataList.fromJson(Map<String, dynamic> json) {
+    var representSentencesFromJson = json['representSentences'] as List;
+    List<ExampleSentence> representSentencesList = representSentencesFromJson
+        .map((i) => ExampleSentence.fromJson(i))
+        .toList();
+
+    var exampleSentencesFromJson = json['exampleSentences'] as List;
+    List<ExampleSentence> exampleSentencesList = exampleSentencesFromJson
+        .map((i) => ExampleSentence.fromJson(i))
+        .toList();
+
+    var metaGrammarsFromJson = json['metaGrammars'] as List;
+    List<MetaGrammar> metaGrammarsList =
+        metaGrammarsFromJson.map((i) => MetaGrammar.fromJson(i)).toList();
+
+    return GrammarChapterDataList(
+      level: json['level'],
+      cycle: json['cycle'],
+      sets: json['sets'],
+      chapter: json['chapter'],
+      title: json['title'],
+      sentence: json['sentence'],
+      imageUrl: json['imageUrl'],
+      description: json['description'],
+      descriptionEng: json['descriptionEng'],
+      descriptionChn: json['descriptionChn'],
+      descriptionVie: json['descriptionVie'],
+      descriptionRus: json['descriptionRus'],
+      metaGrammars: metaGrammarsList,
+      representSentences: representSentencesList,
+      exampleSentences: exampleSentencesList,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'level': level,
+      'cycle': cycle,
+      'sets': sets,
+      'chapter': chapter,
+      'title': title,
+      'sentence': sentence,
+      'imageUrl': imageUrl,
+      'description': description,
+      'descriptionEng': descriptionEng,
+      'descriptionChn': descriptionChn,
+      'descriptionVie': descriptionVie,
+      'descriptionRus': descriptionRus,
+      'metaGrammars': metaGrammars?.map((e) => e.toJson()).toList(),
+      'representSentences': representSentences?.map((e) => e.toJson()).toList(),
+      'exampleSentences': exampleSentences?.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
+class MetaGrammar {
+  int id;
+  String title;
+
+  MetaGrammar({
+    required this.id,
+    required this.title,
+  });
+
+  factory MetaGrammar.fromJson(Map<String, dynamic> json) {
+    return MetaGrammar(
+      id: json['id'],
+      title: json['title'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+    };
+  }
+}
+
+class ExampleSentence {
+  int? order;
+  String? characterType;
+  String? expression;
+  String? expressionEng;
+  String? expressionChn;
+  String? expressionVie;
+  String? expressionRus;
+  String? voiceUrl;
+
+  ExampleSentence({
+    this.order,
+    this.characterType,
+    this.expression,
+    this.expressionEng,
+    this.expressionChn,
+    this.expressionVie,
+    this.expressionRus,
+    this.voiceUrl,
+  });
+
+  factory ExampleSentence.fromJson(Map<String, dynamic> json) {
+    return ExampleSentence(
+      order: json['order'],
+      characterType: json['characterType'],
+      expression: json['expression'],
+      expressionEng: json['expressionEng'],
+      expressionChn: json['expressionChn'],
+      expressionVie: json['expressionVie'],
+      expressionRus: json['expressionRus'],
+      voiceUrl: json['voiceUrl'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'order': order,
+      'characterType': characterType,
+      'expression': expression,
+      'expressionEng': expressionEng,
+      'expressionChn': expressionChn,
+      'expressionVie': expressionVie,
+      'expressionRus': expressionRus,
+      'voiceUrl': voiceUrl,
+    };
+  }
+
+  ExampleSentence.copyWith({
+    this.order,
+    this.characterType,
+    this.expression,
+    this.expressionEng,
+    this.expressionChn,
+    this.expressionVie,
+    this.expressionRus,
+    this.voiceUrl,
+  });
 }

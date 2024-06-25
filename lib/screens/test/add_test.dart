@@ -19,7 +19,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   final TestDataRepository testDataRepository = TestDataRepository();
   static const int MAXIMUM_PROBLEM_CNT = 100;
 
-  IntroInfo infoData = const IntroInfo(
+  IntroInfo infoData = IntroInfo(
     dataId: 0,
     level: LEVEL.LEVEL1,
     cycle: 0,
@@ -148,11 +148,11 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                 onPressed: () async {
                   Navigator.of(context).pop();
                   setState(() {
-                    for (int i = 0; i < _selected.length; i++) {
-                      if (_selected[i]) {
-                        _problemList.removeAt(i);
-                      }
-                    }
+                    _problemList = _problemList
+                        .where((element) =>
+                            !_selected[_problemList.indexOf(element)])
+                        .toList();
+                    _selected.fillRange(0, _selected.length, false);
                   });
                 },
                 child: const Text('확인'),

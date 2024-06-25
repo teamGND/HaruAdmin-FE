@@ -8,16 +8,16 @@ import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/colors.dart';
 
 class IntroInfo {
-  final int? dataId;
-  final LEVEL? level;
-  final CATEGORY? category;
-  final int? cycle;
-  final int? sets;
-  final int? chapter;
-  final String? title;
-  final List<String>? wordDatas;
+  int? dataId;
+  LEVEL? level;
+  CATEGORY? category;
+  int? cycle;
+  int? sets;
+  int? chapter;
+  String? title;
+  List<String>? wordDatas;
 
-  const IntroInfo({
+  IntroInfo({
     this.dataId,
     this.level,
     this.category,
@@ -53,7 +53,7 @@ class IntroInfo {
 
 class IntroInfoNotifier extends Notifier<IntroInfo> {
   @override
-  IntroInfo build() => const IntroInfo();
+  IntroInfo build() => IntroInfo();
 
   void update({
     int? dataId,
@@ -104,10 +104,24 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
   late List<TextEditingController> _controllers;
   late IntroInfo info;
 
+  addWord() {
+    if (wordList.length > 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('단어는 최대 10개까지 입력 가능합니다.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+    setState(() {
+      wordList.add('');
+    });
+  }
+
   saveIntroData() async {
     try {
-      IntroInfo info = ref.read(introProvider);
-
       if (info.category == null ||
           info.level == null ||
           info.cycle == null ||
@@ -142,29 +156,53 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
               closeIconColor: Colors.white,
             ),
           );
+          return;
         }
       }
-      await introRepository
-          .addToIntroDataList(AddIntroData(
-        id: info.dataId,
-        level: info.level.toString().split('.')[1],
-        category: info.category.toString().split('.')[1],
-        chapter: info.chapter!,
-        cycle: info.cycle!,
-        sets: info.sets!,
-        titleKor: convertWordListToString(title: info.title, words: wordList),
-      ))
-          .then((value) {
-        ref.watch(introProvider.notifier).update(dataId: value.id);
+      if (info.dataId == null) {
+        // 새로 데이터 POST
+        await introRepository
+            .addToIntroData(
+                data: AddIntroData(
+          id: info.dataId,
+          level: info.level.toString().split('.')[1],
+          category: info.category.toString().split('.')[1],
+          chapter: info.chapter!,
+          cycle: info.cycle!,
+          sets: info.sets!,
+          titleKor: convertWordListToString(title: info.title, words: wordList),
+        ))
+            .then((value) {
+          ref.watch(introProvider.notifier).update(dataId: value.id);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Center(child: Text('저장되었습니다.')),
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Center(child: Text('새로운 챕터를 추가하였습니다.')),
             showCloseIcon: true,
             closeIconColor: Colors.white,
-          ),
-        );
-      });
+          ));
+        });
+      } else {
+        // 해당 아이디 데이터 PATCH
+        await introRepository
+            .updateIntroData(
+                id: info.dataId!,
+                data: UpdateIntroData(
+                  level: info.level.toString().split('.')[1],
+                  category: info.category.toString().split('.')[1],
+                  cycle: info.cycle!,
+                  sets: info.sets!,
+                  chapter: info.chapter!,
+                  titleKor: convertWordListToString(
+                      title: info.title, words: wordList),
+                ))
+            .then((value) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Center(child: Text('수정을 완료하였습니다.')),
+            showCloseIcon: true,
+            closeIconColor: Colors.white,
+          ));
+        });
+      }
     } catch (e) {
       throw Exception(e);
     }
@@ -303,6 +341,11 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         controller: TextEditingController(
                           text: info.cycle != null ? info.cycle.toString() : '',
                         ),
+                        onChanged: (value) {
+                          setState(() {
+                            info = info.copyWith(cycle: int.parse(value));
+                          });
+                        },
                       ),
                     )),
 
@@ -317,6 +360,11 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         controller: TextEditingController(
                           text: info.sets != null ? info.sets.toString() : '',
                         ),
+                        onChanged: (value) {
+                          setState(() {
+                            info = info.copyWith(sets: int.parse(value));
+                          });
+                        },
                       ),
                     )),
 
@@ -333,6 +381,11 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                               ? info.chapter.toString()
                               : '',
                         ),
+                        onChanged: (value) {
+                          setState(() {
+                            info = info.copyWith(chapter: int.parse(value));
+                          });
+                        },
                       ),
                     )),
 
@@ -346,12 +399,12 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         controller: TextEditingController(text: info.title),
                         onChanged: (value) {
                           setState(() {
-                            info = info.copyWith(title: value);
+                            info.title = value;
                           });
                         },
                       ),
                     )),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
 
                     // 저장 버튼 //
                     TextButton(
@@ -381,34 +434,19 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text("단어 리스트",
+                          const Text("단어 리스트",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               )),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               filledButton(
                                   buttonName: '추가',
                                   color: Colors.blue,
                                   onPressed: () {
-                                    if (wordList.length >= 10) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Center(
-                                              child: Text(
-                                                  '단어는 최대 10개까지 입력 가능합니다.')),
-                                          showCloseIcon: true,
-                                          closeIconColor: Colors.white,
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                    setState(() {
-                                      wordList.add('');
-                                    });
+                                    addWord();
                                   }),
                               const SizedBox(width: 10),
                               filledButton(
@@ -437,7 +475,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                                     MediaQuery.of(context).size.height * 0.5,
                                 child: Center(
                                   child: wordList.isEmpty
-                                      ? Text(
+                                      ? const Text(
                                           '<추가> 버튼을 눌러\n단어를 추가해 주세요.',
                                           style: TextStyle(
                                             color: Colors.grey,
@@ -473,6 +511,9 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                                                             Colors.grey[500]),
                                                     border: InputBorder.none,
                                                   ),
+                                                  onEditingComplete: () {
+                                                    addWord();
+                                                  },
                                                   controller:
                                                       _controllers[index],
                                                 ),
@@ -484,7 +525,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                           ),
                         ],
                       )
-                    : SizedBox()
+                    : const SizedBox()
               ],
             ),
           ),

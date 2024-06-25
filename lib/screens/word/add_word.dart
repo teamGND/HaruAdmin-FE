@@ -25,10 +25,9 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   late List<TextEditingController> descriptionControllers;
 
   // 회차 데이터 가져오기
-  bool _isLoading = true;
   IntroInfo info = IntroInfo();
   List<WordChapterData> _datas = [];
-  List<bool> _isChecked = List<bool>.filled(10, false);
+  final List<bool> _isChecked = List<bool>.filled(10, false);
 
   List<Map<String, double>> tabletitle = [
     {'': 50},
@@ -42,6 +41,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     {'RUS': 100},
     {'추가 설명': 100},
   ];
+
+  late Future<void> _wordDataFuture;
 
   void addNewWord() {
     if (_datas.length >= 10) {
@@ -73,10 +74,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   }
 
   void save() async {
-    if (_isLoading) {
-      return;
-    }
-
     if (_datas.isNotEmpty) {
       bool isWordFilled = _datas.every((element) {
         if (element.title.isEmpty || element.title == '') {
@@ -98,10 +95,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     }
 
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
       if (info.dataId != null) {
         for (int i = 0; i < _datas.length; i++) {
           _datas[i].order = i + 1;
@@ -139,10 +132,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           }
         });
       }
-
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       throw Exception(e);
     }
@@ -241,12 +230,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
   Future<void> fetchWordData() async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
       if (info.dataId != null) {
         await wordRepository.getWordData(id: info.dataId!).then((value) {
-          print(value.wordDataList);
           _datas = value.wordDataList;
         });
 
@@ -269,10 +254,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
             .map((data) => TextEditingController(text: data.description))
             .toList();
       }
-
-      setState(() {
-        _isLoading = false;
-      });
     } catch (e) {
       throw Exception(e);
     }
@@ -282,17 +263,29 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   void initState() {
     super.initState();
     info = ref.read(introProvider);
-    fetchWordData();
+    _wordDataFuture = fetchWordData();
   }
 
   @override
   void dispose() {
-    titleControllers.forEach((controller) => controller.dispose());
-    englishControllers.forEach((controller) => controller.dispose());
-    chineseControllers.forEach((controller) => controller.dispose());
-    vietnamControllers.forEach((controller) => controller.dispose());
-    russianControllers.forEach((controller) => controller.dispose());
-    descriptionControllers.forEach((controller) => controller.dispose());
+    for (var controller in titleControllers) {
+      controller.dispose();
+    }
+    for (var controller in englishControllers) {
+      controller.dispose();
+    }
+    for (var controller in chineseControllers) {
+      controller.dispose();
+    }
+    for (var controller in vietnamControllers) {
+      controller.dispose();
+    }
+    for (var controller in russianControllers) {
+      controller.dispose();
+    }
+    for (var controller in descriptionControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -322,9 +315,16 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SizedBox(
+                child: FutureBuilder(
+                    future: _wordDataFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      return SizedBox(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: SizedBox(
@@ -415,7 +415,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                               },
                                               child: const Text(
                                                 '불러오기',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.blue,
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 10,
@@ -546,7 +546,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                             ),
                           ),
                         ),
-                      ),
+                      );
+                    }),
               ),
               const SizedBox(height: 20),
               SizedBox(

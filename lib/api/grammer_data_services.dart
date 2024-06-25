@@ -25,6 +25,15 @@ class GrammerDataRepository {
     }
   }
 
+  getGrammarData({required int id}) async {
+    try {
+      final response = await dio.get('/grammar/$id');
+      return GrammarChapterDataList.fromJson(response.data);
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
   addToGrammerDataList(AddGrammerData data) async {
     try {
       final response = await dio.post('/grammer', data: data.toJson());

@@ -289,7 +289,65 @@ class AddIntroData {
       chapter: chapter ?? this.chapter,
       cycle: cycle ?? this.cycle,
       sets: sets ?? this.sets,
-      titleKor: title ?? this.titleKor,
+      titleKor: title ?? titleKor,
+    );
+  }
+}
+
+class UpdateIntroData {
+  String level;
+  String category;
+  int cycle;
+  int sets;
+  int chapter;
+  String? titleKor;
+
+  UpdateIntroData({
+    required this.level,
+    required this.category,
+    required this.cycle,
+    required this.sets,
+    required this.chapter,
+    this.titleKor,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'level': level,
+      'category': category,
+      'chapter': chapter,
+      'cycle': cycle,
+      'sets': sets,
+      'titleKor': titleKor,
+    };
+  }
+
+  factory UpdateIntroData.fromJson(Map<String, dynamic> json) {
+    return UpdateIntroData(
+      level: json['level'],
+      category: json['category'],
+      chapter: json['chapter'],
+      cycle: json['cycle'],
+      sets: json['sets'],
+      titleKor: json['titleKor'],
+    );
+  }
+
+  UpdateIntroData copyWith({
+    String? level,
+    String? category,
+    int? chapter,
+    int? cycle,
+    int? sets,
+    String? title,
+  }) {
+    return UpdateIntroData(
+      level: level ?? this.level,
+      category: category ?? this.category,
+      chapter: chapter ?? this.chapter,
+      cycle: cycle ?? this.cycle,
+      sets: sets ?? this.sets,
+      titleKor: title ?? titleKor,
     );
   }
 }

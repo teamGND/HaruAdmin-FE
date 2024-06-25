@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/model/intro_data_model.dart';
+import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/button.dart';
@@ -212,6 +213,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
   void initState() {
     super.initState();
     info = ref.read(introProvider);
+
     wordList = info.wordDatas ?? [];
     _controllers = wordList.map((word) {
       final controller = TextEditingController(text: word);

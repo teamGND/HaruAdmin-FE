@@ -201,6 +201,18 @@ class WordChapterData {
       'description': description,
     };
   }
+
+  WordChapterData.copyWith(WordChapterData data)
+      : id = data.id,
+        order = data.order,
+        title = data.title,
+        imgUrl = data.imgUrl,
+        voiceUrl = data.voiceUrl,
+        english = data.english,
+        chinese = data.chinese,
+        vietnam = data.vietnam,
+        russian = data.russian,
+        description = data.description;
 }
 
 class PatchWordChapterData {

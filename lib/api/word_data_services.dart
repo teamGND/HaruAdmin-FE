@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
-import 'package:http_parser/http_parser.dart';
 
 class WordDataRepository {
   final dio = DioClient().provideDio();
@@ -63,16 +62,14 @@ class WordDataRepository {
   }
 
   Future<String?> uploadFile(
-      {required Uint8List fileBytes, required String fileName}) async {
+      {required Uint8List fileBytes,
+      required String fileName,
+      required String fileType}) async {
     try {
       FormData formData = FormData.fromMap({
         'file': MultipartFile.fromBytes(
           fileBytes,
-          filename: fileName,
-          contentType: MediaType(
-            'image',
-            'png',
-          ),
+          filename: '$fileName.$fileType',
         ),
       });
 
@@ -91,5 +88,6 @@ class WordDataRepository {
     } catch (e) {
       throw Exception(e);
     }
+    return null;
   }
 }

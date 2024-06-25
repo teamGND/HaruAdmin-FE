@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
+import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
@@ -28,7 +29,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   List<TextEditingController> exampleChineseControllers = [];
   List<TextEditingController> exampleVietnamControllers = [];
   List<TextEditingController> exampleRussianControllers = [];
-  List<TextEditingController> descriptionControllers = [];
+  List<TextEditingController> descriptionControllers =
+      []; // 0: 한국어, 1: 영어, 2: 중국어, 3: 베트남어, 4: 러시아어
 
   IntroInfo info = IntroInfo();
   GrammarChapterDataList _data =
@@ -132,6 +134,14 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               ));
             }
           });
+
+          ref.read(DialogueDataProvider.notifier).update(DialogueData(
+                korean: _representSentences[0].expression,
+                english: _representSentences[0].expressionEng,
+                chinese: _representSentences[0].expressionChn,
+                vietnamese: _representSentences[0].expressionVie,
+                russian: _representSentences[0].expressionRus,
+              ));
         });
 
         titleControllers = List.generate(
@@ -349,25 +359,9 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 500,
-                      child: buildDialog(
-                        koreanController: titleControllers.isNotEmpty
-                            ? titleControllers[0]
-                            : TextEditingController(),
-                        englishController: englishControllers.isNotEmpty
-                            ? englishControllers[0]
-                            : TextEditingController(),
-                        chineseController: chineseControllers.isNotEmpty
-                            ? chineseControllers[0]
-                            : TextEditingController(),
-                        vietnamController: vietnamControllers.isNotEmpty
-                            ? vietnamControllers[0]
-                            : TextEditingController(),
-                        russianController: russianControllers.isNotEmpty
-                            ? russianControllers[0]
-                            : TextEditingController(),
-                      ),
+                      child: DialogueWidget(),
                     ),
                     const SizedBox(height: 15),
                     const Row(
@@ -724,271 +718,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
       ));
     }
     return rows;
-  }
-}
-
-class buildDialog extends StatefulWidget {
-  const buildDialog({
-    super.key,
-    required this.koreanController,
-    required this.englishController,
-    required this.chineseController,
-    required this.vietnamController,
-    required this.russianController,
-  });
-
-  final TextEditingController koreanController;
-  final TextEditingController englishController;
-  final TextEditingController chineseController;
-  final TextEditingController vietnamController;
-  final TextEditingController russianController;
-
-  @override
-  State<buildDialog> createState() => DialogueState();
-}
-
-class DialogueState extends State<buildDialog> {
-  late List<TextEditingController> _textEditingControllers;
-  final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
-  final List<String> _inputText = ["", "", "", "", ""];
-  int _selectedLanguage = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _textEditingControllers = [
-      widget.koreanController,
-      widget.englishController,
-      widget.chineseController,
-      widget.vietnamController,
-      widget.russianController,
-    ];
-
-    for (int i = 0; i < _textEditingControllers.length; i++) {
-      _textEditingControllers[i].addListener(() {
-        setState(() {
-          _inputText[i] = _textEditingControllers[i].text;
-        });
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var element in _textEditingControllers) {
-      element.dispose();
-    }
-
-    super.dispose();
-  }
-
-  List<InlineSpan> parseText(String text) {
-    List<InlineSpan> spans = [];
-    List<String> lines = text.split('\n');
-
-    for (int i = 0; i < lines.length; i++) {
-      String line = lines[i];
-      if (i > 0) {
-        spans.add(const WidgetSpan(child: SizedBox(height: 8)));
-      }
-      spans.add(WidgetSpan(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            i != 0
-                ? Container(
-                    width: 25,
-                    height: 25,
-                    margin: const EdgeInsets.only(right: 8.0),
-                    padding: const EdgeInsets.all(5.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.lightBlue,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$i',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
-            Expanded(
-              child: RichText(
-                textAlign: i == 0
-                    ? TextAlign.center
-                    : TextAlign.start, // Center align the first line text
-                text: TextSpan(
-                  children: parseLine(line),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ));
-    }
-    return spans;
-  }
-
-  List<TextSpan> parseLine(String line) {
-    List<TextSpan> spans = [];
-    RegExp exp = RegExp(r'<(.*?)>|\[(.*?)\]|\*(.*?)\*|([^<>\[\]\*]+)');
-    Iterable<RegExpMatch> matches = exp.allMatches(line);
-
-    for (var match in matches) {
-      if (match.group(0)!.startsWith('<') && match.group(0)!.endsWith('>')) {
-        spans.add(
-          TextSpan(
-            text: match.group(1),
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        );
-      } else if (match.group(0)!.startsWith('[') &&
-          match.group(0)!.endsWith(']')) {
-        spans.add(
-          TextSpan(
-            text: match.group(2),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-          ),
-        );
-      } else if (match.group(0)!.startsWith('*') &&
-          match.group(0)!.endsWith('*')) {
-        spans.add(
-          TextSpan(
-            text: match.group(3),
-            style: const TextStyle(color: Colors.red, fontSize: 11),
-          ),
-        );
-      } else {
-        spans.add(
-          TextSpan(
-            text: match.group(0),
-            style: const TextStyle(fontSize: 10),
-          ),
-        );
-      }
-    }
-    return spans;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Flexible(
-          flex: 1,
-          child: Container(
-            height: 500,
-            width: 300,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                DecoratedBox(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF0F0F0),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                    ),
-                  ),
-                  child: SizedBox(
-                    height: 50,
-                    width: 300,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        _languageTitles.length,
-                        (index) => RadioListTile(
-                          title: Text(_languageTitles[index]),
-                          value: index,
-                          groupValue: _selectedLanguage,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedLanguage = value as int;
-                            });
-                          },
-                        ),
-                      ).toList(),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 470,
-                  width: 300,
-                  child: TextFormField(
-                    maxLines: 15,
-                    style: const TextStyle(
-                      fontSize: 11,
-                    ),
-                    decoration: const InputDecoration(
-                      fillColor: Colors.white,
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 5),
-                    ),
-                    controller: _textEditingControllers[_selectedLanguage],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Flexible(
-          flex: 1,
-          child: Container(
-            height: 500,
-            width: 300,
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: const Color(0xffffd4f3ff),
-              border: Border.all(
-                color: Colors.white,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Container(
-              width: 300,
-              height: 500,
-              color: const Color(0xFFFFFFFF),
-              padding: const EdgeInsets.all(10),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 10),
-                    const SizedBox(height: 10),
-                    Image.asset('assets/images/blue_head.png',
-                        width: 40, height: 40),
-                    const SizedBox(height: 10),
-                    RichText(
-                      text: TextSpan(
-                        children: parseText(_inputText[_selectedLanguage]),
-                        style:
-                            const TextStyle(color: Colors.black, fontSize: 10),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

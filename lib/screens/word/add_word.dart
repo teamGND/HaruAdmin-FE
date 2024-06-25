@@ -62,38 +62,47 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           title: '',
         ),
       );
+      titleControllers.add(TextEditingController());
+      englishControllers.add(TextEditingController());
+      chineseControllers.add(TextEditingController());
+      vietnamControllers.add(TextEditingController());
+      russianControllers.add(TextEditingController());
+      descriptionControllers.add(TextEditingController());
     });
   }
 
   void deleteSelectedWord() {
     setState(() {
-      _datas = _datas
-          .where((element) => !_isChecked[_datas.indexOf(element)])
-          .toList();
+      List<int> indicesToRemove = [];
+      for (int i = 0; i < _datas.length; i++) {
+        if (_isChecked[i]) {
+          indicesToRemove.add(i);
+        }
+      }
+
+      // 뒤에서부터 지워서 index shift 방지
+      indicesToRemove.sort((a, b) => b.compareTo(a));
+
+      // 데이터와 컨트롤러 삭제
+      for (int index in indicesToRemove) {
+        _datas.removeAt(index);
+        titleControllers.removeAt(index);
+        englishControllers.removeAt(index);
+        chineseControllers.removeAt(index);
+        vietnamControllers.removeAt(index);
+        russianControllers.removeAt(index);
+        descriptionControllers.removeAt(index);
+      }
+
+      // 순서 재정렬
+      for (int i = 0; i < _datas.length; i++) {
+        _datas[i].order = i + 1;
+      }
+      _isChecked.fillRange(0, 10, false);
     });
   }
 
   void save() async {
-    if (_datas.isNotEmpty) {
-      bool isWordFilled = _datas.every((element) {
-        if (element.title.isEmpty || element.title == '') {
-          return false;
-        }
-        return true;
-      });
-
-      if (!isWordFilled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Center(child: Text('단어를 입력해주세요')),
-            showCloseIcon: true,
-            closeIconColor: Colors.white,
-          ),
-        );
-        return;
-      }
-    }
-
     try {
       if (info.dataId != null) {
         for (int i = 0; i < _datas.length; i++) {
@@ -106,6 +115,26 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           _datas[i].vietnam = vietnamControllers[i].text;
           _datas[i].russian = russianControllers[i].text;
           _datas[i].description = descriptionControllers[i].text;
+        }
+
+        if (_datas.isNotEmpty) {
+          bool isWordFilled = _datas.every((element) {
+            if (element.title.isEmpty || element.title == '') {
+              return false;
+            }
+            return true;
+          });
+
+          if (!isWordFilled) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Center(child: Text('단어를 입력해주세요')),
+                showCloseIcon: true,
+                closeIconColor: Colors.white,
+              ),
+            );
+            return;
+          }
         }
 
         await wordRepository
@@ -123,8 +152,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
             .then((value) {
           if (value != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Center(child: Text(value)),
+              const SnackBar(
+                content: Center(child: Text('저장 완료')),
                 showCloseIcon: true,
                 closeIconColor: Colors.white,
               ),
@@ -164,10 +193,16 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
             .uploadFile(
           fileBytes: file.bytes!,
           fileName: _datas[index].title,
+          fileType: file.extension!,
         )
             .then((value) {
           setState(() {
-            _datas[index].imgUrl = value;
+            _datas = _datas.map((data) {
+              if (data.order == index + 1) {
+                data.imgUrl = value;
+              }
+              return data;
+            }).toList();
           });
         });
       } else {
@@ -201,16 +236,23 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
             .uploadFile(
           fileBytes: file.bytes!,
           fileName: _datas[index].title,
+          fileType: file.extension!,
         )
             .then((value) {
           setState(() {
-            _datas[index].voiceUrl = value;
+            _datas = _datas.map((data) {
+              if (data.order == index + 1) {
+                data.voiceUrl = value;
+              }
+              return data;
+            }).toList();
           });
         });
       } else {
         // User canceled the picker
       }
     } catch (e) {
+      print(e);
       throw Exception(e);
     }
   }
@@ -218,12 +260,23 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   playAudio(int index) async {
     try {
       final player = AudioPlayer();
+      if (_datas[index].voiceUrl == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(child: Text('음성 파일이 없습니다.')),
+            showCloseIcon: true,
+            closeIconColor: Colors.white,
+          ),
+        );
+        return;
+      }
       await player.setUrl(_datas[index].voiceUrl!);
       await player.setVolume(0.5);
       await player.pause();
       await player.stop();
       player.play();
     } catch (e) {
+      print(e);
       throw Exception(e);
     }
   }

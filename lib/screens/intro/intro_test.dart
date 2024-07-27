@@ -6,6 +6,7 @@ import 'package:haru_admin/model/intro_data_model.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
+import 'package:haru_admin/widgets/buttons.dart';
 
 class IntroTestScreen extends ConsumerStatefulWidget {
   const IntroTestScreen({super.key});
@@ -438,15 +439,10 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                 ],
                               ),
                             ),
-                            FilledButton(
-                              onPressed: () {
-                                addChapter(null);
-                              },
-                              style: const ButtonStyle(
-                                  backgroundColor:
-                                      WidgetStatePropertyAll(Colors.blue)),
-                              child: const Text('회차추가'),
-                            )
+                            MyCustomButton(
+                                text: '회차추가',
+                                onTap: () => addChapter(null),
+                                color: Colors.blue)
                           ],
                         ),
                       ],

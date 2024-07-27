@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:haru_admin/widgets/buttons.dart';
 
 class MetaGrammarModal extends StatelessWidget {
   const MetaGrammarModal({
     super.key,
   });
+
+  void addMetaGrammar(context) {
+    Navigator.of(context).pop();
+  }
+
+  void cancel(context) {
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,31 +26,12 @@ class MetaGrammarModal extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () {
-            // Perform the necessary actions when the user clicks on the "Add" button
-            Navigator.of(context).pop();
-          },
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(Colors.blue),
-          ),
-          child: const Text(
-            '추가',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(Colors.grey),
-          ),
-          child: const Text(
-            '취소',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
+        MyCustomButton(
+            text: '추가',
+            onTap: () => addMetaGrammar(context),
+            color: Colors.blue),
+        MyCustomButton(
+            text: '취소', onTap: () => cancel(context), color: Colors.grey)
       ],
     );
   }

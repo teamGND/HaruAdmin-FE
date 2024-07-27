@@ -61,10 +61,12 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     int cycle;
     int sets;
     int chapter;
+    int? introId;
     String? title;
     List<String> wordList = [];
     if (data == null) {
       // 새로 추가
+
       category = introData.content.last.category;
       level = introData.content.last.level;
       cycle = introData.content.last.cycle;
@@ -79,11 +81,14 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
         sets += 1;
       }
     } else {
+      // 수정
+
       category = data.category;
       level = data.level;
       cycle = data.cycle;
       sets = data.sets;
       chapter = data.chapter;
+      introId = data.id;
 
       if (data.category == 'WORD' && data.titleKor != null) {
         wordList = convertWordStringToList(title: data.titleKor!) ?? [];
@@ -91,7 +96,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
       }
     }
     ref.watch(introProvider.notifier).update(
-        dataId: data?.id,
+        dataId: introId,
         chapter: chapter,
         cycle: cycle,
         sets: sets,

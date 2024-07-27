@@ -19,14 +19,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   final TestDataRepository testDataRepository = TestDataRepository();
   static const int MAXIMUM_PROBLEM_CNT = 100;
 
-  IntroInfo infoData = IntroInfo(
-    dataId: 0,
-    level: LEVEL.LEVEL1,
-    cycle: 0,
-    sets: 0,
-    chapter: 0,
-    title: '',
-  );
+  IntroInfo info = IntroInfo();
   bool _isLoading = false;
   List<String> _exampleData = [];
   List<ProblemDataModel> _problemList = [];
@@ -40,19 +33,51 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   * (3) 테스트 - 101 ~ 208
   * (4) 중간평가 - 101 ~ 208
   */
-  Map<int, String> dropdownTitle = {
-    101: '101. 그림보고 어휘 3지선다',
-    102: '102. 어휘보고 그림 3지선다',
-    103: '103. 그림보고 타이핑',
-    104: '104. 받아쓰기',
-    201: '201. 그림보고 어휘 3지선다',
-    202: '202. 어휘보고 그림 3지선다',
-    203: '203. 그림보고 타이핑',
-    204: '204. 받아쓰기',
-    205: '205. 어휘보고 그림 3지선다',
-    206: '206. 그림보고 타이핑',
-    207: '207. 그림보고 타이핑',
-    208: '208. OX 퀴즈',
+  Map<CATEGORY, Map<int, String>> dropdownTitle = {
+    CATEGORY.WORD: {
+      101: '101. 그림보고 어휘 3지선다',
+      102: '102. 어휘보고 그림 3지선다',
+      103: '103. 그림보고 타이핑',
+      104: '104. 받아쓰기',
+    },
+    CATEGORY.GRAMMAR: {
+      201: '201. 그림보고 어휘 3지선다',
+      202: '202. 어휘보고 그림 3지선다',
+      203: '203. 그림보고 타이핑',
+      204: '204. 받아쓰기',
+      205: '205. 어휘보고 그림 3지선다',
+      206: '206. 그림보고 타이핑',
+      207: '207. 그림보고 타이핑',
+      208: '208. OX 퀴즈',
+    },
+    CATEGORY.TEST: {
+      101: '101. 그림보고 어휘 3지선다',
+      102: '102. 어휘보고 그림 3지선다',
+      103: '103. 그림보고 타이핑',
+      104: '104. 받아쓰기',
+      201: '201. 그림보고 어휘 3지선다',
+      202: '202. 어휘보고 그림 3지선다',
+      203: '203. 그림보고 타이핑',
+      204: '204. 받아쓰기',
+      205: '205. 어휘보고 그림 3지선다',
+      206: '206. 그림보고 타이핑',
+      207: '207. 그림보고 타이핑',
+      208: '208. OX 퀴즈',
+    },
+    CATEGORY.MIDTERM: {
+      101: '101. 그림보고 어휘 3지선다',
+      102: '102. 어휘보고 그림 3지선다',
+      103: '103. 그림보고 타이핑',
+      104: '104. 받아쓰기',
+      201: '201. 그림보고 어휘 3지선다',
+      202: '202. 어휘보고 그림 3지선다',
+      203: '203. 그림보고 타이핑',
+      204: '204. 받아쓰기',
+      205: '205. 어휘보고 그림 3지선다',
+      206: '206. 그림보고 타이핑',
+      207: '207. 그림보고 타이핑',
+      208: '208. OX 퀴즈',
+    },
   };
   int dropdownValue = 101;
 
@@ -165,8 +190,8 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   @override
   void initState() {
     super.initState();
-    infoData = ref.read(introProvider);
-    fetchTestData(infoData.dataId!);
+    info = ref.read(introProvider);
+    fetchTestData(info.dataId!);
   }
 
   @override
@@ -222,7 +247,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
             ],
           ),
           UpperTable(
-            info: infoData,
+            info: info,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -305,7 +330,8 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                   width: 200,
                   child: DropdownButton(
                     value: dropdownValue,
-                    items: dropdownTitle.entries
+                    items: dropdownTitle[info.category]!
+                        .entries
                         .map((e) => DropdownMenuItem(
                               value: e.key,
                               child: Padding(

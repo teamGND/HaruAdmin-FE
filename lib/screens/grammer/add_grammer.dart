@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
+import 'package:haru_admin/screens/grammer/widget/meta_grammar_modal.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
@@ -68,9 +69,99 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     }
   }
 
-  addMetaGrammar() {}
-  addNewSentence() {}
-  deleteSelectedSentence() {}
+  addMetaGrammar() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MetaGrammarModal();
+      },
+    );
+  }
+
+  addRepresentiveSentence() {
+    if (_representSentences.length > 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('대표 문장은 2개까지만 추가 가능합니다.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _representSentences.add(ExampleSentence(
+        expression: '',
+        expressionEng: '',
+        expressionChn: '',
+        expressionVie: '',
+        expressionRus: '',
+        characterType: 'BLUE',
+      ));
+      titleControllers.add(TextEditingController());
+      englishControllers.add(TextEditingController());
+      chineseControllers.add(TextEditingController());
+      vietnamControllers.add(TextEditingController());
+      russianControllers.add(TextEditingController());
+      descriptionControllers.add(TextEditingController());
+    });
+  }
+
+  addExampleSentence() {
+    if (_representSentences.length > 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('대표 문장은 10개까지만 추가 가능합니다.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _exampleSentences.add(ExampleSentence(
+        expression: '',
+        expressionEng: '',
+        expressionChn: '',
+        expressionVie: '',
+        expressionRus: '',
+        characterType: 'BLUE',
+      ));
+      exampleTitleControllers.add(TextEditingController());
+      exampleEnglishControllers.add(TextEditingController());
+      exampleChineseControllers.add(TextEditingController());
+      exampleVietnamControllers.add(TextEditingController());
+      exampleRussianControllers.add(TextEditingController());
+    });
+  }
+
+  deleteSelectedRepresentiveSentence() {
+    if (_representSentences.length == 1) {
+      return;
+    }
+
+    setState(() {
+      _representSentences.removeAt(_representSentences.length - 1);
+      titleControllers.removeAt(titleControllers.length - 1);
+      englishControllers.removeAt(englishControllers.length - 1);
+      chineseControllers.removeAt(chineseControllers.length - 1);
+      vietnamControllers.removeAt(vietnamControllers.length - 1);
+      russianControllers.removeAt(russianControllers.length - 1);
+    });
+  }
+
+  deleteSelectedExampleSentence() {
+    setState(() {
+      _exampleSentences.removeAt(_exampleSentences.length - 1);
+      exampleTitleControllers.removeAt(exampleTitleControllers.length - 1);
+      exampleEnglishControllers.removeAt(exampleEnglishControllers.length - 1);
+      exampleChineseControllers.removeAt(exampleChineseControllers.length - 1);
+      exampleVietnamControllers.removeAt(exampleVietnamControllers.length - 1);
+      exampleRussianControllers.removeAt(exampleRussianControllers.length - 1);
+    });
+  }
+
   confirm() {}
   translate() {}
   save() {}
@@ -98,6 +189,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             .uploadFile(
           fileBytes: file.bytes!,
           fileName: 'grammar_${_data.chapter.toString()}',
+          fileType: file.extension!,
         )
             .then((value) {
           setState(() {
@@ -308,7 +400,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           buttonName: '추가',
                           color: Colors.blue,
                           onPressed: () {
-                            addMetaGrammar();
+                            addRepresentiveSentence();
+                          },
+                        ),
+                        const SizedBox(width: 20),
+                        filledButton(
+                          buttonName: '삭제',
+                          color: Colors.yellow,
+                          onPressed: () {
+                            deleteSelectedRepresentiveSentence();
                           },
                         ),
                       ],
@@ -416,7 +516,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         const SizedBox(width: 20),
                         filledButton(
-                          buttonName: '추가',
+                          buttonName: '새로 추가',
                           color: Colors.blue,
                           onPressed: () {
                             addMetaGrammar();
@@ -425,16 +525,32 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                       ],
                     ),
                     const SizedBox(height: 15),
-                    const Row(
+                    Row(
                       children: [
-                        SizedBox(width: 10),
-                        Icon(Icons.download_done_outlined),
-                        Text(
+                        const SizedBox(width: 10),
+                        const Icon(Icons.download_done_outlined),
+                        const Text(
                           ' 예시 문장',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        const SizedBox(width: 20),
+                        filledButton(
+                          buttonName: '추가',
+                          color: Colors.blue,
+                          onPressed: () {
+                            addExampleSentence();
+                          },
+                        ),
+                        const SizedBox(width: 20),
+                        filledButton(
+                          buttonName: '삭제',
+                          color: Colors.yellow,
+                          onPressed: () {
+                            deleteSelectedRepresentiveSentence();
+                          },
                         ),
                       ],
                     ),
@@ -471,22 +587,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             height: 60,
             width: MediaQuery.of(context).size.width * 0.75,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                filledButton(
-                  buttonName: '문장 추가',
-                  color: const Color(0xFF3F99F7),
-                  onPressed: () {
-                    addNewSentence();
-                  },
-                ),
-                const SizedBox(width: 10),
-                filledButton(
-                  buttonName: '문장 빼기',
-                  color: const Color(0xFFFFCC4A),
-                  onPressed: () {
-                    deleteSelectedSentence();
-                  },
-                ),
                 const Expanded(child: SizedBox()),
                 filledButton(
                   buttonName: 'Confirm',
@@ -718,55 +820,5 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
       ));
     }
     return rows;
-  }
-}
-
-class DescriptionTableComponent extends StatelessWidget {
-  const DescriptionTableComponent({
-    super.key,
-    required this.title,
-    required this.textController,
-  });
-
-  final String title;
-  final TextEditingController textController;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 100,
-      width: 300,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.grey,
-          width: 0.5,
-        ),
-        color: Colors.white,
-      ),
-      child: Row(
-        children: [
-          Flexible(
-            flex: 1,
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Flexible(
-            flex: 4,
-            child: TextField(
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 5),
-              ),
-              controller: textController,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

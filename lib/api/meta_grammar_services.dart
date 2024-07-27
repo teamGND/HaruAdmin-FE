@@ -1,42 +1,59 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
+import 'package:haru_admin/model/meta_data_model.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
-import 'package:http_parser/http_parser.dart';
 
-class GrammerDataRepository {
+class MetaGrammarDataRepository {
   final dio = DioClient().provideDio();
   final dio4File = DioClient().provideDioForFile();
   SecureStorage secureStorage = SecureStorage();
 
-  getGrammerDataList({
+  getMetaGrammerDataList({
     required int page,
     required int size,
   }) async {
     try {
       final response = await dio.get(
-        '/grammar-list?pageNumber=$page&pageSize=$size',
+        '/grammar/meta-list?pageNumber=$page&pageSize=$size',
       );
-      return GrammarDataList.fromJson(response.data);
+      return MetaGrammarDataList.fromJson(response.data);
     } catch (e) {
       print("error : $e");
     }
   }
 
-  getGrammarData({required int id}) async {
+  addNewMetaData({
+    required AddMetaData data,
+  }) {
     try {
-      final response = await dio.get('/grammar/$id');
-      return GrammarChapterDataList.fromJson(response.data);
+      dio.post(
+        '/grammar/meta',
+        data: data.toJson(),
+      );
     } catch (e) {
       print("error : $e");
     }
   }
 
-  addToGrammerDataList(AddGrammerData data) async {
+  updateMetaData({
+    required AddMetaData data,
+    required int id,
+  }) {
     try {
-      final response = await dio.post('/grammer', data: data.toJson());
+      dio.patch(
+        '/grammar/meta/$id',
+        data: data.toJson(),
+      );
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  deleteMetaData(List<int> ids) async {
+    try {
+      final response = await dio.delete('/grammar/meta', data: ids);
 
       return response;
     } catch (e) {
@@ -56,7 +73,8 @@ class GrammerDataRepository {
         ),
       });
 
-      final response = await dio4File.post('/grammar/file', data: formData);
+      final response =
+          await dio4File.post('/grammar/meta/file', data: formData);
 
       if (response.statusCode == 200) {
         String? fileUrl = response.data['fileUrl'];

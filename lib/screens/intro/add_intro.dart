@@ -205,6 +205,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
         });
       }
     } catch (e) {
+      print(e);
       throw Exception(e);
     }
   }

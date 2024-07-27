@@ -1,7 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haru_admin/api/translate_service.dart';
 import 'package:haru_admin/api/word_data_services.dart';
+import 'package:haru_admin/model/translate_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/widgets/button.dart';
@@ -17,7 +19,7 @@ class AddWordScreen extends ConsumerStatefulWidget {
 
 class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   final WordDataRepository wordRepository = WordDataRepository();
-  late List<TextEditingController> titleControllers;
+  final TranslateRepository translateRepository = TranslateRepository();
   late List<TextEditingController> englishControllers;
   late List<TextEditingController> chineseControllers;
   late List<TextEditingController> vietnamControllers;
@@ -44,33 +46,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
   late Future<void> _wordDataFuture;
 
-  void addNewWord() {
-    if (_datas.length >= 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Center(child: Text('단어는 최대 10개까지 추가 가능합니다.')),
-          showCloseIcon: true,
-          closeIconColor: Colors.white,
-        ),
-      );
-      return;
-    }
-    setState(() {
-      _datas.add(
-        WordChapterData(
-          order: _datas.length + 1,
-          title: '',
-        ),
-      );
-      titleControllers.add(TextEditingController());
-      englishControllers.add(TextEditingController());
-      chineseControllers.add(TextEditingController());
-      vietnamControllers.add(TextEditingController());
-      russianControllers.add(TextEditingController());
-      descriptionControllers.add(TextEditingController());
-    });
-  }
-
   void deleteSelectedWord() {
     setState(() {
       List<int> indicesToRemove = [];
@@ -86,7 +61,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
       // 데이터와 컨트롤러 삭제
       for (int index in indicesToRemove) {
         _datas.removeAt(index);
-        titleControllers.removeAt(index);
         englishControllers.removeAt(index);
         chineseControllers.removeAt(index);
         vietnamControllers.removeAt(index);
@@ -109,7 +83,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           _datas[i].order = i + 1;
         }
         for (int i = 0; i < _datas.length; i++) {
-          _datas[i].title = titleControllers[i].text;
           _datas[i].english = englishControllers[i].text;
           _datas[i].chinese = chineseControllers[i].text;
           _datas[i].vietnam = vietnamControllers[i].text;
@@ -166,7 +139,32 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     }
   }
 
-  void translate() {}
+  void translate() async {
+    try {
+      for (var data in _datas) {
+        TranslatedResponse? response =
+            await translateRepository.translate(korean: data.title);
+        if (response != null) {
+          setState(() {
+            data.english = response.english;
+            data.chinese = response.chinese;
+            data.vietnam = response.vietnam;
+            data.russian = response.russian;
+          });
+        }
+      }
+
+      for (int i = 0; i < _datas.length; i++) {
+        englishControllers[i].text = _datas[i].english ?? '';
+        chineseControllers[i].text = _datas[i].chinese ?? '';
+        vietnamControllers[i].text = _datas[i].vietnam ?? '';
+        russianControllers[i].text = _datas[i].russian ?? '';
+      }
+    } catch (e) {
+      print(e);
+      throw Exception(e);
+    }
+  }
 
   void confirm() {}
   void getImageUrl(int index) async {
@@ -288,9 +286,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           _datas = value.wordDataList;
         });
 
-        titleControllers = _datas
-            .map((data) => TextEditingController(text: data.title))
-            .toList();
         englishControllers = _datas
             .map((data) => TextEditingController(text: data.english))
             .toList();
@@ -321,9 +316,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
   @override
   void dispose() {
-    for (var controller in titleControllers) {
-      controller.dispose();
-    }
     for (var controller in englishControllers) {
       controller.dispose();
     }
@@ -441,12 +433,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                     // 3. 단어
                                     TableComponent(
                                       width: tabletitle[2].values.first,
-                                      child: TextField(
-                                        decoration: const InputDecoration(
-                                          border: InputBorder.none,
-                                        ),
-                                        controller: titleControllers[index],
-                                        textAlign: TextAlign.center,
+                                      child: Text(
+                                        _datas[index].title,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.normal,
                                           fontSize: 12,
@@ -608,12 +596,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                 width: MediaQuery.of(context).size.width * 0.75,
                 child: Row(
                   children: [
-                    filledButton(
-                      buttonName: '단어 추가',
-                      color: const Color(0xFF3F99F7),
-                      onPressed: addNewWord,
-                    ),
-                    const SizedBox(width: 10),
                     filledButton(
                       buttonName: '단어 빼기',
                       color: const Color(0xFFFFCC4A),

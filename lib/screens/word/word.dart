@@ -219,14 +219,14 @@ class _WordState extends ConsumerState<Word> {
                                       ),
                                     ),
                                     SizedBox(
-                                      // 단어 리스트
+                                      // 타이틀
                                       height: 35,
                                       child: Center(
-                                        child: Text(data.title!),
+                                        child: Text(data.title ?? ''),
                                       ),
                                     ),
                                     SizedBox(
-                                      // 타이틀
+                                      // 단어 데이터
                                       height: 35,
                                       child: TextButton(
                                         onPressed: () {

@@ -58,48 +58,54 @@ class DialogueWidget extends ConsumerStatefulWidget {
 class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
   int _selectedLanguage = 0;
-  late TextEditingController _korcontroller;
-  late TextEditingController _engcontroller;
-  late TextEditingController _chncontroller;
-  late TextEditingController _viecontroller;
-  late TextEditingController _ruscontroller;
   late DialogueData _dialogueData;
-  List<String> _inputText = [
-    '한국어 대사',
-    'English Dialogue',
-    '中文对话',
-    'Tiếng Việt',
-    'Русский диалог',
+
+  final List<TextEditingController> _dialogueController = [
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
+    TextEditingController(),
   ];
+  final List<String> _inputText = ['', '', '', '', ''];
+  final List<String> _hintText = [
+    '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.',
+    '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.',
+    '<标题>\n使用[方括号]强调。\n添加*星号*进行评论。',
+    '<Tiêu đề>\nSử dụng [dấu ngoặc vuông] để nhấn mạnh.\nThêm *dấu sao* để bình luận.',
+    '<Заголовок>\nИспользуйте [квадратные скобки] для выделения.\nДобавьте *звездочки* для комментариев.',
+  ];
+
+  save() {
+    ref.read(DialogueDataProvider.notifier).update(
+          DialogueData(
+            korean: _dialogueController[0].text,
+            english: _dialogueController[1].text,
+            chinese: _dialogueController[2].text,
+            vietnamese: _dialogueController[3].text,
+            russian: _dialogueController[4].text,
+          ),
+        );
+  }
 
   @override
   void initState() {
     super.initState();
-
     _dialogueData = ref.read(DialogueDataProvider.notifier).state;
-
-    _inputText = [
-      _dialogueData.korean ?? '',
-      _dialogueData.english ?? '',
-      _dialogueData.chinese ?? '',
-      _dialogueData.vietnamese ?? '',
-      _dialogueData.russian ?? '',
-    ];
-
-    _korcontroller = TextEditingController(text: _inputText[0]);
-    _engcontroller = TextEditingController(text: _inputText[1]);
-    _chncontroller = TextEditingController(text: _inputText[2]);
-    _viecontroller = TextEditingController(text: _inputText[3]);
-    _ruscontroller = TextEditingController(text: _inputText[4]);
+    for (int i = 0; i < _dialogueController.length; i++) {
+      _dialogueController[i].addListener(() {
+        setState(() {
+          _inputText[i] = _dialogueController[i].text;
+        });
+      });
+    }
   }
 
   @override
   void dispose() {
-    _korcontroller.dispose();
-    _engcontroller.dispose();
-    _chncontroller.dispose();
-    _viecontroller.dispose();
-    _ruscontroller.dispose();
+    for (var controller in _dialogueController) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -258,38 +264,42 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                       style: const TextStyle(
                         fontSize: 11,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         fillColor: Colors.white,
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 5),
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 5),
+                        hintText: _hintText[_selectedLanguage],
                       ),
-                      controller: _selectedLanguage == 0
-                          ? _korcontroller
-                          : _selectedLanguage == 1
-                              ? _engcontroller
-                              : _selectedLanguage == 2
-                                  ? _chncontroller
-                                  : _selectedLanguage == 3
-                                      ? _viecontroller
-                                      : _ruscontroller,
+                      controller: _dialogueController[_selectedLanguage],
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      ref.read(DialogueDataProvider.notifier).update(
-                            DialogueData(
-                              korean: _korcontroller.text,
-                              english: _engcontroller.text,
-                              chinese: _chncontroller.text,
-                              vietnamese: _viecontroller.text,
-                              russian: _ruscontroller.text,
-                            ),
-                          );
-                    },
-                    child: const Text('저장'),
+                SizedBox(
+                  height: 50,
+                  width: 300,
+                  child: GestureDetector(
+                    onTap: save,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '저장',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -304,7 +314,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
             width: 300,
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              color: const Color(0xffffd4f3ff),
+              color: const Color(0xffd4f3ff),
               border: Border.all(
                 color: Colors.white,
                 width: 1,

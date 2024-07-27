@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/screens/admin.dart';
 import 'package:haru_admin/screens/authentication/login_page.dart';
 import 'package:haru_admin/screens/authentication/signup_page.dart';
@@ -61,11 +62,6 @@ final GoRouter router = GoRouter(
           builder: (context, state) => const AddWordScreen(),
         ),
         GoRoute(
-          name: '메타 데이터',
-          path: '/meta',
-          builder: (context, state) => const Meta(),
-        ),
-        GoRoute(
           name: '메타 데이터 추가',
           path: '/meta/add',
           builder: (context, state) => const AddMeta(),
@@ -97,6 +93,11 @@ Map<String, List<GoRoute>> sidebarRoutes = {
       name: '문법 데이터',
       path: '/grammer',
       builder: (context, state) => const GrammerData(),
+    ),
+    GoRoute(
+      name: '메타 데이터',
+      path: '/meta',
+      builder: (context, state) => const MeteGrammarScreen(),
     ),
   ],
   'my': [

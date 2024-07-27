@@ -5,8 +5,10 @@ import 'package:haru_admin/model/intro_data_model.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
-import 'package:haru_admin/widgets/button.dart';
+
 import 'package:haru_admin/widgets/colors.dart';
+
+import '../../widgets/buttons.dart';
 
 class IntroInfo {
   int? dataId;
@@ -208,6 +210,15 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
       print(e);
       throw Exception(e);
     }
+  }
+
+  void delete() {
+    if (wordList.isEmpty) {
+      return;
+    }
+    setState(() {
+      wordList.removeLast();
+    });
   }
 
   @override
@@ -445,24 +456,17 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              filledButton(
-                                  buttonName: '추가',
-                                  color: Colors.blue,
-                                  onPressed: () {
-                                    addWord();
-                                  }),
+                              MyCustomButton(
+                                text: '추가',
+                                onTap: () => addWord(),
+                                color: Colors.blue,
+                              ),
                               const SizedBox(width: 10),
-                              filledButton(
-                                  buttonName: '삭제',
-                                  color: Colors.red,
-                                  onPressed: () {
-                                    if (wordList.isEmpty) {
-                                      return;
-                                    }
-                                    setState(() {
-                                      wordList.removeLast();
-                                    });
-                                  }),
+                              MyCustomButton(
+                                text: '삭제',
+                                onTap: () => delete(),
+                                color: Colors.red,
+                              ),
                             ],
                           ),
                           const SizedBox(height: 5),

@@ -5,6 +5,7 @@ import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/utils/enum_type.dart';
+import 'package:haru_admin/widgets/buttons.dart';
 
 class Word extends ConsumerStatefulWidget {
   const Word({super.key});
@@ -313,15 +314,11 @@ class _WordState extends ConsumerState<Word> {
                                   ],
                                 ),
                               ),
-                              FilledButton(
-                                onPressed: () {
-                                  addChapter(null);
-                                },
-                                style: const ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStatePropertyAll(Colors.blue)),
-                                child: const Text('회차추가'),
-                              )
+                              MyCustomButton(
+                                text: '회차추가',
+                                onTap: () => addChapter(null),
+                                color: Colors.blue,
+                              ),
                             ],
                           ),
                         ],

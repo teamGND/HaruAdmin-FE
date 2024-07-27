@@ -6,9 +6,10 @@ import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/model/translate_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
-import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 import 'package:just_audio/just_audio.dart';
+
+import '../../widgets/buttons.dart';
 
 class AddWordScreen extends ConsumerStatefulWidget {
   const AddWordScreen({super.key});
@@ -596,37 +597,29 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                 width: MediaQuery.of(context).size.width * 0.75,
                 child: Row(
                   children: [
-                    filledButton(
-                      buttonName: '단어 빼기',
+                    MyCustomButton(
+                      text: '단어 뺴기',
+                      onTap: () => deleteSelectedWord(),
                       color: const Color(0xFFFFCC4A),
-                      onPressed: () {
-                        deleteSelectedWord();
-                      },
                     ),
                     const Expanded(child: SizedBox()),
-                    filledButton(
-                      buttonName: 'Confirm',
+                    MyCustomButton(
+                      text: 'Confirm',
+                      onTap: () => confirm(),
                       color: const Color(0xFFFF7D53),
-                      onPressed: () {
-                        confirm();
-                      },
                     ),
                     const SizedBox(width: 10),
-                    filledButton(
-                      buttonName: '번역 불러오기',
+                    MyCustomButton(
+                      text: '번역 불러오기',
+                      onTap: () => translate(),
                       color: const Color(0xFF484848),
-                      onPressed: () {
-                        translate();
-                      },
                     ),
                     const SizedBox(width: 10),
-                    filledButton(
-                      buttonName: '저장하기',
+                    MyCustomButton(
+                      text: '저장하기',
+                      onTap: () => save(),
                       color: const Color(0xFF3F99F7),
-                      onPressed: () {
-                        save();
-                      },
-                    ),
+                    )
                   ],
                 ),
               ),

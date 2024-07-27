@@ -4,8 +4,8 @@ import 'package:haru_admin/api/test_data_services.dart';
 import 'package:haru_admin/model/test_data_model.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/utils/enum_type.dart';
+import 'package:haru_admin/widgets/buttons.dart';
 import 'package:haru_admin/widgets/problem_provider.dart';
-import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
 
 class AddTestScreen extends ConsumerStatefulWidget {
@@ -228,21 +228,19 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
               ),
               Flexible(
                 flex: 1,
-                child: filledButton(
-                  buttonName: 'Save',
-                  color: Colors.blue,
-                  onPressed: () {
-                    save();
-                  },
+                child: MyCustomButton(
+                  text: 'Save',
+                  onTap: () => save(),
+                  color: const Color(0xFF3F99F7),
                 ),
               ),
               const SizedBox(width: 10),
               Flexible(
                   flex: 1,
-                  child: filledButton(
-                    buttonName: 'Confirm',
+                  child: MyCustomButton(
+                    text: 'Confirm',
+                    onTap: () => save(),
                     color: const Color(0xFFFF7D53),
-                    onPressed: () {},
                   )),
             ],
           ),
@@ -359,12 +357,10 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                 const Spacer(),
                 Padding(
                   padding: const EdgeInsets.only(right: 10.0),
-                  child: filledButton(
-                    buttonName: '추가',
+                  child: MyCustomButton(
+                    text: '추가',
+                    onTap: () => addNewProblem(),
                     color: Colors.blue,
-                    onPressed: () {
-                      addNewProblem();
-                    },
                   ),
                 )
               ],

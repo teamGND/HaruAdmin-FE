@@ -6,8 +6,9 @@ import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/screens/grammer/widget/meta_grammar_modal.dart';
 import 'package:haru_admin/screens/intro/add_intro.dart';
-import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
+
+import '../../widgets/buttons.dart';
 
 class AddGrammerScreen extends ConsumerStatefulWidget {
   const AddGrammerScreen({super.key});
@@ -73,7 +74,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return MetaGrammarModal();
+        return const MetaGrammarModal();
       },
     );
   }
@@ -396,20 +397,16 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        filledButton(
-                          buttonName: '추가',
+                        MyCustomButton(
+                          text: '추가',
+                          onTap: () => addRepresentiveSentence(),
                           color: Colors.blue,
-                          onPressed: () {
-                            addRepresentiveSentence();
-                          },
                         ),
                         const SizedBox(width: 20),
-                        filledButton(
-                          buttonName: '삭제',
+                        MyCustomButton(
+                          text: '삭제',
+                          onTap: () => deleteSelectedRepresentiveSentence(),
                           color: Colors.yellow,
-                          onPressed: () {
-                            deleteSelectedRepresentiveSentence();
-                          },
                         ),
                       ],
                     ),
@@ -515,12 +512,10 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        filledButton(
-                          buttonName: '새로 추가',
+                        MyCustomButton(
+                          text: '새로 추가',
+                          onTap: () => addMetaGrammar(),
                           color: Colors.blue,
-                          onPressed: () {
-                            addMetaGrammar();
-                          },
                         ),
                       ],
                     ),
@@ -537,20 +532,16 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        filledButton(
-                          buttonName: '추가',
+                        MyCustomButton(
+                          text: '추가',
+                          onTap: () => addExampleSentence(),
                           color: Colors.blue,
-                          onPressed: () {
-                            addExampleSentence();
-                          },
                         ),
                         const SizedBox(width: 20),
-                        filledButton(
-                          buttonName: '삭제',
+                        MyCustomButton(
+                          text: '삭제',
+                          onTap: () => deleteSelectedRepresentiveSentence(),
                           color: Colors.yellow,
-                          onPressed: () {
-                            deleteSelectedRepresentiveSentence();
-                          },
                         ),
                       ],
                     ),
@@ -590,28 +581,22 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const Expanded(child: SizedBox()),
-                filledButton(
-                  buttonName: 'Confirm',
+                MyCustomButton(
+                  text: 'Confirm',
+                  onTap: () => confirm(),
                   color: const Color(0xFFFF7D53),
-                  onPressed: () {
-                    confirm();
-                  },
                 ),
                 const SizedBox(width: 10),
-                filledButton(
-                  buttonName: '번역 불러오기',
+                MyCustomButton(
+                  text: '번역 불러오기',
+                  onTap: () => translate(),
                   color: const Color(0xFF484848),
-                  onPressed: () {
-                    translate();
-                  },
                 ),
                 const SizedBox(width: 10),
-                filledButton(
-                  buttonName: '저장하기',
+                MyCustomButton(
+                  text: '저장하기',
+                  onTap: () => save(),
                   color: const Color(0xFF3F99F7),
-                  onPressed: () {
-                    save();
-                  },
                 ),
               ],
             ),

@@ -30,6 +30,9 @@ class MetaGrammarModal extends StatelessWidget {
             text: '추가',
             onTap: () => addMetaGrammar(context),
             color: Colors.blue),
+        const SizedBox(
+          height: 10,
+        ),
         MyCustomButton(
             text: '취소', onTap: () => cancel(context), color: Colors.grey)
       ],

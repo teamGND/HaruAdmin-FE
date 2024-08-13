@@ -10,10 +10,12 @@ class TranslateRepository {
 
   Future<TranslatedResponse?> translate({
     required String korean,
+    required String? english,
   }) async {
     try {
       Response res = await dio.get('/translate', data: {
         "korean": korean,
+        "english": english,
       });
 
       return TranslatedResponse.fromJson(res.data);

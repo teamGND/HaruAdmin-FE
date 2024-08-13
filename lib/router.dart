@@ -6,14 +6,14 @@ import 'package:haru_admin/screens/authentication/login_page.dart';
 import 'package:haru_admin/screens/authentication/signup_page.dart';
 import 'package:haru_admin/screens/grammer/add_grammer.dart';
 import 'package:haru_admin/screens/grammer/grammer.dart';
-import 'package:haru_admin/screens/intro/add_intro.dart';
-import 'package:haru_admin/screens/intro/intro_test.dart';
-import 'package:haru_admin/screens/meta/add_meta.dart';
-import 'package:haru_admin/screens/meta/meta.dart';
+import 'package:haru_admin/screens/intro/add_intro_screen.dart';
+import 'package:haru_admin/screens/intro/intro_test_screen.dart';
+import 'package:haru_admin/screens/meta/add_meta_screen.dart';
+import 'package:haru_admin/screens/meta/meta_screen.dart';
 import 'package:haru_admin/screens/mypage.dart';
-import 'package:haru_admin/screens/test/add_test.dart';
-import 'package:haru_admin/screens/word/add_word.dart';
-import 'package:haru_admin/screens/word/word.dart';
+import 'package:haru_admin/screens/test/add_test_screen.dart';
+import 'package:haru_admin/screens/word/add_word_screen.dart';
+import 'package:haru_admin/screens/word/word_screen.dart';
 import 'widgets/sidebar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -97,7 +97,7 @@ Map<String, List<GoRoute>> sidebarRoutes = {
     GoRoute(
       name: '메타 데이터',
       path: '/meta',
-      builder: (context, state) => const MeteGrammarScreen(),
+      builder: (context, state) => const MetaGrammarScreen(),
     ),
   ],
   'my': [

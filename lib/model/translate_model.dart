@@ -1,8 +1,8 @@
 class TranslatedResponse {
-  String chinese;
-  String english;
-  String russian;
-  String vietnam;
+  String? chinese;
+  String? english;
+  String? russian;
+  String? vietnam;
 
   TranslatedResponse({
     required this.chinese,
@@ -18,14 +18,5 @@ class TranslatedResponse {
       russian: json['russian'],
       vietnam: json['vietnam'],
     );
-  }
-
-  Map<String, String> toJson() {
-    return {
-      'chinese': chinese,
-      'english': english,
-      'russian': russian,
-      'vietnam': vietnam,
-    };
   }
 }

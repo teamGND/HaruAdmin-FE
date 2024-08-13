@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/model/intro_data_model.dart';
-import 'package:haru_admin/screens/intro/add_intro.dart';
 import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/buttons.dart';
+
+import '../../provider/intro_provider.dart';
 
 class IntroTestScreen extends ConsumerStatefulWidget {
   const IntroTestScreen({super.key});
@@ -40,7 +41,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     '회차',
     '타이틀',
     '상태',
-    '퀴즈/테스트',
+    '퀴즈',
   ];
 
   final List<bool> _selected = List.generate(_pageSize, (index) => false);
@@ -56,60 +57,83 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     fetchData();
   }
 
-  void addChapter(IntroListComponentData? data) {
-    String category;
-    String level;
+  void addChapter() {
+    CATEGORY category;
+    LEVEL level;
     int cycle;
     int sets;
     int chapter;
-    int? introId;
     String? title;
     List<String> wordList = [];
-    if (data == null) {
-      // 새로 추가
 
-      category = introData.content.last.category;
-      level = introData.content.last.level;
+    ref.read(introProvider.notifier).clear();
+    if (introData.content.isEmpty) {
+      // 맨처음으로 새로 추가
+      category = CATEGORY.WORD;
+      level = levelFromString(dropdownValue.toString());
+      cycle = 1;
+      sets = 1;
+      chapter = 1;
+      title = '';
+    } else {
+      // 새로 추가
+      category = categoryFromString(introData.content.last.category);
+      level = levelFromString(introData.content.last.level);
       cycle = introData.content.last.cycle;
       sets = introData.content.last.sets;
       chapter = introData.content.last.chapter + 1;
       title = '';
 
-      if (category == 'MIDTERM') {
+      if (category == CATEGORY.MIDTERM) {
+        category = CATEGORY.WORD;
         cycle += 1;
         sets += 1;
-      } else if (category == 'TEST') {
+      } else if (category == CATEGORY.TEST) {
+        category = CATEGORY.WORD;
         sets += 1;
-      }
-    } else {
-      // 수정
-
-      category = data.category;
-      level = data.level;
-      cycle = data.cycle;
-      sets = data.sets;
-      chapter = data.chapter;
-      introId = data.id;
-
-      if (data.category == 'WORD' && data.titleKor != null) {
-        wordList = convertWordStringToList(title: data.titleKor!) ?? [];
-        title = convertWordStringToTitle(title: data.titleKor!);
       }
     }
     ref.watch(introProvider.notifier).update(
-        dataId: introId,
         chapter: chapter,
         cycle: cycle,
         sets: sets,
-        category: CATEGORY.WORD,
-        level: LEVEL.LEVEL1,
+        category: category,
+        level: level,
         title: title,
         wordDatas: wordList);
 
     context.go('/intro/add');
   }
 
-  void addTest(IntroListComponentData data) {
+  void updateWordGrammarChapter(IntroListComponentData data) {
+    CATEGORY category = categoryFromString(data.category);
+    LEVEL level = levelFromString(data.level);
+    int cycle = data.cycle;
+    int sets = data.sets;
+    int chapter = data.chapter;
+    int? introId = data.id;
+    String? title = data.titleKor;
+    List<String> wordList = [];
+    if (category == CATEGORY.WORD && data.titleKor != null) {
+      wordList = convertWordStringToList(title: data.titleKor!) ?? [];
+      title = convertWordStringToTitle(title: data.titleKor!);
+    } else {
+      title = data.titleKor?.split('[')[0];
+    }
+    ref.watch(introProvider.notifier).update(
+        dataId: introId,
+        chapter: chapter,
+        cycle: cycle,
+        sets: sets,
+        category: category,
+        level: level,
+        title: title,
+        wordDatas: wordList);
+
+    context.go('/intro/add');
+  }
+
+  void addQuiz(IntroListComponentData data) {
     String? title = data.titleKor;
     List<String> wordList = [];
     try {
@@ -122,8 +146,27 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           chapter: data.chapter,
           cycle: data.cycle,
           sets: data.sets,
-          category: CATEGORY.values.firstWhere(
-              (element) => element.toString().split('.').last == data.category),
+          category: categoryFromString(data.category),
+          level: dropdownValue,
+          title: title,
+          wordDatas: wordList);
+
+      context.go('/quiz/add');
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void addTest(IntroListComponentData data) {
+    String? title = data.titleKor;
+    List<String> wordList = [];
+    try {
+      ref.watch(introProvider.notifier).update(
+          dataId: data.id,
+          chapter: data.chapter,
+          cycle: data.cycle,
+          sets: data.sets,
+          category: CATEGORY.TEST,
           level: dropdownValue,
           title: title,
           wordDatas: wordList);
@@ -174,7 +217,16 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                       .where((element) => _selected[element.key])
                       .map((e) => e.value.id)
                       .toList();
-                  await IntroDataRepository().deleteIntroData(ids);
+                  await IntroDataRepository()
+                      .deleteIntroData(ids)
+                      .then((value) {
+                    // 데이터 메시지 팝업
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(value.toString()),
+                      ),
+                    );
+                  });
                   fetchData();
                 },
                 child: const Text('확인'),
@@ -258,125 +310,156 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (introData.content.isEmpty) {
-                    return const Center(child: Text('데이터가 없습니다.'));
                   } else {
                     return Column(
                       children: [
-                        Table(
-                          border: TableBorder.all(
-                            color: const Color(0xFFB9B9B9),
-                            width: 1,
-                          ),
-                          columnWidths: const {
-                            0: FlexColumnWidth(1),
-                            1: FlexColumnWidth(2),
-                            2: FlexColumnWidth(1),
-                            3: FlexColumnWidth(1),
-                            4: FlexColumnWidth(1),
-                            5: FlexColumnWidth(10), // title
-                            6: FlexColumnWidth(2),
-                            7: FlexColumnWidth(2),
-                          },
-                          children: [
-                            TableRow(
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF0F0F0),
-                              ),
-                              children: List.generate(
-                                tabletitle.length,
-                                (index) => SizedBox(
-                                    height: 40,
-                                    child:
-                                        Center(child: Text(tabletitle[index]))),
-                              ),
-                            ),
-                            ...List.generate(introData.content.length, (index) {
-                              IntroListComponentData data =
-                                  introData.content[index];
-                              return TableRow(
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
+                        introData.content.isEmpty
+                            ? const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(20.0),
+                                  child: Text(
+                                    '데이터가 없습니다.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 ),
+                              )
+                            : Table(
+                                border: TableBorder.all(
+                                  color: const Color(0xFFB9B9B9),
+                                  width: 1,
+                                ),
+                                columnWidths: const {
+                                  0: FlexColumnWidth(1),
+                                  1: FlexColumnWidth(2),
+                                  2: FlexColumnWidth(1),
+                                  3: FlexColumnWidth(1),
+                                  4: FlexColumnWidth(1),
+                                  5: FlexColumnWidth(10), // title
+                                  6: FlexColumnWidth(2),
+                                  7: FlexColumnWidth(2),
+                                },
                                 children: [
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: Center(
-                                      child: Checkbox(
-                                        value: _selected[index],
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _selected[index] = value!;
-                                          });
-                                        },
+                                  TableRow(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFF0F0F0),
+                                    ),
+                                    children: List.generate(
+                                      tabletitle.length,
+                                      (index) => SizedBox(
+                                          height: 40,
+                                          child: Center(
+                                              child: Text(tabletitle[index]))),
+                                    ),
+                                  ),
+                                  ...List.generate(introData.content.length,
+                                      (index) {
+                                    IntroListComponentData data =
+                                        introData.content[index];
+                                    return TableRow(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
                                       ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: Center(
-                                      child: Text(data.category),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: Center(
-                                      child: Text(data.cycle.toString()),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: Center(
-                                      child: Text(data.sets.toString()),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: Center(
-                                      child: Text(data.chapter.toString()),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: (data.category == 'WORD' ||
-                                            data.category == 'GRAMMAR')
-                                        ? TextButton(
-                                            onPressed: () {
-                                              addChapter(data);
-                                            },
-                                            child: Text(
-                                              data.titleKor ?? '',
-                                            ))
-                                        : Center(
-                                            child: Text(data.titleKor ?? ''),
-                                          ),
-                                  ),
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: Center(
-                                      child: Text(data.state ?? 'EMPTY'),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: _rowHeight,
-                                    child: Center(
-                                      child: TextButton(
-                                          onPressed: () {
-                                            addTest(data);
-                                          },
-                                          child: const Text(
-                                            '퀴즈',
-                                            style: TextStyle(
-                                              color: Colors.blue,
+                                      children: [
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: Center(
+                                            child: Checkbox(
+                                              value: _selected[index],
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _selected[index] = value!;
+                                                });
+                                              },
                                             ),
-                                          )),
-                                    ),
-                                  ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: Center(
+                                            child: Text(data.category),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: Center(
+                                            child: Text(data.cycle.toString()),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: Center(
+                                            child: Text(data.sets.toString()),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: Center(
+                                            child:
+                                                Text(data.chapter.toString()),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: (data.category == 'WORD' ||
+                                                  data.category == 'GRAMMAR')
+                                              ? TextButton(
+                                                  onPressed: () {
+                                                    updateWordGrammarChapter(
+                                                        data);
+                                                  },
+                                                  child: Text(
+                                                    data.titleKor ?? '',
+                                                  ))
+                                              : TextButton(
+                                                  onPressed: () {
+                                                    addTest(data);
+                                                  },
+                                                  child:
+                                                      Text(data.titleKor ?? ''),
+                                                ),
+                                        ),
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: Center(
+                                            child: Text(data.state ?? 'EMPTY'),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: _rowHeight,
+                                          child: Center(
+                                            child: (data.category == 'TEST' ||
+                                                    data.category == 'MIDTERM')
+                                                ? TextButton(
+                                                    onPressed: () {
+                                                      addTest(data);
+                                                    },
+                                                    child: const Text(
+                                                      '테스트',
+                                                      style: TextStyle(
+                                                        color: Colors.orange,
+                                                      ),
+                                                    ))
+                                                : TextButton(
+                                                    onPressed: () {
+                                                      addQuiz(data);
+                                                    },
+                                                    child: const Text(
+                                                      '퀴즈',
+                                                      style: TextStyle(
+                                                        color: Colors.blue,
+                                                      ),
+                                                    )),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }),
                                 ],
-                              );
-                            }),
-                          ],
-                        ),
+                              ),
                         const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -441,7 +524,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                             ),
                             MyCustomButton(
                                 text: '회차추가',
-                                onTap: () => addChapter(null),
+                                onTap: () => addChapter(),
                                 color: Colors.blue)
                           ],
                         ),

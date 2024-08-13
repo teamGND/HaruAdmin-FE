@@ -1,5 +1,5 @@
 class MetaGrammarDataList {
-  List<MetaGrammarData> content;
+  List<MetaGrammarData>? content;
   bool empty;
   bool first;
   bool last;
@@ -40,22 +40,6 @@ class MetaGrammarDataList {
       totalElements: json['totalElements'],
       totalPages: json['totalPages'],
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'content': List<dynamic>.from(content.map((x) => x.toJson())),
-      'empty': empty,
-      'first': first,
-      'last': last,
-      'number': number,
-      'numberOfElements': numberOfElements,
-      'pageable': pageable.toJson(),
-      'size': size,
-      'sort': sort.toJson(),
-      'totalElements': totalElements,
-      'totalPages': totalPages,
-    };
   }
 }
 

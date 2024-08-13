@@ -1,91 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/model/intro_data_model.dart';
-import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 
 import 'package:haru_admin/widgets/colors.dart';
 
 import '../../widgets/buttons.dart';
-
-class IntroInfo {
-  int? dataId;
-  LEVEL? level;
-  CATEGORY? category;
-  int? cycle;
-  int? sets;
-  int? chapter;
-  String? title;
-  List<String>? wordDatas;
-
-  IntroInfo({
-    this.dataId,
-    this.level,
-    this.category,
-    this.cycle,
-    this.sets,
-    this.chapter,
-    this.title,
-    this.wordDatas,
-  });
-
-  IntroInfo copyWith({
-    int? dataId,
-    LEVEL? level,
-    CATEGORY? category,
-    int? cycle,
-    int? sets,
-    int? chapter,
-    String? title,
-    List<String>? wordDatas,
-  }) {
-    return IntroInfo(
-      dataId: dataId ?? this.dataId,
-      level: level ?? this.level,
-      category: category ?? this.category,
-      cycle: cycle ?? this.cycle,
-      sets: sets ?? this.sets,
-      chapter: chapter ?? this.chapter,
-      title: title ?? this.title,
-      wordDatas: wordDatas ?? this.wordDatas,
-    );
-  }
-}
-
-class IntroInfoNotifier extends Notifier<IntroInfo> {
-  @override
-  IntroInfo build() => IntroInfo();
-
-  void update({
-    int? dataId,
-    LEVEL? level,
-    CATEGORY? category,
-    int? cycle,
-    int? sets,
-    int? chapter,
-    String? title,
-    List<String>? wordDatas,
-  }) {
-    state = state.copyWith(
-      dataId: dataId,
-      level: level,
-      category: category,
-      cycle: cycle,
-      sets: sets,
-      chapter: chapter,
-      title: title,
-      wordDatas: wordDatas,
-    );
-  }
-}
-
-/// 인트로 데이터 조회/수정 화면
-/// 수정 -> 타이틀만 수정가능
-///
-final introProvider =
-    NotifierProvider<IntroInfoNotifier, IntroInfo>(IntroInfoNotifier.new);
+import '../../provider/intro_provider.dart';
 
 class AddIntroScreen extends ConsumerStatefulWidget {
   const AddIntroScreen({super.key});
@@ -104,8 +29,23 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
     'MIDTERM': '중간평가',
   };
   List<String> wordList = [];
+  late TextEditingController _titleController;
   late List<TextEditingController> _controllers;
   late IntroInfo info;
+
+  void changeCategory(CATEGORY? value) {
+    setState(() {
+      info = info.copyWith(category: value);
+
+      if (value == CATEGORY.TEST) {
+        _titleController.text = '테스트 ${info.sets}';
+      } else if (value == CATEGORY.MIDTERM) {
+        _titleController.text = '중간평가 ${info.cycle}';
+      } else {
+        _titleController.text = info.title ?? '';
+      }
+    });
+  }
 
   addWord() {
     if (wordList.length > 10) {
@@ -163,48 +103,46 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
         }
       }
       if (info.dataId == null) {
+        info.title = _titleController.text;
+
         // 새로 데이터 POST
-        await introRepository
-            .addToIntroData(
-                data: AddIntroData(
-          id: info.dataId,
+        AddIntroDataResponse response = await introRepository.addNewIntroData(
+            data: AddIntroData(
           level: info.level.toString().split('.')[1],
           category: info.category.toString().split('.')[1],
           chapter: info.chapter!,
           cycle: info.cycle!,
           sets: info.sets!,
           titleKor: convertWordListToString(title: info.title, words: wordList),
-        ))
-            .then((value) {
-          ref.watch(introProvider.notifier).update(dataId: value.id);
+        ));
+        ref.watch(introProvider.notifier).update(dataId: response.introDataId);
 
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Center(child: Text('새로운 챕터를 추가하였습니다.')),
-            showCloseIcon: true,
-            closeIconColor: Colors.white,
-          ));
-        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Center(child: Text('새로운 챕터를 추가하였습니다.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ));
       } else {
         // 해당 아이디 데이터 PATCH
-        await introRepository
-            .updateIntroData(
-                id: info.dataId!,
-                data: UpdateIntroData(
-                  level: info.level.toString().split('.')[1],
-                  category: info.category.toString().split('.')[1],
-                  cycle: info.cycle!,
-                  sets: info.sets!,
-                  chapter: info.chapter!,
-                  titleKor: convertWordListToString(
-                      title: info.title, words: wordList),
-                ))
-            .then((value) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Center(child: Text('수정을 완료하였습니다.')),
-            showCloseIcon: true,
-            closeIconColor: Colors.white,
-          ));
-        });
+        info.title = _titleController.text;
+
+        await introRepository.updateIntroData(
+            id: info.dataId!,
+            data: UpdateIntroData(
+              level: info.level.toString().split('.')[1],
+              category: info.category.toString().split('.')[1],
+              cycle: info.cycle!,
+              sets: info.sets!,
+              chapter: info.chapter!,
+              titleKor:
+                  convertWordListToString(title: info.title, words: wordList),
+            ));
+
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Center(child: Text('수정을 완료하였습니다.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ));
       }
     } catch (e) {
       print(e);
@@ -234,6 +172,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
       });
       return controller;
     }).toList();
+    _titleController = TextEditingController(text: info.title);
   }
 
   @override
@@ -307,6 +246,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                             info = info.copyWith(level: level);
                           });
                         },
+                        focusColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         borderRadius: BorderRadius.circular(10),
                         underline: Container(
@@ -329,9 +269,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                                       value: option,
                                       groupValue: info.category,
                                       onChanged: (CATEGORY? value) {
-                                        setState(() {
-                                          info = info.copyWith(category: value);
-                                        });
+                                        changeCategory(value);
                                       },
                                     ),
                                     Text(
@@ -355,11 +293,6 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         controller: TextEditingController(
                           text: info.cycle != null ? info.cycle.toString() : '',
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            info = info.copyWith(cycle: int.parse(value));
-                          });
-                        },
                       ),
                     )),
 
@@ -374,11 +307,6 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         controller: TextEditingController(
                           text: info.sets != null ? info.sets.toString() : '',
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            info = info.copyWith(sets: int.parse(value));
-                          });
-                        },
                       ),
                     )),
 
@@ -395,11 +323,6 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                               ? info.chapter.toString()
                               : '',
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            info = info.copyWith(chapter: int.parse(value));
-                          });
-                        },
                       ),
                     )),
 
@@ -410,12 +333,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                       child: TextField(
                         decoration:
                             const InputDecoration(border: InputBorder.none),
-                        controller: TextEditingController(text: info.title),
-                        onChanged: (value) {
-                          setState(() {
-                            info.title = value;
-                          });
-                        },
+                        controller: _titleController,
                       ),
                     )),
                     const SizedBox(height: 30),
@@ -448,8 +366,8 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Text("단어 리스트",
-                              style: TextStyle(
+                          Text("단어 리스트 (${wordList.length}개)",
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               )),

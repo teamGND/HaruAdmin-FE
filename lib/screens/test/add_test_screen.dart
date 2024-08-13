@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/test_data_services.dart';
 import 'package:haru_admin/model/test_data_model.dart';
-import 'package:haru_admin/screens/intro/add_intro.dart';
+import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/buttons.dart';
 import 'package:haru_admin/widgets/problem_provider.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
+
+import '../../provider/intro_provider.dart';
 
 class AddTestScreen extends ConsumerStatefulWidget {
   const AddTestScreen({super.key});

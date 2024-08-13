@@ -56,6 +56,8 @@ class WordDataRepository {
         String errorMessage = response.data['message'];
         return errorMessage;
       }
+
+      return response;
     } catch (e) {
       print("error : $e");
     }

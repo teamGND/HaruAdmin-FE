@@ -41,6 +41,35 @@ class IntroDataList {
       empty: json['empty'],
     );
   }
+
+  // copywith
+  IntroDataList copyWith({
+    List<IntroListComponentData>? content,
+    PageableData? pageable,
+    int? totalElements,
+    int? totalPages,
+    bool? last,
+    int? size,
+    int? number,
+    SortData? sort,
+    int? numberOfElements,
+    bool? first,
+    bool? empty,
+  }) {
+    return IntroDataList(
+      content: content ?? this.content,
+      pageable: pageable ?? this.pageable,
+      totalElements: totalElements ?? this.totalElements,
+      totalPages: totalPages ?? this.totalPages,
+      last: last ?? this.last,
+      size: size ?? this.size,
+      number: number ?? this.number,
+      sort: sort ?? this.sort,
+      numberOfElements: numberOfElements ?? this.numberOfElements,
+      first: first ?? this.first,
+      empty: empty ?? this.empty,
+    );
+  }
 }
 
 class SortData {
@@ -129,6 +158,33 @@ class IntroListComponentData {
       titleKor: json['titleKor'],
       contentKor: json['contentKor'],
       state: json['state'],
+    );
+  }
+
+  // copywith
+  IntroListComponentData copyWith({
+    int? id,
+    String? level,
+    String? category,
+    int? cycle,
+    int? sets,
+    int? chapter,
+    int? adminId,
+    String? titleKor,
+    String? contentKor,
+    String? state,
+  }) {
+    return IntroListComponentData(
+      id: id ?? this.id,
+      level: level ?? this.level,
+      category: category ?? this.category,
+      cycle: cycle ?? this.cycle,
+      sets: sets ?? this.sets,
+      chapter: chapter ?? this.chapter,
+      adminId: adminId ?? this.adminId,
+      titleKor: titleKor ?? this.titleKor,
+      contentKor: contentKor ?? this.contentKor,
+      state: state ?? this.state,
     );
   }
 }
@@ -233,7 +289,6 @@ class IntroModel {
 }
 
 class AddIntroData {
-  int? id;
   String level;
   String category;
   int chapter;
@@ -242,7 +297,6 @@ class AddIntroData {
   String? titleKor;
 
   AddIntroData({
-    this.id,
     required this.level,
     required this.category,
     required this.chapter,
@@ -253,7 +307,6 @@ class AddIntroData {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'level': level,
       'category': category,
       'chapter': chapter,
@@ -265,7 +318,6 @@ class AddIntroData {
 
   factory AddIntroData.fromJson(Map<String, dynamic> json) {
     return AddIntroData(
-      id: json['id'],
       level: json['level'],
       category: json['category'],
       chapter: json['chapter'],
@@ -291,6 +343,22 @@ class AddIntroData {
       sets: sets ?? this.sets,
       titleKor: title ?? titleKor,
     );
+  }
+}
+
+class AddIntroDataResponse {
+  int introDataId;
+
+  AddIntroDataResponse({required this.introDataId});
+
+  factory AddIntroDataResponse.fromJson(Map<String, dynamic> json) {
+    return AddIntroDataResponse(introDataId: json['introDataId']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'introDataId': introDataId,
+    };
   }
 }
 

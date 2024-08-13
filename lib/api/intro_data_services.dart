@@ -31,11 +31,12 @@ class IntroDataRepository {
     }
   }
 
-  addToIntroData({required AddIntroData data}) async {
+  Future<AddIntroDataResponse> addNewIntroData(
+      {required AddIntroData data}) async {
     try {
       final response = await dio.post('/intro', data: data.toJson());
 
-      return response;
+      return AddIntroDataResponse.fromJson(response.data);
     } catch (e) {
       print("error : $e");
       throw Exception(e);

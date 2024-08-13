@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:haru_admin/api/meta_grammar_services.dart';
 import 'package:haru_admin/model/meta_data_model.dart';
 
-class MeteGrammarScreen extends StatefulWidget {
-  const MeteGrammarScreen({super.key});
+class MetaGrammarScreen extends StatefulWidget {
+  const MetaGrammarScreen({super.key});
 
   @override
-  State<MeteGrammarScreen> createState() => _MeteGrammarScreenState();
+  State<MetaGrammarScreen> createState() => _MetaGrammarScreenState();
 }
 
-class _MeteGrammarScreenState extends State<MeteGrammarScreen> {
+class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
   static const MAX_META_DATA = 20;
   late Future<void> _metaListDataFuture;
-  late List<MetaGrammarData> _metaGrammarTitles;
+  List<MetaGrammarData> _metaGrammarTitles = [];
 
   fetchMetaListData() async {
     // 메타문법 데이터를 가져오는 비동기 함수
@@ -22,7 +22,7 @@ class _MeteGrammarScreenState extends State<MeteGrammarScreen> {
           .then((value) {
         setState(() {
           _metaGrammarTitles =
-              value.metaDataList.content; // 메타데이터 리스트에서 타이틀만 가져오기
+              value.MetaGrammarDataList; // 메타데이터 리스트에서 타이틀만 가져오기
         });
       });
     } catch (e) {
@@ -74,45 +74,40 @@ class _MeteGrammarScreenState extends State<MeteGrammarScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
-                } else if (_metaGrammarTitles.isEmpty) {
-                  return const Center(child: Text('데이터가 없습니다.'));
-                }
-                return SizedBox(
-                  width: 500,
-                  height: 500,
-                  child: Table(
-                    border: TableBorder.all(),
-                    children: [
-                      const TableRow(
-                        children: [
-                          TableCell(
-                            child: Text('ID'),
-                          ),
-                          TableCell(
-                            child: Text('Title'),
-                          ),
-                          TableCell(
-                            child: Text('Content'),
-                          ),
-                        ],
-                      ),
-                      for (var meta in _metaGrammarTitles)
-                        TableRow(
+                } else if (_metaGrammarTitles == []) {
+                  return const Text('데이터가 없습니다.');
+                } else {
+                  return SizedBox(
+                    width: 500,
+                    height: 500,
+                    child: Table(
+                      border: TableBorder.all(),
+                      children: [
+                        const TableRow(
                           children: [
                             TableCell(
-                              child: Text(meta.id.toString()),
+                              child: Text('ID'),
                             ),
                             TableCell(
-                              child: Text(meta.title.toString()),
-                            ),
-                            TableCell(
-                              child: Text(meta.content.toString()),
+                              child: Text('Title'),
                             ),
                           ],
                         ),
-                    ],
-                  ),
-                );
+                        for (var meta in _metaGrammarTitles)
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: Text(meta.id.toString()),
+                              ),
+                              TableCell(
+                                child: Text(meta.title.toString()),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  );
+                }
               },
             ),
             const SizedBox(height: 20),

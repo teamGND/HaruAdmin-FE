@@ -5,11 +5,12 @@ import 'package:haru_admin/api/translate_service.dart';
 import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/model/translate_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
-import 'package:haru_admin/screens/intro/add_intro.dart';
+import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../widgets/buttons.dart';
+import '../../provider/intro_provider.dart';
 
 class AddWordScreen extends ConsumerStatefulWidget {
   const AddWordScreen({super.key});
@@ -38,10 +39,10 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     {'단어': 150},
     {'이미지': 200},
     {'음성': 100},
-    {'ENG': 100},
-    {'CHN': 100},
-    {'VIE': 100},
-    {'RUS': 100},
+    {'ENG': 150},
+    {'CHN': 150},
+    {'VIE': 150},
+    {'RUS': 150},
     {'추가 설명': 100},
   ];
 
@@ -141,10 +142,33 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   }
 
   void translate() async {
+    // 한국어, 영어 모두 입력안했을 때 '한국어와 영어를 모두 입력해주세요' snack bar
+    bool isKoreanFilled = _datas.every((element) {
+      if (element.title.isEmpty ||
+          element.title == '' ||
+          element.english == '') {
+        return false;
+      }
+      return true;
+    });
+
+    if (isKoreanFilled == false) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('한국어와 영어를 모두 입력하고 저장한 후 번역해주세요')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+
     try {
       for (var data in _datas) {
-        TranslatedResponse? response =
-            await translateRepository.translate(korean: data.title);
+        TranslatedResponse? response = await translateRepository.translate(
+          korean: data.title,
+          english: data.english,
+        );
         if (response != null) {
           setState(() {
             data.english = response.english;
@@ -287,6 +311,13 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           _datas = value.wordDataList;
         });
 
+        // 순서 0 일때
+        for (int i = 0; i < _datas.length; i++) {
+          if (_datas[i].order == 0) {
+            _datas[i].order = i + 1;
+          }
+        }
+
         englishControllers = _datas
             .map((data) => TextEditingController(text: data.english))
             .toList();
@@ -369,7 +400,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                           child: CircularProgressIndicator(),
                         );
                       }
-
                       return SizedBox(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -377,6 +407,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                             width: MediaQuery.of(context).size.width,
                             child: ReorderableListView(
                               scrollDirection: Axis.vertical,
+                              shrinkWrap: true,
                               header: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: List.generate(
@@ -501,8 +532,12 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                     TableComponent(
                                       width: tabletitle[5].values.first,
                                       child: TextField(
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           border: InputBorder.none,
+                                          hintText:
+                                              '[ENG] ${_datas[index].title}',
+                                          hintStyle: const TextStyle(
+                                              color: Colors.orange),
                                         ),
                                         controller: englishControllers[index],
                                         textAlign: TextAlign.center,
@@ -516,8 +551,12 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                     TableComponent(
                                       width: tabletitle[6].values.first,
                                       child: TextField(
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           border: InputBorder.none,
+                                          hintText:
+                                              '[中文] ${_datas[index].title}',
+                                          hintStyle: const TextStyle(
+                                              color: Colors.orange),
                                         ),
                                         controller: chineseControllers[index],
                                         textAlign: TextAlign.center,
@@ -531,8 +570,12 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                     TableComponent(
                                       width: tabletitle[7].values.first,
                                       child: TextField(
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           border: InputBorder.none,
+                                          hintText:
+                                              '[Tiếng Việt] ${_datas[index].title}',
+                                          hintStyle: const TextStyle(
+                                              color: Colors.orange),
                                         ),
                                         controller: vietnamControllers[index],
                                         textAlign: TextAlign.center,
@@ -546,8 +589,12 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                     TableComponent(
                                       width: tabletitle[8].values.first,
                                       child: TextField(
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           border: InputBorder.none,
+                                          hintText:
+                                              '[Русский язык] ${_datas[index].title}',
+                                          hintStyle: const TextStyle(
+                                              color: Colors.orange),
                                         ),
                                         controller: russianControllers[index],
                                         textAlign: TextAlign.center,
@@ -583,6 +630,10 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                   }
                                   final item = _datas.removeAt(oldIndex);
                                   _datas.insert(newIndex, item);
+                                  _datas = _datas.map((data) {
+                                    data.order = _datas.indexOf(data) + 1;
+                                    return data;
+                                  }).toList();
                                 });
                               },
                             ),

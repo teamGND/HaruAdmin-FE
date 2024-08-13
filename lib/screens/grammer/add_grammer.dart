@@ -5,10 +5,11 @@ import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/screens/grammer/widget/meta_grammar_modal.dart';
-import 'package:haru_admin/screens/intro/add_intro.dart';
+import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 
 import '../../widgets/buttons.dart';
+import '../../provider/intro_provider.dart';
 
 class AddGrammerScreen extends ConsumerStatefulWidget {
   const AddGrammerScreen({super.key});
@@ -355,7 +356,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            '단어 데이터 조회/수정',
+            '문법 데이터 조회/수정',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 20),
@@ -406,7 +407,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         MyCustomButton(
                           text: '삭제',
                           onTap: () => deleteSelectedRepresentiveSentence(),
-                          color: Colors.yellow,
+                          color: Colors.orange,
                         ),
                       ],
                     ),
@@ -649,7 +650,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             height: 40,
             child: Center(
               child: Text(
-                (i + 1).toString(),
+                isRep ? (i).toString() : (i + 1).toString(),
                 style: const TextStyle(
                   fontSize: 14,
                 ),

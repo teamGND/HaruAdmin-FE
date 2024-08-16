@@ -5,7 +5,6 @@ import 'package:haru_admin/api/translate_service.dart';
 import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/model/translate_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
-import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -169,6 +168,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           korean: data.title,
           english: data.english,
         );
+        print(response);
         if (response != null) {
           setState(() {
             data.english = response.english;

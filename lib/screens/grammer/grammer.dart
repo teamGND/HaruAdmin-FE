@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
-import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/buttons.dart';
 
@@ -70,15 +69,18 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
   void addChapter(int? index) {
     if (index == null && grammarData.content != null) {
       ref.watch(introProvider.notifier).update(
+            level: dropdownValue,
             chapter: grammarData.content!.last.chapter + 1,
           );
     } else if (index == null) {
       ref.watch(introProvider.notifier).update(
+            level: dropdownValue,
             chapter: 1,
           );
     } else {
       ref.watch(introProvider.notifier).update(
             dataId: grammarData.content![index].id,
+            level: dropdownValue,
             cycle: grammarData.content![index].cycle,
             sets: grammarData.content![index].sets,
             chapter: grammarData.content![index].chapter,

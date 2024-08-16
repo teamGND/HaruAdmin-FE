@@ -1,51 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haru_admin/api/grammer_data_services.dart';
+import 'package:haru_admin/provider/intro_provider.dart';
 
-class DialogueData {
-  final String? korean;
-  final String? english;
-  final String? chinese;
-  final String? vietnamese;
-  final String? russian;
+import '../../../api/translate_service.dart';
+import '../../../model/grammer_data_model.dart';
+import '../../../model/translate_model.dart';
+import '../grammar_provider.dart';
 
-  DialogueData({
-    this.korean,
-    this.english,
-    this.chinese,
-    this.vietnamese,
-    this.russian,
-  });
-
-  DialogueData copyWith({
-    String? korean,
-    String? english,
-    String? chinese,
-    String? vietnamese,
-    String? russian,
-  }) {
-    return DialogueData(
-      korean: korean ?? this.korean,
-      english: english ?? this.english,
-      chinese: chinese ?? this.chinese,
-      vietnamese: vietnamese ?? this.vietnamese,
-      russian: russian ?? this.russian,
-    );
-  }
-}
-
-class DialogueDataNotifier extends Notifier<DialogueData> {
-  @override
-  DialogueData build() => DialogueData();
-
-  void update(DialogueData data) {
-    state = data;
-  }
-}
-
-final DialogueDataProvider =
-    NotifierProvider<DialogueDataNotifier, DialogueData>(
-        DialogueDataNotifier.new);
-
+// 제시문
 class DialogueWidget extends ConsumerStatefulWidget {
   const DialogueWidget({
     super.key,
@@ -56,9 +19,19 @@ class DialogueWidget extends ConsumerStatefulWidget {
 }
 
 class DialogueWidgetState extends ConsumerState<DialogueWidget> {
+  final TranslateRepository translateRepository = TranslateRepository();
+  final GrammerDataRepository grammerDataRepository = GrammerDataRepository();
+
   final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
+  final List<String> characterTypes = [
+    'BLACK',
+    'RED',
+    'BLUE',
+    'YELLOW',
+    'PINK'
+  ];
+
   int _selectedLanguage = 0;
-  late DialogueData _dialogueData;
 
   final List<TextEditingController> _dialogueController = [
     TextEditingController(),
@@ -69,110 +42,102 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   ];
   final List<String> _inputText = ['', '', '', '', ''];
   final List<String> _hintText = [
-    '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.',
-    '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.',
-    '<标题>\n使用[方括号]强调。\n添加*星号*进行评论。',
-    '<Tiêu đề>\nSử dụng [dấu ngoặc vuông] để nhấn mạnh.\nThêm *dấu sao* để bình luận.',
-    '<Заголовок>\nИспользуйте [квадратные скобки] для выделения.\nДобавьте *звездочки* для комментариев.',
+    '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.\n{}로 화자를 표시하세요.',
+    '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.\nUse {} to indicate the speaker.',
+    '<标题>\n使用[方括号]强调。\n添加*星号*进行评论。\n使用{}表示发言者。',
+    '<Tiêu đề>\nSử dụng [dấu ngoặc vuông] để nhấn mạnh.\nThêm *dấu sao* để bình luận.\nSử dụng {} để chỉ định người nói.',
+    '<Заголовок>\nИспользуйте [квадратные скобки] для выделения.\nДобавьте *звездочки* для комментариев.\nИспользуйте {} для указания говорящего.',
   ];
 
-  save() {
-    ref.read(DialogueDataProvider.notifier).update(
-          DialogueData(
-            korean: _dialogueController[0].text,
-            english: _dialogueController[1].text,
-            chinese: _dialogueController[2].text,
-            vietnamese: _dialogueController[3].text,
-            russian: _dialogueController[4].text,
+  // 저장
+  save() async {
+    ref.read(grammarDataProvider.notifier).updateDialogue(
+          dialogue: _dialogueController[0].text,
+          dialogueEng: _dialogueController[1].text,
+          dialogueChn: _dialogueController[2].text,
+          dialogueVie: _dialogueController[3].text,
+          dialogueRus: _dialogueController[4].text,
+        );
+    try {
+      int? grammarId = ref.watch(introProvider.notifier).dataId;
+
+      if (grammarId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(child: Text('문법을 선택해주세요.')),
+            showCloseIcon: true,
+            closeIconColor: Colors.white,
           ),
         );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _dialogueData = ref.read(DialogueDataProvider.notifier).state;
-    for (int i = 0; i < _dialogueController.length; i++) {
-      _dialogueController[i].addListener(() {
-        setState(() {
-          _inputText[i] = _dialogueController[i].text;
-        });
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _dialogueController) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  List<InlineSpan> parseText(String text) {
-    List<InlineSpan> spans = [];
-    List<String> lines = text.split('\n');
-
-    for (int i = 0; i < lines.length; i++) {
-      String line = lines[i];
-      if (i > 0) {
-        spans.add(const WidgetSpan(child: SizedBox(height: 8)));
+        return;
       }
-      spans.add(WidgetSpan(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            i != 0
-                ? Container(
-                    width: 25,
-                    height: 25,
-                    margin: const EdgeInsets.only(right: 8.0),
-                    padding: const EdgeInsets.all(5.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.lightBlue,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$i',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
-            Expanded(
-              child: RichText(
-                textAlign: i == 0
-                    ? TextAlign.center
-                    : TextAlign.start, // Center align the first line text
-                text: TextSpan(
-                  children: parseLine(line),
-                ),
-              ),
-            ),
-          ],
+      await grammerDataRepository.updateGrammarData(
+        id: grammarId,
+        data: AddGrammarData(
+          description: _dialogueController[0].text,
+          descriptionEng: _dialogueController[1].text,
+          descriptionChn: _dialogueController[2].text,
+          descriptionVie: _dialogueController[3].text,
+          descriptionRus: _dialogueController[4].text,
         ),
-      ));
+      );
+    } catch (e) {
+      print("error : $e");
     }
-    return spans;
   }
 
-  List<TextSpan> parseLine(String line) {
-    List<TextSpan> spans = [];
-    RegExp exp = RegExp(r'<(.*?)>|\[(.*?)\]|\*(.*?)\*|([^<>\[\]\*]+)');
+  //translate
+  translate() async {
+    try {
+      bool isKoreanFilled = _dialogueController[0].text.isNotEmpty;
+
+      if (isKoreanFilled == false) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(child: Text('한국어 제시문을 입력해주세요.')),
+            showCloseIcon: true,
+            closeIconColor: Colors.white,
+          ),
+        );
+        return;
+      }
+
+      TranslatedResponse? response = await translateRepository.translate(
+        korean: _dialogueController[0].text,
+        english: _dialogueController[1].text,
+      );
+      print(response);
+      _dialogueController[1].text = response?.english ?? '';
+      _dialogueController[2].text = response?.chinese ?? '';
+      _dialogueController[3].text = response?.vietnam ?? '';
+      _dialogueController[4].text = response?.russian ?? '';
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  List<InlineSpan> parseLine(String line) {
+    List<InlineSpan> spans = [];
+    RegExp exp =
+        RegExp(r'<(.*?)>|\[(.*?)\]|\*(.*?)\*|\{(.*?)\}|([^<>\[\]\*\{\}]+)');
     Iterable<RegExpMatch> matches = exp.allMatches(line);
 
     for (var match in matches) {
       if (match.group(0)!.startsWith('<') && match.group(0)!.endsWith('>')) {
         spans.add(
-          TextSpan(
-            text: match.group(1),
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Container(
+              alignment: Alignment.center,
+              width: double.infinity, // Expand the container to full width
+              child: Text(
+                match.group(1)!,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
         );
@@ -192,6 +157,22 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
             style: const TextStyle(color: Colors.red, fontSize: 11),
           ),
         );
+      } else if (match.group(0)!.startsWith('{') &&
+          match.group(0)!.endsWith('}')) {
+        // Matching for the color codes inside {}
+        String colorName = match.group(4)!;
+        String imageName =
+            'assets/images/character_$colorName.png'; // adjust the path as necessary
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Image.asset(
+              imageName,
+              width: 20, // adjust size as necessary
+              height: 20,
+            ),
+          ),
+        );
       } else {
         spans.add(
           TextSpan(
@@ -205,26 +186,48 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    for (int i = 0; i < _dialogueController.length; i++) {
+      _dialogueController[i].addListener(() {
+        setState(() {
+          _inputText[i] = _dialogueController[i].text;
+        });
+      });
+    }
+
+    _dialogueController[0].text = ref.read(grammarDataProvider).dialogue ?? '';
+    _dialogueController[1].text =
+        ref.read(grammarDataProvider).dialogueEng ?? '';
+    _dialogueController[2].text =
+        ref.read(grammarDataProvider).dialogueChn ?? '';
+    _dialogueController[3].text =
+        ref.read(grammarDataProvider).dialogueVie ?? '';
+    _dialogueController[4].text =
+        ref.read(grammarDataProvider).dialogueRus ?? '';
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _dialogueController) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Flexible(
+        Expanded(
           flex: 1,
-          child: Container(
+          child: SizedBox(
             height: 500,
-            width: 300,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
             child: Column(
               children: [
                 SizedBox(
                   height: 50,
-                  width: 300,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -256,51 +259,134 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: TextFormField(
-                      maxLines: 15,
-                      style: const TextStyle(
-                        fontSize: 11,
-                      ),
-                      decoration: InputDecoration(
-                        fillColor: Colors.white,
-                        border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 5),
-                        hintText: _hintText[_selectedLanguage],
-                      ),
-                      controller: _dialogueController[_selectedLanguage],
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 1,
                     ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 16.0,
+                    ),
+                    child: Column(children: [
+                      SizedBox(
+                        height: 300,
+                        child: TextFormField(
+                          maxLines: 15,
+                          style: const TextStyle(
+                            fontSize: 11,
+                          ),
+                          decoration: InputDecoration(
+                            fillColor: Colors.white,
+                            border: InputBorder.none,
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 5),
+                            hintText: _hintText[_selectedLanguage],
+                          ),
+                          controller: _dialogueController[_selectedLanguage],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 50,
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('화자: '),
+                              ...List.generate(
+                                characterTypes.length,
+                                (index) => GestureDetector(
+                                  onTap: () {
+                                    _dialogueController[_selectedLanguage]
+                                        .text += '{${characterTypes[index]}}';
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5.0),
+                                    child: Container(
+                                      height: 50,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                          color: Colors.grey,
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/character_${characterTypes[index]}.png',
+                                        width: 30,
+                                        height: 30,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ]),
+                      ),
+                    ]),
                   ),
                 ),
-                SizedBox(
-                  height: 50,
-                  width: 300,
-                  child: GestureDetector(
-                    onTap: save,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        border: Border.all(
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: save,
+                      child: Container(
+                        height: 50,
+                        width: 100,
+                        decoration: BoxDecoration(
                           color: Colors.blue,
-                          width: 1,
+                          border: Border.all(
+                            color: Colors.blue,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '저장',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                        child: const Center(
+                          child: Text(
+                            '완료',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: translate,
+                      child: Container(
+                        height: 50,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF484848),
+                          border: Border.all(
+                            color: const Color(0xFF484848),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            '번역',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -331,8 +417,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 10),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     Image.asset('assets/images/blue_head.png',
                         width: 40, height: 40),
                     const SizedBox(height: 10),
@@ -341,7 +426,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                       height: 400,
                       child: RichText(
                         text: TextSpan(
-                          children: parseText(_inputText[_selectedLanguage]),
+                          children: parseLine(_inputText[_selectedLanguage]),
                           style: const TextStyle(
                               color: Colors.black, fontSize: 10),
                         ),

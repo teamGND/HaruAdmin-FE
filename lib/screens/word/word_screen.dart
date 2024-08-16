@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/api/word_data_services.dart';
-import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/utils/enum_type.dart';
-import 'package:haru_admin/widgets/buttons.dart';
 
 import '../../provider/intro_provider.dart';
 

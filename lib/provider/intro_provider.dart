@@ -75,6 +75,8 @@ class IntroInfoNotifier extends Notifier<IntroInfo> {
   void clear() {
     state = IntroInfo();
   }
+
+  int? get dataId => state.dataId;
 }
 
 /// 인트로 데이터 조회/수정 화면

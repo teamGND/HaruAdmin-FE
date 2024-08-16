@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
+import 'package:haru_admin/screens/grammer/grammar_provider.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/screens/grammer/widget/meta_grammar_modal.dart';
-import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 
+import '../../api/translate_service.dart';
+import '../../model/translate_model.dart';
 import '../../widgets/buttons.dart';
 import '../../provider/intro_provider.dart';
+import 'widget/grammar_description_widget.dart';
 
 class AddGrammerScreen extends ConsumerStatefulWidget {
   const AddGrammerScreen({super.key});
@@ -19,21 +22,22 @@ class AddGrammerScreen extends ConsumerStatefulWidget {
 }
 
 class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
-  /* represent sentence 타입이 BLACK 이면 제시문으로 */
-
   final GrammerDataRepository grammerRepository = GrammerDataRepository();
+  final TranslateRepository translateRepository = TranslateRepository();
+
+  // 타이틀 입력
   List<TextEditingController> titleControllers = [];
+  // 대표 문장
   List<TextEditingController> englishControllers = [];
   List<TextEditingController> chineseControllers = [];
   List<TextEditingController> vietnamControllers = [];
   List<TextEditingController> russianControllers = [];
+
   List<TextEditingController> exampleTitleControllers = [];
   List<TextEditingController> exampleEnglishControllers = [];
   List<TextEditingController> exampleChineseControllers = [];
   List<TextEditingController> exampleVietnamControllers = [];
   List<TextEditingController> exampleRussianControllers = [];
-  List<TextEditingController> descriptionControllers =
-      []; // 0: 한국어, 1: 영어, 2: 중국어, 3: 베트남어, 4: 러시아어
 
   IntroInfo info = IntroInfo();
   GrammarChapterDataList _data =
@@ -48,26 +52,59 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     '순서',
     '문장',
     '음성',
-    '캐릭터',
     'ENG',
     'CHN',
     'VIE',
     'RUS',
   ];
 
-  void _updateRow(
-    bool isRep,
-    int index,
-    ExampleSentence sentence,
-  ) {
-    if (isRep) {
-      setState(() {
-        _representSentences[index] = sentence;
-      });
-    } else {
-      setState(() {
-        _exampleSentences[index] = sentence;
-      });
+  void getAudioUrl({
+    required bool isRep,
+    required int index,
+  }) async {
+    String? title = isRep
+        ? titleControllers[index].text
+        : exampleTitleControllers[index].text;
+
+    if (title == '' || title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('음성 업로드 전, 단어를 입력해주세요.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['mp3']);
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        await grammerRepository
+            .uploadFile(
+          fileBytes: file.bytes!,
+          fileName: title,
+          fileType: file.extension!,
+        )
+            .then((value) {
+          setState(() {
+            if (isRep) {
+              _representSentences[index].voiceUrl = value;
+            } else {
+              _exampleSentences[index].voiceUrl = value;
+            }
+          });
+        });
+      } else {
+        // User canceled the picker
+      }
+    } catch (e) {
+      print(e);
+      throw Exception(e);
     }
   }
 
@@ -93,6 +130,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     }
     setState(() {
       _representSentences.add(ExampleSentence(
+        order: _representSentences.length,
         expression: '',
         expressionEng: '',
         expressionChn: '',
@@ -105,15 +143,14 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
       chineseControllers.add(TextEditingController());
       vietnamControllers.add(TextEditingController());
       russianControllers.add(TextEditingController());
-      descriptionControllers.add(TextEditingController());
     });
   }
 
   addExampleSentence() {
-    if (_representSentences.length > 3) {
+    if (_representSentences.length > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Center(child: Text('대표 문장은 10개까지만 추가 가능합니다.')),
+          content: Center(child: Text('예시 문장은 10개까지만 추가 가능합니다.')),
           showCloseIcon: true,
           closeIconColor: Colors.white,
         ),
@@ -140,6 +177,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
 
   deleteSelectedRepresentiveSentence() {
     if (_representSentences.length == 1) {
+      // index 0은 제시문으로 삭제 안되게 막기
       return;
     }
 
@@ -154,6 +192,9 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   }
 
   deleteSelectedExampleSentence() {
+    if (_exampleSentences.isEmpty) {
+      return;
+    }
     setState(() {
       _exampleSentences.removeAt(_exampleSentences.length - 1);
       exampleTitleControllers.removeAt(exampleTitleControllers.length - 1);
@@ -164,14 +205,21 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     });
   }
 
-  confirm() {}
-  translate() {}
-  save() {}
-  Future<void> getImageUrl() async {
-    if (_data.title == null || _data.title == '') {
+  translate({required isRep}) async {
+    List<ExampleSentence> datas =
+        isRep ? _representSentences.sublist(1) : _exampleSentences;
+
+    bool isKoreanFilled = datas.every((element) {
+      if (element.expression == '' || element.expressionEng == '') {
+        return false;
+      }
+      return true;
+    });
+
+    if (isKoreanFilled == false) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Center(child: Text('이미지 업로드 전, 타이틀을 입력해주세요.')),
+          content: Center(child: Text('한국어와 영어를 모두 입력하고 저장한 후 번역해주세요')),
           showCloseIcon: true,
           closeIconColor: Colors.white,
         ),
@@ -180,29 +228,115 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     }
 
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['png', 'jpg', 'svg', 'jpeg']);
-
-      if (result != null) {
-        PlatformFile file = result.files.first;
-
-        await grammerRepository
-            .uploadFile(
-          fileBytes: file.bytes!,
-          fileName: 'grammar_${_data.chapter.toString()}',
-          fileType: file.extension!,
-        )
-            .then((value) {
+      for (var data in datas) {
+        TranslatedResponse? response = await translateRepository.translate(
+          korean: data.expression!,
+          english: data.expressionEng,
+        );
+        print(response);
+        if (response != null) {
           setState(() {
-            _data.imageUrl = value;
+            data.expressionEng = response.english;
+            data.expressionChn = response.chinese;
+            data.expressionVie = response.vietnam;
+            data.expressionRus = response.russian;
           });
-        });
-      } else {
-        // User canceled the picker
+        }
+        if (isRep) {
+          for (int i = 0; i < datas.length; i++) {
+            englishControllers[i + 1].text = datas[i].expressionEng ?? '';
+            chineseControllers[i + 1].text = datas[i].expressionChn ?? '';
+            vietnamControllers[i + 1].text = datas[i].expressionVie ?? '';
+            russianControllers[i + 1].text = datas[i].expressionRus ?? '';
+          }
+        } else {
+          for (int i = 0; i < datas.length; i++) {
+            exampleEnglishControllers[i].text = datas[i].expressionEng ?? '';
+            exampleChineseControllers[i].text = datas[i].expressionChn ?? '';
+            exampleVietnamControllers[i].text = datas[i].expressionVie ?? '';
+            exampleRussianControllers[i].text = datas[i].expressionRus ?? '';
+          }
+        }
       }
     } catch (e) {
+      print(e);
       throw Exception(e);
+    }
+  }
+
+  confirm() {}
+  save() async {
+    try {
+      _representSentences[0] = ExampleSentence(
+        id: _representSentences[0].id,
+        order: 0,
+        expression: ref.read(grammarDataProvider).dialogue,
+        expressionEng: ref.read(grammarDataProvider).dialogueEng,
+        expressionChn: ref.read(grammarDataProvider).dialogueChn,
+        expressionVie: ref.read(grammarDataProvider).dialogueVie,
+        expressionRus: ref.read(grammarDataProvider).dialogueRus,
+        characterType: 'BLACK',
+        voiceUrl: ref.read(grammarDataProvider).grammarAudioUrl,
+      );
+
+      List<Sentence> sentences = [];
+      for (int i = 0; i < _representSentences.length; i++) {
+        sentences.add(Sentence(
+          id: _representSentences[i].id,
+          order: i,
+          sentenceType: "REPRESENT",
+          expression: _representSentences[i].expression,
+          expressionEng: _representSentences[i].expressionEng,
+          expressionChn: _representSentences[i].expressionChn,
+          expressionVie: _representSentences[i].expressionVie,
+          expressionRus: _representSentences[i].expressionRus,
+          voiceUrl: _representSentences[i].voiceUrl,
+          characterType: 'BLACK',
+        ));
+      }
+      for (int i = 0; i < _exampleSentences.length; i++) {
+        sentences.add(Sentence(
+          id: _exampleSentences[i].id,
+          order: i,
+          sentenceType: "EXAMPLE",
+          expression: _exampleSentences[i].expression,
+          expressionEng: _exampleSentences[i].expressionEng,
+          expressionChn: _exampleSentences[i].expressionChn,
+          expressionVie: _exampleSentences[i].expressionVie,
+          expressionRus: _exampleSentences[i].expressionRus,
+          voiceUrl: _exampleSentences[i].voiceUrl,
+          characterType: 'YELLOW',
+        ));
+      }
+
+      await grammerRepository
+          .updateGrammarData(
+        id: info.dataId!,
+        data: AddGrammarData(
+          level: info.level.toString().split('.').last,
+          cycle: info.cycle,
+          sets: info.sets,
+          chapter: info.chapter,
+          title: info.title,
+          description: ref.read(grammarDataProvider).description,
+          descriptionEng: ref.read(grammarDataProvider).descriptionEng,
+          descriptionChn: ref.read(grammarDataProvider).descriptionChn,
+          descriptionVie: ref.read(grammarDataProvider).descriptionVie,
+          descriptionRus: ref.read(grammarDataProvider).descriptionRus,
+          sentenceList: sentences,
+        ),
+      )
+          .then((value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Center(child: Text('저장 완료')),
+            showCloseIcon: true,
+            closeIconColor: Colors.white,
+          ),
+        );
+      });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -219,6 +353,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             if (_representSentences.isEmpty) {
               // 제시문
               _representSentences.add(ExampleSentence(
+                order: 0,
                 expression: '',
                 expressionEng: '',
                 expressionChn: '',
@@ -228,16 +363,16 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               ));
             }
           });
-
-          ref.read(DialogueDataProvider.notifier).update(DialogueData(
-                korean: _representSentences[0].expression,
-                english: _representSentences[0].expressionEng,
-                chinese: _representSentences[0].expressionChn,
-                vietnamese: _representSentences[0].expressionVie,
-                russian: _representSentences[0].expressionRus,
-              ));
         });
 
+        ref.read(grammarDataProvider.notifier).updateDialogue(
+            dialogue: _representSentences[0].expression,
+            dialogueEng: _representSentences[0].expressionEng,
+            dialogueChn: _representSentences[0].expressionChn,
+            dialogueVie: _representSentences[0].expressionVie,
+            dialogueRus: _representSentences[0].expressionRus);
+
+        /* 컨트롤러에 추가 */
         titleControllers = List.generate(
           _representSentences.length,
           (index) => TextEditingController(
@@ -291,13 +426,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                 text: _exampleSentences[index].expressionRus),
           );
         }
-        descriptionControllers = [
-          TextEditingController(text: _data.description ?? ''),
-          TextEditingController(text: _data.descriptionEng ?? ''),
-          TextEditingController(text: _data.descriptionChn ?? ''),
-          TextEditingController(text: _data.descriptionVie ?? ''),
-          TextEditingController(text: _data.descriptionRus ?? ''),
-        ];
       }
     } catch (e) {
       print(e);
@@ -377,6 +505,81 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                 return Column(
                   children: [
                     Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 50,
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Text(
+                                '[1] 제시문 화면',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const Row(
+                      children: [
+                        SizedBox(width: 10),
+                        Icon(Icons.download_done_outlined),
+                        Text(
+                          ' 제시문',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 20),
+                        Text(
+                          '\t#1 제목은 맨 위 < > 사이에\n\t#2 볼드체 목표 문법 [ ] 사이에',
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                        SizedBox(width: 30),
+                        Text(
+                          '#3 각주는 * * 사이에\n#4 화자는 { } 사이에',
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 500,
+                      child: DialogueWidget(),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 50,
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Text(
+                                '[2] 문법 설명 화면',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -409,6 +612,14 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           onTap: () => deleteSelectedRepresentiveSentence(),
                           color: Colors.orange,
                         ),
+                        const SizedBox(width: 20),
+                        MyCustomButton(
+                          text: '번역',
+                          onTap: () {
+                            translate(isRep: true);
+                          },
+                          color: const Color(0XFF484848),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -425,11 +636,10 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                             0: FlexColumnWidth(1), // 순서
                             1: FlexColumnWidth(3), // 문장
                             2: FlexColumnWidth(1), // 음성 file
-                            3: FlexColumnWidth(1), // 캐릭터 타입
-                            4: FlexColumnWidth(3), // eng
-                            5: FlexColumnWidth(3), // chn
-                            6: FlexColumnWidth(3), // vie
-                            7: FlexColumnWidth(3), // rus
+                            3: FlexColumnWidth(3), // eng
+                            4: FlexColumnWidth(3), // chn
+                            5: FlexColumnWidth(3), // vie
+                            6: FlexColumnWidth(3), // rus
                           },
                           children: _buildTableRows(true),
                         ),
@@ -437,32 +647,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                     ),
                     const SizedBox(height: 15),
                     const Row(
-                      children: [
-                        SizedBox(width: 10),
-                        Icon(Icons.download_done_outlined),
-                        Text(
-                          ' 제시문',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        Text(
-                          '제목은 맨 위 < > 사이에, 볼드체 목표 문법[ ] 사이에, 각주는 * * 사이에',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 500,
-                      child: DialogueWidget(),
-                    ),
-                    const SizedBox(height: 15),
-                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(width: 10),
                         Icon(Icons.download_done_outlined),
@@ -473,33 +659,31 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        SizedBox(width: 20),
+                        Text(
+                          '\t #1 제목은 맨 위 < > 사이에\n\t #2 볼드체 목표 문법 [ ] 사이에\n\t #3 예시 문장은 { } 사이에',
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                        SizedBox(width: 30),
+                        Text(
+                          '#4 번호 매기기는 @@사이에 숫자넣기\n#5 메타문법은 ^^ ^^ 사이에',
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
                       ],
+                    ),
+                    const SizedBox(
+                      height: 500,
+                      child: DescriptionWidget(),
                     ),
                     const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        (_data.imageUrl != null)
-                            ? Image.network(
-                                _data.imageUrl!,
-                                width: 200,
-                                height: 200,
-                              )
-                            : SizedBox(
-                                width: 200,
-                                height: 200,
-                                child: IconButton(
-                                    onPressed: () {
-                                      getImageUrl();
-                                    },
-                                    icon: const Icon(
-                                      size: 100,
-                                      Icons.image,
-                                      color: Color(0xFFB9B9B9),
-                                    )),
-                              ),
-                        Table()
-                      ],
-                    ),
                     const SizedBox(height: 15),
                     Row(
                       children: [
@@ -518,6 +702,26 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           onTap: () => addMetaGrammar(),
                           color: Colors.blue,
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 50,
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Text(
+                                '[3] 예시 문장 학습 화면',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -542,7 +746,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         MyCustomButton(
                           text: '삭제',
                           onTap: () => deleteSelectedRepresentiveSentence(),
-                          color: Colors.yellow,
+                          color: Colors.orange,
+                        ),
+                        const SizedBox(width: 20),
+                        MyCustomButton(
+                          text: '번역',
+                          onTap: () {
+                            translate(isRep: true);
+                          },
+                          color: const Color(0XFF484848),
                         ),
                       ],
                     ),
@@ -560,21 +772,21 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                             0: FlexColumnWidth(1), // 순서
                             1: FlexColumnWidth(3), // 문장
                             2: FlexColumnWidth(1), // 음성 file
-                            3: FlexColumnWidth(1), // 캐릭터 타입
-                            4: FlexColumnWidth(3), // eng
-                            5: FlexColumnWidth(3), // chn
-                            6: FlexColumnWidth(3), // vie
-                            7: FlexColumnWidth(3), // rus
+                            3: FlexColumnWidth(3), // eng
+                            4: FlexColumnWidth(3), // chn
+                            5: FlexColumnWidth(3), // vie
+                            6: FlexColumnWidth(3), // rus
                           },
                           children: _buildTableRows(false),
                         ),
                       ),
-                    ),
+                    )
                   ],
                 );
               }
             },
           ),
+          const SizedBox(height: 50),
           SizedBox(
             height: 60,
             width: MediaQuery.of(context).size.width * 0.75,
@@ -589,12 +801,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                 ),
                 const SizedBox(width: 10),
                 MyCustomButton(
-                  text: '번역 불러오기',
-                  onTap: () => translate(),
-                  color: const Color(0xFF484848),
-                ),
-                const SizedBox(width: 10),
-                MyCustomButton(
                   text: '저장하기',
                   onTap: () => save(),
                   color: const Color(0xFF3F99F7),
@@ -602,6 +808,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 20)
         ],
       ),
     ));
@@ -679,71 +886,14 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               child: IconButton(
                 onPressed: () {
                   // 오디오 불러오기
+                  getAudioUrl(isRep: isRep, index: i);
                 },
                 icon: const Icon(Icons.volume_up_rounded),
               ),
             ),
           ),
-          // 4. 캐릭터 타입
-          SizedBox(
-            height: 40,
-            child: Center(
-              child: DropdownButton<String>(
-                padding: const EdgeInsets.all(2),
-                value: isRep
-                    ? _representSentences[i].characterType
-                    : _exampleSentences[i].characterType,
-                items: [
-                  DropdownMenuItem(
-                      value: 'BLUE',
-                      child: Image.asset(
-                        'assets/images/blue.png',
-                        fit: BoxFit.fitHeight,
-                      )),
-                  DropdownMenuItem(
-                    value: 'YELLOW',
-                    child: Image.asset(
-                      'assets/images/yellow.png',
-                      fit: BoxFit.fitHeight,
-                    ),
-                  ),
-                  DropdownMenuItem(
-                    value: 'PINK',
-                    child: Image.asset(
-                      'assets/images/pink.png',
-                      fit: BoxFit.fitHeight,
-                    ),
-                  ),
-                  DropdownMenuItem(
-                    value: 'RED',
-                    child: Image.asset(
-                      'assets/images/red.png',
-                      fit: BoxFit.fitHeight,
-                    ),
-                  ),
-                  DropdownMenuItem(
-                    value: 'BLACK',
-                    child: Image.asset(
-                      'assets/images/black.png',
-                      fit: BoxFit.fitHeight,
-                    ),
-                  ),
-                ],
-                onChanged: (value) {
-                  if (isRep) {
-                    setState(() {
-                      _representSentences[i].characterType = value!;
-                    });
-                  } else {
-                    setState(() {
-                      _exampleSentences[i].characterType = value!;
-                    });
-                  }
-                },
-              ),
-            ),
-          ),
-          // 5. ENG
+
+          // 4. ENG
           SizedBox(
             height: 40,
             child: Center(
@@ -758,7 +908,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               ),
             ),
           ),
-          // 6. CHN
+          // 5. CHN
           SizedBox(
             height: 40,
             child: Center(
@@ -773,7 +923,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               ),
             ),
           ),
-          // 7. VIE
+          // 6. VIE
           SizedBox(
             height: 40,
             child: Center(
@@ -788,7 +938,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               ),
             ),
           ),
-          // 8. RUS
+          // . RUS
           SizedBox(
             height: 40,
             child: Center(

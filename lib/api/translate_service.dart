@@ -13,7 +13,7 @@ class TranslateRepository {
     required String? english,
   }) async {
     try {
-      Response res = await dio.get('/translate', data: {
+      Response res = await dio.post('/translate', data: {
         "korean": korean,
         "english": english,
       });

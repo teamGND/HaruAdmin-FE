@@ -89,37 +89,40 @@ class GrammarDataListComponent {
   }
 }
 
-class AddGrammerData {
-  String level;
-  int cycle;
-  int chapter;
-  String title;
-  String imageUrl;
-  String description;
-  String descriptionEng;
-  String descriptionChn;
-  String descriptionVie;
-  String descriptionRus;
-  List<Sentence> sentence;
+class AddGrammarData {
+  String? level;
+  int? cycle;
+  int? sets;
+  int? chapter;
+  String? title;
+  String? imageUrl;
+  String? description;
+  String? descriptionEng;
+  String? descriptionChn;
+  String? descriptionVie;
+  String? descriptionRus;
+  List<Sentence>? sentenceList;
 
-  AddGrammerData({
-    required this.level,
-    required this.cycle,
-    required this.chapter,
-    required this.title,
-    required this.imageUrl,
-    required this.description,
-    required this.descriptionEng,
-    required this.descriptionChn,
-    required this.descriptionVie,
-    required this.descriptionRus,
-    required this.sentence,
+  AddGrammarData({
+    this.level,
+    this.cycle,
+    this.sets,
+    this.chapter,
+    this.title,
+    this.imageUrl,
+    this.description,
+    this.descriptionEng,
+    this.descriptionChn,
+    this.descriptionVie,
+    this.descriptionRus,
+    this.sentenceList,
   });
 
-  factory AddGrammerData.fromJson(Map<String, dynamic> jsondata) {
-    return AddGrammerData(
+  factory AddGrammarData.fromJson(Map<String, dynamic> jsondata) {
+    return AddGrammarData(
       level: jsondata['level'],
       cycle: jsondata['cycle'],
+      sets: jsondata['sets'],
       chapter: jsondata['chapter'],
       title: jsondata['title'],
       imageUrl: jsondata['imageUrl'],
@@ -128,7 +131,7 @@ class AddGrammerData {
       descriptionChn: jsondata['descriptionChn'],
       descriptionVie: jsondata['descriptionVie'],
       descriptionRus: jsondata['descriptionRus'],
-      sentence: jsondata['sentence']
+      sentenceList: jsondata['sentenceList']
           .map<Sentence>((sentence) => Sentence.fromJson(sentence))
           .toList(),
     );
@@ -138,6 +141,7 @@ class AddGrammerData {
     return {
       'level': level,
       'cycle': cycle,
+      'sets': sets,
       'chapter': chapter,
       'title': title,
       'imageUrl': imageUrl,
@@ -146,25 +150,27 @@ class AddGrammerData {
       'descriptionChn': descriptionChn,
       'descriptionVie': descriptionVie,
       'descriptionRus': descriptionRus,
-      'sentence': sentence.map((sentence) => sentence.toJson()).toList(),
+      'sentence': sentenceList?.map((sentence) => sentence.toJson()).toList(),
     };
   }
 }
 
 class Sentence {
-  String sentenceType;
+  int? id;
   int order;
-  String characterType;
-  String expression;
-  String expressionEng;
-  String expressionChn;
-  String expressionVie;
-  String expressionRus;
-  String voiceUrl;
+  String? sentenceType;
+  String? characterType;
+  String? expression;
+  String? expressionEng;
+  String? expressionChn;
+  String? expressionVie;
+  String? expressionRus;
+  String? voiceUrl;
 
   Sentence({
-    required this.sentenceType,
+    required this.id,
     required this.order,
+    required this.sentenceType,
     required this.characterType,
     required this.expression,
     required this.expressionEng,
@@ -176,8 +182,9 @@ class Sentence {
 
   factory Sentence.fromJson(Map<String, dynamic> jsondata) {
     return Sentence(
-      sentenceType: jsondata['sentenceType'],
+      id: jsondata['id'],
       order: jsondata['order'],
+      sentenceType: jsondata['sentenceType'],
       characterType: jsondata['characterType'],
       expression: jsondata['expression'],
       expressionEng: jsondata['expressionEng'],
@@ -190,8 +197,9 @@ class Sentence {
 
   Map<String, dynamic> toJson() {
     return {
-      'sentenceType': sentenceType,
+      'id': id,
       'order': order,
+      'sentenceType': sentenceType,
       'characterType': characterType,
       'expression': expression,
       'expressionEng': expressionEng,
@@ -318,6 +326,7 @@ class MetaGrammar {
 }
 
 class ExampleSentence {
+  int? id;
   int? order;
   String? characterType;
   String? expression;
@@ -328,6 +337,7 @@ class ExampleSentence {
   String? voiceUrl;
 
   ExampleSentence({
+    this.id,
     this.order,
     this.characterType,
     this.expression,

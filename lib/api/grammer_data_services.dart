@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
-import 'package:http_parser/http_parser.dart';
 
 class GrammerDataRepository {
   final dio = DioClient().provideDio();
@@ -34,10 +33,29 @@ class GrammerDataRepository {
     }
   }
 
-  addToGrammerDataList(AddGrammerData data) async {
+  addToGrammerDataList(AddGrammarData data) async {
     try {
-      final response = await dio.post('/grammer', data: data.toJson());
+      final response = await dio.post('/grammar', data: data.toJson());
 
+      return response;
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  postGrammarChapterData(
+      {required int id, required AddGrammarData data}) async {
+    try {
+      final response = await dio.post('/grammar/$id', data: data.toJson());
+      return response;
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  updateGrammarData({required int id, required AddGrammarData data}) async {
+    try {
+      final response = await dio.put('/grammar/$id', data: data.toJson());
       return response;
     } catch (e) {
       print("error : $e");

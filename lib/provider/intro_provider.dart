@@ -77,6 +77,7 @@ class IntroInfoNotifier extends Notifier<IntroInfo> {
   }
 
   int? get dataId => state.dataId;
+  int? get chapter => state.chapter;
 }
 
 /// 인트로 데이터 조회/수정 화면

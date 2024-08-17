@@ -58,14 +58,14 @@ Widget DataField(String data, {bool isDoubled = false}) {
   );
 }
 
-class textformfield extends StatefulWidget {
-  const textformfield({super.key});
+class Textformfield extends StatefulWidget {
+  const Textformfield({super.key});
 
   @override
-  State<textformfield> createState() => _textformfieldState();
+  State<Textformfield> createState() => _TextformfieldState();
 }
 
-class _textformfieldState extends State<textformfield> {
+class _TextformfieldState extends State<Textformfield> {
   @override
   Widget build(BuildContext context) {
     return Padding(

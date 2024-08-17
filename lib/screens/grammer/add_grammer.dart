@@ -26,8 +26,10 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   final TranslateRepository translateRepository = TranslateRepository();
 
   // 타이틀 입력
-  List<TextEditingController> titleControllers = [];
+  TextEditingController titleController = TextEditingController();
+
   // 대표 문장
+  List<TextEditingController> koreanControllers = [];
   List<TextEditingController> englishControllers = [];
   List<TextEditingController> chineseControllers = [];
   List<TextEditingController> vietnamControllers = [];
@@ -63,7 +65,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     required int index,
   }) async {
     String? title = isRep
-        ? titleControllers[index].text
+        ? koreanControllers[index].text
         : exampleTitleControllers[index].text;
 
     if (title == '' || title.isEmpty) {
@@ -138,7 +140,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         expressionRus: '',
         characterType: 'BLUE',
       ));
-      titleControllers.add(TextEditingController());
+      koreanControllers.add(TextEditingController());
       englishControllers.add(TextEditingController());
       chineseControllers.add(TextEditingController());
       vietnamControllers.add(TextEditingController());
@@ -183,7 +185,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
 
     setState(() {
       _representSentences.removeAt(_representSentences.length - 1);
-      titleControllers.removeAt(titleControllers.length - 1);
+      koreanControllers.removeAt(koreanControllers.length - 1);
       englishControllers.removeAt(englishControllers.length - 1);
       chineseControllers.removeAt(chineseControllers.length - 1);
       vietnamControllers.removeAt(vietnamControllers.length - 1);
@@ -249,14 +251,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             vietnamControllers[i + 1].text = datas[i].expressionVie ?? '';
             russianControllers[i + 1].text = datas[i].expressionRus ?? '';
           }
-        } else {
-          for (int i = 0; i < datas.length; i++) {
-            exampleEnglishControllers[i].text = datas[i].expressionEng ?? '';
-            exampleChineseControllers[i].text = datas[i].expressionChn ?? '';
-            exampleVietnamControllers[i].text = datas[i].expressionVie ?? '';
-            exampleRussianControllers[i].text = datas[i].expressionRus ?? '';
-          }
-        }
+        } else {}
       }
     } catch (e) {
       print(e);
@@ -267,6 +262,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   confirm() {}
   save() async {
     try {
+      // 0번째 인덱스는 제시문
       _representSentences[0] = ExampleSentence(
         id: _representSentences[0].id,
         order: 0,
@@ -297,7 +293,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
       for (int i = 0; i < _exampleSentences.length; i++) {
         sentences.add(Sentence(
           id: _exampleSentences[i].id,
-          order: i,
+          order: i + 1,
           sentenceType: "EXAMPLE",
           expression: _exampleSentences[i].expression,
           expressionEng: _exampleSentences[i].expressionEng,
@@ -317,7 +313,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           cycle: info.cycle,
           sets: info.sets,
           chapter: info.chapter,
-          title: info.title,
+          title: titleController.text,
           description: ref.read(grammarDataProvider).description,
           descriptionEng: ref.read(grammarDataProvider).descriptionEng,
           descriptionChn: ref.read(grammarDataProvider).descriptionChn,
@@ -351,7 +347,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             _metaGrammar = value.metaGrammars;
 
             if (_representSentences.isEmpty) {
-              // 제시문
+              // 제시문이 없을 경우. 대표 문장 0번째 인덱스에 추가
               _representSentences.add(ExampleSentence(
                 order: 0,
                 expression: '',
@@ -365,15 +361,19 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           });
         });
 
+        // 제시문
         ref.read(grammarDataProvider.notifier).updateDialogue(
             dialogue: _representSentences[0].expression,
             dialogueEng: _representSentences[0].expressionEng,
             dialogueChn: _representSentences[0].expressionChn,
             dialogueVie: _representSentences[0].expressionVie,
             dialogueRus: _representSentences[0].expressionRus);
-
         /* 컨트롤러에 추가 */
-        titleControllers = List.generate(
+        // 타이틀
+        titleController = TextEditingController(text: info.title);
+
+        // 대표 문장
+        koreanControllers = List.generate(
           _representSentences.length,
           (index) => TextEditingController(
               text: _representSentences[index].expression),
@@ -399,6 +399,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               text: _representSentences[index].expressionRus),
         );
 
+        // 예시 문장
         if (_exampleSentences.isNotEmpty) {
           exampleTitleControllers = List.generate(
             _exampleSentences.length,
@@ -442,7 +443,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
 
   @override
   void dispose() {
-    for (var element in titleControllers) {
+    for (var element in koreanControllers) {
       element.dispose();
     }
     for (var element in englishControllers) {
@@ -874,7 +875,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                   contentPadding: EdgeInsets.symmetric(horizontal: 5),
                 ),
                 controller:
-                    isRep ? titleControllers[i] : exampleTitleControllers[i],
+                    isRep ? koreanControllers[i] : exampleTitleControllers[i],
               ),
             ),
           ),

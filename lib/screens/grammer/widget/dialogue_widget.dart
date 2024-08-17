@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
@@ -6,6 +7,7 @@ import 'package:haru_admin/provider/intro_provider.dart';
 import '../../../api/translate_service.dart';
 import '../../../model/grammer_data_model.dart';
 import '../../../model/translate_model.dart';
+import '../../../utils/parse_dialogue_line.dart';
 import '../grammar_provider.dart';
 
 // 제시문
@@ -49,6 +51,47 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
     '<Заголовок>\nИспользуйте [квадратные скобки] для выделения.\nДобавьте *звездочки* для комментариев.\nИспользуйте {} для указания говорящего.',
   ];
 
+  // 제시문 오디오 파일 업로드
+  void getAudioUrl() async {
+    int? chatper = ref.watch(introProvider.notifier).chapter;
+    String audioName = 'dialogue_chapter$chatper';
+
+    if (chatper == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('챕터를 선택해주세요.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['mp3']);
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        await grammerDataRepository
+            .uploadFile(
+          fileBytes: file.bytes!,
+          fileName: audioName,
+          fileType: file.extension!,
+        )
+            .then((value) {
+          ref.read(grammarDataProvider.notifier).updateDialogueAudioUrl(value!);
+        });
+      } else {
+        // User canceled the picker
+      }
+    } catch (e) {
+      print(e);
+      throw Exception(e);
+    }
+  }
+
   // 저장
   save() async {
     ref.read(grammarDataProvider.notifier).updateDialogue(
@@ -86,7 +129,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
     }
   }
 
-  //translate
+  // 번역
   translate() async {
     try {
       bool isKoreanFilled = _dialogueController[0].text.isNotEmpty;
@@ -114,75 +157,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
     } catch (e) {
       print("error : $e");
     }
-  }
-
-  List<InlineSpan> parseLine(String line) {
-    List<InlineSpan> spans = [];
-    RegExp exp =
-        RegExp(r'<(.*?)>|\[(.*?)\]|\*(.*?)\*|\{(.*?)\}|([^<>\[\]\*\{\}]+)');
-    Iterable<RegExpMatch> matches = exp.allMatches(line);
-
-    for (var match in matches) {
-      if (match.group(0)!.startsWith('<') && match.group(0)!.endsWith('>')) {
-        spans.add(
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Container(
-              alignment: Alignment.center,
-              width: double.infinity, // Expand the container to full width
-              child: Text(
-                match.group(1)!,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-        );
-      } else if (match.group(0)!.startsWith('[') &&
-          match.group(0)!.endsWith(']')) {
-        spans.add(
-          TextSpan(
-            text: match.group(2),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-          ),
-        );
-      } else if (match.group(0)!.startsWith('*') &&
-          match.group(0)!.endsWith('*')) {
-        spans.add(
-          TextSpan(
-            text: match.group(3),
-            style: const TextStyle(color: Colors.red, fontSize: 11),
-          ),
-        );
-      } else if (match.group(0)!.startsWith('{') &&
-          match.group(0)!.endsWith('}')) {
-        // Matching for the color codes inside {}
-        String colorName = match.group(4)!;
-        String imageName =
-            'assets/images/character_$colorName.png'; // adjust the path as necessary
-        spans.add(
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Image.asset(
-              imageName,
-              width: 20, // adjust size as necessary
-              height: 20,
-            ),
-          ),
-        );
-      } else {
-        spans.add(
-          TextSpan(
-            text: match.group(0),
-            style: const TextStyle(fontSize: 10),
-          ),
-        );
-      }
-    }
-    return spans;
   }
 
   @override
@@ -386,6 +360,32 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                         ),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: getAudioUrl,
+                      child: Container(
+                        height: 50,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFCDCDCD),
+                          border: Border.all(
+                            color: const Color(0xFFCDCDCD),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            '음성 파일',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -426,7 +426,8 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                       height: 400,
                       child: RichText(
                         text: TextSpan(
-                          children: parseLine(_inputText[_selectedLanguage]),
+                          children:
+                              parseDialogueLine(_inputText[_selectedLanguage]),
                           style: const TextStyle(
                               color: Colors.black, fontSize: 10),
                         ),

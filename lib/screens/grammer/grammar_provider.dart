@@ -71,6 +71,16 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
 
   get getImageUrl => state.grammarImageUrl;
 
+  get getAudioUrl => state.grammarAudioUrl;
+
+  updateDescriptionImageUrl(String imageUrl) {
+    state = state.copyWith(grammarImageUrl: imageUrl);
+  }
+
+  updateDialogueAudioUrl(String audioUrl) {
+    state = state.copyWith(grammarAudioUrl: audioUrl);
+  }
+
   updateDialogue({
     String? dialogue,
     String? dialogueEng,

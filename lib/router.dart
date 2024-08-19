@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/screens/admin.dart';
 import 'package:haru_admin/screens/authentication/login_page.dart';
 import 'package:haru_admin/screens/authentication/signup_page.dart';
@@ -11,6 +10,7 @@ import 'package:haru_admin/screens/intro/intro_test_screen.dart';
 import 'package:haru_admin/screens/meta/add_meta_screen.dart';
 import 'package:haru_admin/screens/meta/meta_screen.dart';
 import 'package:haru_admin/screens/mypage.dart';
+import 'package:haru_admin/screens/test/add_quiz_screen.dart';
 import 'package:haru_admin/screens/test/add_test_screen.dart';
 import 'package:haru_admin/screens/word/add_word_screen.dart';
 import 'package:haru_admin/screens/word/word_screen.dart';
@@ -48,13 +48,26 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           name: '테스트 데이터 추가',
-          path: '/test/add',
-          builder: (context, state) => const AddTestScreen(),
+          path: '/test/add/:introId?cycle&sets',
+          builder: (context, state) => AddTestScreen(
+            state.pathParameters['introId'],
+            state.uri.queryParameters['cycle'],
+            state.uri.queryParameters['sets'],
+          ),
+        ),
+        GoRoute(
+          name: '퀴즈 데이터 추가',
+          path: '/quiz/add/:introId',
+          builder: (context, state) => AddQuizScreen(
+            state.pathParameters['introId'],
+          ),
         ),
         GoRoute(
           name: '문법 데이터 추가',
-          path: '/grammar/add',
-          builder: (context, state) => const AddGrammerScreen(),
+          path: '/grammar/add/:grammarId',
+          builder: (context, state) => AddGrammerScreen(
+            state.pathParameters['grammarId'],
+          ),
         ),
         GoRoute(
           name: '단어 데이터 추가',
@@ -91,7 +104,7 @@ Map<String, List<GoRoute>> sidebarRoutes = {
     ),
     GoRoute(
       name: '문법 데이터',
-      path: '/grammer',
+      path: '/grammar',
       builder: (context, state) => const GrammerData(),
     ),
     GoRoute(

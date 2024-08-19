@@ -2,26 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/test_data_services.dart';
 import 'package:haru_admin/model/test_data_model.dart';
-import 'package:haru_admin/utils/enum_type.dart';
+import 'package:haru_admin/widgets/add_problem_table.dart';
 import 'package:haru_admin/widgets/buttons.dart';
 import 'package:haru_admin/widgets/problem_provider.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
 
 import '../../provider/intro_provider.dart';
 
-class AddTestScreen extends ConsumerStatefulWidget {
-  const AddTestScreen(this.introId, this.cycle, this.sets, {super.key});
+class AddQuizScreen extends ConsumerStatefulWidget {
+  const AddQuizScreen(this.introId, {super.key});
   final String? introId;
-  final String? cycle;
-  final String? sets;
 
   @override
-  ConsumerState<AddTestScreen> createState() => _AddTestScreenState();
+  ConsumerState<AddQuizScreen> createState() => _AddQuizScreenState();
 }
 
-class _AddTestScreenState extends ConsumerState<AddTestScreen> {
+class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
   final TestDataRepository testDataRepository = TestDataRepository();
-  static const int MAXIMUM_PROBLEM_CNT = 100;
+  static const int MAXIMUM_PROBLEM_CNT = 100; // 최대 문제 수
 
   IntroInfo info = IntroInfo();
   bool _isLoading = false;
@@ -30,44 +28,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   final List<bool> _selected =
       List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
 
-  /*
-  * 문제 타입
-  * (1) 단어 퀴즈 - 101 ~ 104
-  * (2) 문법 퀴즈 - 201 ~ 208
-  * (3) 테스트 - 101 ~ 208
-  * (4) 중간평가 - 101 ~ 208
-  */
-  Map<CATEGORY, Map<int, String>> dropdownTitle = {
-    CATEGORY.TEST: {
-      101: '101. 그림보고 어휘 3지선다',
-      102: '102. 어휘보고 그림 3지선다',
-      103: '103. 그림보고 타이핑',
-      104: '104. 받아쓰기',
-      201: '201. 그림보고 어휘 3지선다',
-      202: '202. 어휘보고 그림 3지선다',
-      203: '203. 그림보고 타이핑',
-      204: '204. 받아쓰기',
-      205: '205. 어휘보고 그림 3지선다',
-      206: '206. 그림보고 타이핑',
-      207: '207. 그림보고 타이핑',
-      208: '208. OX 퀴즈',
-    },
-    CATEGORY.MIDTERM: {
-      101: '101. 그림보고 어휘 3지선다',
-      102: '102. 어휘보고 그림 3지선다',
-      103: '103. 그림보고 타이핑',
-      104: '104. 받아쓰기',
-      201: '201. 그림보고 어휘 3지선다',
-      202: '202. 어휘보고 그림 3지선다',
-      203: '203. 그림보고 타이핑',
-      204: '204. 받아쓰기',
-      205: '205. 어휘보고 그림 3지선다',
-      206: '206. 그림보고 타이핑',
-      207: '207. 그림보고 타이핑',
-      208: '208. OX 퀴즈',
-    },
-  };
-  int dropdownValue = 101;
+  int? dropdownValue;
 
   Future<void> fetchTestData(int id) async {
     try {
@@ -110,12 +71,18 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   }
 
   addNewProblem() {
-    setState(() {
-      _problemList.add(ProblemDataModel(
-        problemType: dropdownValue,
-        sequence: _problemList.length + 1,
-      ));
-    });
+    if (dropdownValue != null) {
+      ref
+          .read(problemContentsProvider.notifier)
+          .addContents(dropdownValue!, []);
+
+      setState(() {
+        _problemList.add(ProblemDataModel(
+          problemType: dropdownValue!,
+          sequence: _problemList.length + 1,
+        ));
+      });
+    }
   }
 
   save() async {
@@ -217,7 +184,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
               Flexible(
                 flex: 1,
                 child: MyCustomButton(
-                  text: 'Save',
+                  text: '저장',
                   onTap: () => save(),
                   color: const Color(0xFF3F99F7),
                 ),
@@ -296,70 +263,73 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
             indent: 10,
             endIndent: 10,
           ),
-          SizedBox(
-            height: 80,
-            width: 1000,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: SizedBox(
-                    width: 60,
-                    child: Text('타입 선택',
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                SizedBox(
-                  height: 50,
-                  width: 200,
-                  child: DropdownButton(
-                    value: dropdownValue,
-                    items: dropdownTitle[info.category]!
-                        .entries
-                        .map((e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: Text(
-                                  e.value,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  dropdownValue = e.key;
-                                });
-                              },
-                            ))
-                        .toList(),
-                    onChanged: (int? value) {
-                      setState(() {
-                        dropdownValue = value!;
-                      });
-                    },
-                  ),
-                ),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
-                  child: MyCustomButton(
-                    text: '추가',
-                    onTap: () => addNewProblem(),
-                    color: Colors.blue,
-                  ),
-                )
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-            ),
-            child: ProblemTable(problemType: dropdownValue),
-          ),
+          const AddProblemTable(),
+          // SizedBox(
+          //   height: 80,
+          //   width: 1000,
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       const Padding(
+          //         padding: EdgeInsets.only(left: 10),
+          //         child: SizedBox(
+          //           width: 60,
+          //           child: Text('타입 선택',
+          //               style: TextStyle(
+          //                   fontSize: 14, fontWeight: FontWeight.bold)),
+          //         ),
+          //       ),
+          //       SizedBox(
+          //         height: 50,
+          //         width: 200,
+          //         child: DropdownButton(
+          //           value: dropdownValue,
+          //           items: dropdownTitle[info.category]!
+          //               .entries
+          //               .map((e) => DropdownMenuItem(
+          //                     value: e.key,
+          //                     child: Padding(
+          //                       padding:
+          //                           const EdgeInsets.symmetric(horizontal: 5.0),
+          //                       child: Text(
+          //                         e.value,
+          //                         style: const TextStyle(fontSize: 14),
+          //                       ),
+          //                     ),
+          //                     onTap: () {
+          //                       setState(() {
+          //                         dropdownValue = e.key;
+          //                       });
+          //                     },
+          //                   ))
+          //               .toList(),
+          //           onChanged: (int? value) {
+          //             setState(() {
+          //               dropdownValue = value!;
+          //             });
+          //           },
+          //         ),
+          //       ),
+          //       const Spacer(),
+          //       Padding(
+          //         padding: const EdgeInsets.only(right: 10.0),
+          //         child: MyCustomButton(
+          //           text: '추가',
+          //           onTap: () => addNewProblem(),
+          //           color: Colors.blue,
+          //         ),
+          //       )
+          //     ],
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(
+          //     horizontal: 10,
+          //   ),
+          //   child: (dropdownValue != null)
+          //       ? ProblemTable(problemType: dropdownValue!)
+          //       : const SizedBox(height: 10),
+          // ),
           const SizedBox(height: 10),
         ],
       ),

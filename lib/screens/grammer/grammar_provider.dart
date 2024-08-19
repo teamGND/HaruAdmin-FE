@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GrammarData {
   // [1] 제시문 - 대표문장 순서 '0'에 해당
+  int? dialogueId;
   String? dialogue;
   String? dialogueEng;
   String? dialogueChn;
@@ -18,6 +19,7 @@ class GrammarData {
   String? grammarAudioUrl;
 
   GrammarData({
+    this.dialogueId,
     this.dialogue,
     this.dialogueEng,
     this.dialogueChn,
@@ -33,6 +35,7 @@ class GrammarData {
   });
 
   GrammarData copyWith({
+    int? dialogueId,
     String? dialogue,
     String? dialogueEng,
     String? dialogueChn,
@@ -47,6 +50,7 @@ class GrammarData {
     String? grammarAudioUrl,
   }) {
     return GrammarData(
+      dialogueId: dialogueId ?? this.dialogueId,
       dialogue: dialogue ?? this.dialogue,
       dialogueEng: dialogueEng ?? this.dialogueEng,
       dialogueChn: dialogueChn ?? this.dialogueChn,
@@ -69,6 +73,8 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
 
   get getGrammarData => state;
 
+  get getDialogueId => state.dialogueId;
+
   get getImageUrl => state.grammarImageUrl;
 
   get getAudioUrl => state.grammarAudioUrl;
@@ -82,6 +88,7 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
   }
 
   updateDialogue({
+    int? dialogueId,
     String? dialogue,
     String? dialogueEng,
     String? dialogueChn,
@@ -89,6 +96,7 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
     String? dialogueRus,
   }) {
     state = state.copyWith(
+      dialogueId: dialogueId,
       dialogue: dialogue,
       dialogueEng: dialogueEng,
       dialogueChn: dialogueChn,

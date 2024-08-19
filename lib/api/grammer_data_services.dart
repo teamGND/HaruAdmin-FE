@@ -46,7 +46,7 @@ class GrammerDataRepository {
   postGrammarChapterData(
       {required int id, required AddGrammarData data}) async {
     try {
-      final response = await dio.post('/grammar/$id', data: data.toJson());
+      final response = await dio.post('/grammar', data: data.toJson());
       return response;
     } catch (e) {
       print("error : $e");
@@ -55,7 +55,7 @@ class GrammerDataRepository {
 
   updateGrammarData({required int id, required AddGrammarData data}) async {
     try {
-      final response = await dio.put('/grammar/$id', data: data.toJson());
+      final response = await dio.patch('/grammar/$id', data: data.toJson());
       return response;
     } catch (e) {
       print("error : $e");

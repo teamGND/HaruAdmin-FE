@@ -15,7 +15,9 @@ import '../../provider/intro_provider.dart';
 import 'widget/grammar_description_widget.dart';
 
 class AddGrammerScreen extends ConsumerStatefulWidget {
-  const AddGrammerScreen({super.key});
+  const AddGrammerScreen(this.grammarId, {super.key});
+
+  final String? grammarId;
 
   @override
   ConsumerState<AddGrammerScreen> createState() => _AddGrammerScreenState();
@@ -309,18 +311,18 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           .updateGrammarData(
         id: info.dataId!,
         data: AddGrammarData(
-          level: info.level.toString().split('.').last,
-          cycle: info.cycle,
-          sets: info.sets,
-          chapter: info.chapter,
-          title: titleController.text,
-          description: ref.read(grammarDataProvider).description,
-          descriptionEng: ref.read(grammarDataProvider).descriptionEng,
-          descriptionChn: ref.read(grammarDataProvider).descriptionChn,
-          descriptionVie: ref.read(grammarDataProvider).descriptionVie,
-          descriptionRus: ref.read(grammarDataProvider).descriptionRus,
-          sentenceList: sentences,
-        ),
+            level: info.level.toString().split('.').last,
+            cycle: info.cycle,
+            sets: info.sets,
+            chapter: info.chapter,
+            title: titleController.text,
+            description: ref.read(grammarDataProvider).description,
+            descriptionEng: ref.read(grammarDataProvider).descriptionEng,
+            descriptionChn: ref.read(grammarDataProvider).descriptionChn,
+            descriptionVie: ref.read(grammarDataProvider).descriptionVie,
+            descriptionRus: ref.read(grammarDataProvider).descriptionRus,
+            sentenceList: sentences,
+            status: 'WAIT'),
       )
           .then((value) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -363,6 +365,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
 
         // 제시문
         ref.read(grammarDataProvider.notifier).updateDialogue(
+            dialogueId: _representSentences[0].id,
             dialogue: _representSentences[0].expression,
             dialogueEng: _representSentences[0].expressionEng,
             dialogueChn: _representSentences[0].expressionChn,
@@ -494,7 +497,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             cycle: info.cycle,
             sets: info.sets,
             chapter: info.chapter,
-            title: info.title,
+            titleController: titleController,
           ),
           const SizedBox(height: 10),
           FutureBuilder(

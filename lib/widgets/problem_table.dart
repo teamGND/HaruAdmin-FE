@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/widgets/problem_provider.dart';
 
@@ -12,7 +11,7 @@ class ProblemTable extends ConsumerWidget {
 
   final int problemType;
   final int? index;
-  ProblemContents contents = ProblemContents(problemType: 101);
+  ProblemContents? contents;
 
   static const Map<int, List<String>> tableTitle = {
     101: ['선지 0', '선지 1', '선지 2', '정답 - 0,1,2 중 하나'],

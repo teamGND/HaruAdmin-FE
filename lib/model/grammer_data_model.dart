@@ -102,6 +102,8 @@ class AddGrammarData {
   String? descriptionVie;
   String? descriptionRus;
   List<Sentence>? sentenceList;
+  String? sentence;
+  String? status;
 
   AddGrammarData({
     this.level,
@@ -116,6 +118,8 @@ class AddGrammarData {
     this.descriptionVie,
     this.descriptionRus,
     this.sentenceList,
+    this.sentence,
+    this.status,
   });
 
   factory AddGrammarData.fromJson(Map<String, dynamic> jsondata) {
@@ -134,9 +138,11 @@ class AddGrammarData {
       sentenceList: jsondata['sentenceList']
           .map<Sentence>((sentence) => Sentence.fromJson(sentence))
           .toList(),
+      sentence: jsondata['sentence'],
+      status: jsondata['status'],
     );
   }
-
+  // to Json
   Map<String, dynamic> toJson() {
     return {
       'level': level,
@@ -150,7 +156,9 @@ class AddGrammarData {
       'descriptionChn': descriptionChn,
       'descriptionVie': descriptionVie,
       'descriptionRus': descriptionRus,
-      'sentence': sentenceList?.map((sentence) => sentence.toJson()).toList(),
+      'sentenceList': sentenceList?.map((e) => e.toJson()).toList(),
+      'sentence': sentence,
+      'status': status,
     };
   }
 }

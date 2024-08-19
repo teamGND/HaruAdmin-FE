@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/provider/intro_provider.dart';
@@ -10,7 +8,7 @@ class ChapterCatalogTable extends ConsumerWidget {
   final int? cycle;
   final int? sets;
   final int? chapter;
-  final String? title;
+  final TextEditingController titleController;
 
   const ChapterCatalogTable({
     super.key,
@@ -18,7 +16,7 @@ class ChapterCatalogTable extends ConsumerWidget {
     required this.cycle,
     required this.sets,
     required this.chapter,
-    required this.title,
+    required this.titleController,
   });
 
   @override
@@ -57,9 +55,9 @@ class ChapterCatalogTable extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: TextField(
-                  controller: TextEditingController(text: title),
+                  controller: titleController,
                   onChanged: (value) {
-                    ref.read(introProvider.notifier).update(title: title);
+                    ref.read(introProvider.notifier).update(title: value);
                   },
                   style: const TextStyle(
                     fontSize: 16,

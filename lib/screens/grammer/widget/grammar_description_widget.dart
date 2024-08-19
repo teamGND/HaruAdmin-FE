@@ -5,6 +5,7 @@ import 'package:haru_admin/provider/intro_provider.dart';
 
 import '../../../api/grammer_data_services.dart';
 import '../../../api/translate_service.dart';
+import '../../../model/grammer_data_model.dart';
 import '../../../model/translate_model.dart';
 import '../grammar_provider.dart';
 
@@ -82,7 +83,7 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
   }
 
   save() {
-    ref.read(grammarDataProvider.notifier).getGrammarData(
+    ref.read(grammarDataProvider.notifier).updateDescription(
           description: _descriptionController[0].text,
           descriptionEng: _descriptionController[1].text,
           descriptionChn: _descriptionController[2].text,

@@ -34,7 +34,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   ];
 
   int _selectedLanguage = 0;
-
   final List<TextEditingController> _dialogueController = [
     TextEditingController(),
     TextEditingController(),
@@ -93,7 +92,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   }
 
   // 저장
-  save() async {
+  save() {
     ref.read(grammarDataProvider.notifier).updateDialogue(
           dialogue: _dialogueController[0].text,
           dialogueEng: _dialogueController[1].text,
@@ -101,32 +100,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
           dialogueVie: _dialogueController[3].text,
           dialogueRus: _dialogueController[4].text,
         );
-    try {
-      int? grammarId = ref.watch(introProvider.notifier).dataId;
-
-      if (grammarId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Center(child: Text('문법을 선택해주세요.')),
-            showCloseIcon: true,
-            closeIconColor: Colors.white,
-          ),
-        );
-        return;
-      }
-      await grammerDataRepository.updateGrammarData(
-        id: grammarId,
-        data: AddGrammarData(
-          description: _dialogueController[0].text,
-          descriptionEng: _dialogueController[1].text,
-          descriptionChn: _dialogueController[2].text,
-          descriptionVie: _dialogueController[3].text,
-          descriptionRus: _dialogueController[4].text,
-        ),
-      );
-    } catch (e) {
-      print("error : $e");
-    }
   }
 
   // 번역

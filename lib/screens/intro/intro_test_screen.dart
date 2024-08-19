@@ -151,7 +151,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           title: title,
           wordDatas: wordList);
 
-      context.go('/quiz/add');
+      context.go('/quiz/add/${data.id}');
     } catch (e) {
       print(e);
     }
@@ -171,7 +171,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           title: title,
           wordDatas: wordList);
 
-      context.go('/test/add');
+      context.go('/test/add/${data.id}?cycle=${data.cycle}&sets=${data.sets}');
     } catch (e) {
       print(e);
     }
@@ -227,7 +227,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                       ),
                     );
                   });
-                  fetchData();
+                  await fetchData();
                 },
                 child: const Text('확인'),
               ),

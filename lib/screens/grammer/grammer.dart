@@ -66,7 +66,10 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
     fetchData();
   }
 
-  void addChapter(int? index) {
+  void addChapter({
+    int? index,
+    int grammarId = 0,
+  }) {
     if (index == null && grammarData.content != null) {
       ref.watch(introProvider.notifier).update(
             level: dropdownValue,
@@ -88,7 +91,7 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
           );
     }
 
-    context.go('/grammar/add');
+    context.go('/grammar/add/${grammarId.toString()}');
   }
 
   @override
@@ -234,11 +237,11 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
                             ],
                           ),
                         ),
-                        MyCustomButton(
-                          text: '회차추가',
-                          onTap: () => addChapter(null),
-                          color: Colors.blue,
-                        ),
+                        // MyCustomButton(
+                        //   text: '회차추가',
+                        //   onTap: () => addChapter(),
+                        //   color: Colors.blue,
+                        // ),
                       ],
                     ),
                   ],
@@ -333,7 +336,10 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
               height: 35,
               child: TextButton(
                 onPressed: () {
-                  addChapter(i);
+                  addChapter(
+                    index: i,
+                    grammarId: grammarData.content!.last.id,
+                  );
                 },
                 child: Center(
                   child: grammarData.content![i].representSentences != ''

@@ -1,17 +1,20 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:haru_admin/widgets/problem_provider.dart';
+import 'package:haru_admin/model/test_data_model.dart';
+import 'package:just_audio/just_audio.dart';
+
+import '../api/test_data_services.dart';
 
 class ProblemTable extends ConsumerWidget {
   ProblemTable({
     super.key,
-    required this.problemType,
-    this.index,
+    required this.problem,
+    required this.textController,
   });
-
-  final int problemType;
-  final int? index;
-  ProblemContents? contents;
+  final TestDataRepository testDataRepository = TestDataRepository();
+  final ProblemDataModel problem;
+  List<TextEditingController> textController = [];
 
   static const Map<int, List<String>> tableTitle = {
     101: ['선지 0', '선지 1', '선지 2', '정답 - 0,1,2 중 하나'],
@@ -20,13 +23,80 @@ class ProblemTable extends ConsumerWidget {
     104: ['단어'],
     201: ['그림', ' 그림 설명', '문장 - 빈칸에 ()넣기', '정답 - 여러 개면 /로 구분'],
     202: ['문장 - /로 구분', '정답 순서 - ,로 구분 0부터 카운트'],
-    203: ['문장 - 빈칸에 ()넣기', '선지1', '선지2', '선지3 - 없으면 비우기', '정답 - 0,1,2 중 하나'],
-    204: ['문장 - 빈칸에 ()넣기', '선지1', '선지2', '선지3', '정답 - 틀린 문장. 0,1,2 중 하나'],
+    203: ['문장 - 빈칸에 ()넣기', '선지0', '선지1', '선지2 - 없으면 비우기', '정답 - 0,1,2 중 하나'],
+    204: ['문장 - 빈칸에 ()넣기', '선지0', '선지1', '선지2', '정답 - 틀린 문장. 0,1,2 중 하나'],
     205: ['예시 문장(원래)', '예시 문장(바꾼)', '문제 문장(원래)', '정답 문장 - 여러 개면 /로 구분'],
     206: ['문장 - 띄어쓰기 기준. 틀린 부분 ()로 표시', '올바른 문장 - 여러 개면 /로 구분'],
     207: ['문장', '음성파일 (파일 추가)'],
     208: ['제시 문장', '옳은 문장', '정답 여부(대문자 O,X 중 하나)'],
   };
+
+  void getImageUrl(int index) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['png', 'jpg', 'svg', 'jpeg']);
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        await testDataRepository
+            .uploadFile(
+          fileBytes: file.bytes!,
+          fileName: 'test_${problem.chapter}_${index + 1}',
+          fileType: file.extension!,
+        )
+            .then((value) {
+          textController[index].text = value ?? '';
+        });
+      } else {
+        // User canceled the picker
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  void getAudioUrl(int index) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['mp3']);
+
+      if (result != null) {
+        PlatformFile file = result.files.first;
+
+        await testDataRepository
+            .uploadFile(
+          fileBytes: file.bytes!,
+          fileName: 'test_${problem.chapter}_${index + 1}',
+          fileType: file.extension!,
+        )
+            .then((value) {
+          textController[index].text = value ?? '';
+        });
+      } else {
+        // User canceled the picker
+      }
+    } catch (e) {
+      print(e);
+      throw Exception(e);
+    }
+  }
+
+  playAudio(int index) async {
+    try {
+      final player = AudioPlayer();
+
+      await player.setUrl(textController[index].text);
+      await player.setVolume(0.5);
+      await player.pause();
+      await player.stop();
+      player.play();
+    } catch (e) {
+      print(e);
+      throw Exception(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context, ref) {
@@ -52,9 +122,9 @@ class ProblemTable extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: tableTitle[problemType]!
+              children: tableTitle[problem.problemType]!
                   .map(
-                    (e) => Flexible(
+                    (title) => Flexible(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
@@ -66,7 +136,7 @@ class ProblemTable extends ConsumerWidget {
                         ),
                         child: Center(
                           child: Text(
-                            e,
+                            title,
                             style: const TextStyle(
                                 fontSize: 12, fontWeight: FontWeight.bold),
                           ),
@@ -82,66 +152,82 @@ class ProblemTable extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: index == null
-                  ? List.generate(tableTitle[problemType]!.length, (index) {
-                      return Flexible(
-                        child: DecoratedBox(
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            border: Border.symmetric(
-                                vertical: BorderSide(
-                              color: Colors.grey,
-                              width: 0.5,
-                            )),
-                          ),
-                          child: Center(
-                            child: TextField(
-                                style: const TextStyle(
-                                    fontSize: 10, fontWeight: FontWeight.bold),
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 10),
+              children:
+                  List.generate(tableTitle[problem.problemType]!.length, (idx) {
+                return Flexible(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      border: Border.symmetric(
+                          vertical: BorderSide(
+                        color: Colors.grey,
+                        width: 0.5,
+                      )),
+                    ),
+                    child: Center(
+                      child: (problem.problemType == 201 && idx == 0)
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                textController[idx].text != ''
+                                    ? Image.network(
+                                        textController[idx].text,
+                                      )
+                                    : const SizedBox(),
+                                GestureDetector(
+                                  onTap: () {
+                                    // add Image
+                                    getImageUrl(idx);
+                                  },
+                                  child: const Text('이미지 추가하기',
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.blue)),
                                 ),
-                                controller: TextEditingController(
-                                  text: ' ',
-                                )),
-                          ),
-                        ),
-                      );
-                    })
-                  : ref
-                      .watch(problemContentsProvider.notifier)
-                      .getContents(index!)
-                      .map(
-                        (e) => Flexible(
-                          child: DecoratedBox(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              border: Border.symmetric(
-                                  vertical: BorderSide(
-                                color: Colors.grey,
-                                width: 0.5,
-                              )),
-                            ),
-                            child: Center(
-                              child: TextField(
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
+                              ],
+                            )
+                          : (problem.problemType == 207 && idx == 1)
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    textController[idx].text != ''
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              playAudio(idx);
+                                            },
+                                            child: const Icon(Icons.play_arrow),
+                                          )
+                                        : GestureDetector(
+                                            onTap: () {
+                                              // add Image
+                                              getAudioUrl(idx);
+                                            },
+                                            child: const Text('오디오 추가하기',
+                                                style: TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.blue)),
+                                          ),
+                                  ],
+                                )
+                              : TextField(
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.all(5),
+                                  ),
+                                  controller: textController[idx],
                                 ),
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.all(5),
-                                ),
-                                controller:
-                                    TextEditingController(text: e.toString()),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
+                    ),
+                  ),
+                );
+              }),
             ),
           ),
         ],

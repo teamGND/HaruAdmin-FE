@@ -12,17 +12,20 @@ class MetaGrammarScreen extends StatefulWidget {
 }
 
 class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
+  final MetaGrammarDataRepository metaGrammarDataRepository =
+      MetaGrammarDataRepository();
+
   static const MAX_META_DATA = 20;
   late Future<void> _metaListDataFuture;
   List<MetaGrammarData> _metaGrammarTitles = [];
   int? _selectedMetaDataIdx;
-  // 5 sets of TextEditingController for each language
+  final TextEditingController titleController = TextEditingController();
   final List<TextEditingController> descriptionControllers = [
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
+    TextEditingController(), // 한국어
+    TextEditingController(), // 영어
+    TextEditingController(), // 중국어
+    TextEditingController(), // 베트남어
+    TextEditingController(), // 러시아어
   ];
   List<String> titles = [
     '한국어',
@@ -48,24 +51,31 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
     }
   }
 
-  getSelectedMetaData() async {
-    // 선택된 메타데이터를 가져오는 비동기 함수
-    try {
-      await MetaGrammarDataRepository();
-    } catch (e) {
-      throw Exception(e);
-    }
+  getSelectedMetaData(int index) {
+    setState(() {
+      _selectedMetaDataIdx = index;
+      titleController.text = _metaGrammarTitles[index].title ?? '';
+      // for (var i = 0; i < titles.length; i++) {
+      //   descriptionControllers[i].text =
+      //       _metaGrammarTitles[index].description[i] ?? '';
+      // }
+    });
   }
 
   updateSelectedMetaData() async {
     // 선택된 메타데이터를 업데이트하는 비동기 함수
   }
 
-  addNewMetaData() {
+  addNewMetaData() async {
     // 새로운 메타데이터를 추가하는 gkatn
     setState(() {
       _selectedMetaDataIdx = _metaGrammarTitles.length + 1;
     });
+    try {
+      MetaGrammarDataRepository();
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   saveNewMetaData() async {
@@ -92,6 +102,13 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
               '메타문법 데이터',
               style: TextStyle(
                 fontSize: 25,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const Text(
+              '10개 이상 추가될 경우, 연진 또는 개발자에게 문의하세요',
+              style: TextStyle(
+                fontSize: 5,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -267,13 +284,22 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Align(
-                            alignment: Alignment.bottomRight,
-                            child: MyCustomButton(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            MyCustomButton(
+                              text: '번역',
+                              onTap: () {},
+                              color: const Color(0XFF484848),
+                            ),
+                            const SizedBox(width: 10),
+                            MyCustomButton(
                               text: '저장하기',
                               onTap: () {},
                               color: const Color(0xFF3F99F7),
-                            )),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),

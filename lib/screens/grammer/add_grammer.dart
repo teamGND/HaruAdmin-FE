@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
-import 'package:haru_admin/screens/grammer/grammar_provider.dart';
+import 'package:haru_admin/provider/grammar_provider.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/screens/grammer/widget/meta_grammar_modal.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';

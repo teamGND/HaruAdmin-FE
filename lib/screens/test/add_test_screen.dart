@@ -2,33 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/test_data_services.dart';
 import 'package:haru_admin/model/test_data_model.dart';
+import 'package:haru_admin/utils/convert_problem_list.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/buttons.dart';
-import 'package:haru_admin/widgets/problem_provider.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
 
 import '../../provider/intro_provider.dart';
+import '../../widgets/quiz_test_upper_table.dart';
 
 class AddTestScreen extends ConsumerStatefulWidget {
-  const AddTestScreen(this.introId, this.cycle, this.sets, {super.key});
+  const AddTestScreen(this.category, this.introId, {super.key});
+  final String? category;
   final String? introId;
-  final String? cycle;
-  final String? sets;
 
   @override
   ConsumerState<AddTestScreen> createState() => _AddTestScreenState();
 }
 
 class _AddTestScreenState extends ConsumerState<AddTestScreen> {
-  final TestDataRepository testDataRepository = TestDataRepository();
-  static const int MAXIMUM_PROBLEM_CNT = 100;
+  static const int MAXIMUM_PROBLEM_CNT = 50;
 
+  final TestDataRepository testDataRepository = TestDataRepository();
   IntroInfo info = IntroInfo();
+
+  final List<bool> _selected =
+      List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
   bool _isLoading = false;
   List<String> _exampleData = [];
   List<ProblemDataModel> _problemList = [];
-  final List<bool> _selected =
-      List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
+  List<List<TextEditingController>> textControllers = [];
+  int? dropdownValue;
 
   /*
   * 문제 타입
@@ -37,37 +40,20 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   * (3) 테스트 - 101 ~ 208
   * (4) 중간평가 - 101 ~ 208
   */
-  Map<CATEGORY, Map<int, String>> dropdownTitle = {
-    CATEGORY.TEST: {
-      101: '101. 그림보고 어휘 3지선다',
-      102: '102. 어휘보고 그림 3지선다',
-      103: '103. 그림보고 타이핑',
-      104: '104. 받아쓰기',
-      201: '201. 그림보고 어휘 3지선다',
-      202: '202. 어휘보고 그림 3지선다',
-      203: '203. 그림보고 타이핑',
-      204: '204. 받아쓰기',
-      205: '205. 어휘보고 그림 3지선다',
-      206: '206. 그림보고 타이핑',
-      207: '207. 그림보고 타이핑',
-      208: '208. OX 퀴즈',
-    },
-    CATEGORY.MIDTERM: {
-      101: '101. 그림보고 어휘 3지선다',
-      102: '102. 어휘보고 그림 3지선다',
-      103: '103. 그림보고 타이핑',
-      104: '104. 받아쓰기',
-      201: '201. 그림보고 어휘 3지선다',
-      202: '202. 어휘보고 그림 3지선다',
-      203: '203. 그림보고 타이핑',
-      204: '204. 받아쓰기',
-      205: '205. 어휘보고 그림 3지선다',
-      206: '206. 그림보고 타이핑',
-      207: '207. 그림보고 타이핑',
-      208: '208. OX 퀴즈',
-    },
+  Map<int, String> dropdownTitle = {
+    101: '101. 그림보고 어휘 3지선다',
+    102: '102. 어휘보고 그림 3지선다',
+    103: '103. 그림보고 타이핑',
+    104: '104. 받아쓰기',
+    201: '201. 그림보고 문장 속 빈칸 넣기',
+    202: '202. 순서에 맞게 문장 배치하기',
+    203: '203. 문장 속 빈칸 2지OR3지선다 채우기',
+    204: '204. 문장 속 빈칸에 들어갈 수 없는 말',
+    205: '205. 예시 문장처럼 문제 문장 바꾸기',
+    206: '206. 문장 속 틀린 부분 찾기',
+    207: '207. 문장 받아쓰기',
+    208: '208. 제시 문장이 문법적으로 옳은지 OX 퀴즈',
   };
-  int dropdownValue = 101;
 
   Future<void> fetchTestData(int id) async {
     try {
@@ -75,31 +61,36 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
         _isLoading = true;
       });
 
+      // 데이터 넣기
       await testDataRepository.getTestData(id: id).then((value) {
         setState(() {
           _exampleData = value.exampleList;
           _problemList = value.problemList;
         });
+        if (widget.introId == null || widget.category == null) {
+          return;
+        }
+        ref.read(introProvider.notifier).update(
+              dataId: int.parse(widget.introId!),
+              category: categoryFromString(widget.category!),
+              level: levelFromString(value.level),
+              cycle: value.cycle,
+              sets: value.set,
+              chapter: value.chapter,
+              title: value.title,
+            );
       });
 
-      ref.read(problemContentsProvider.notifier).setContentsList(_problemList
-          .map((e) => ProblemContents(
-                problemType: e.problemType,
-                choice1: e.choice1,
-                choice2: e.choice2,
-                choice3: e.choice3,
-                choice4: e.choice4,
-                answerNumber: e.answerNumber,
-                answerString: e.answerString,
-                picture: e.picture,
-                pictureDescription: e.pictureDescription,
-                questionString: e.questionString,
-                exampleOriginal: e.exampleOriginal,
-                exampleChanged: e.exampleChanged,
-                directionKor: e.directionKor,
-                audio: e.audio,
-              ))
-          .toList());
+      // 텍스트 컨트롤러 초기화
+      for (var problem in _problemList) {
+        List<TextEditingController> temp = [];
+        List<String?> contents = convertProblemContentsToList(problem);
+
+        for (var i = 0; i < contents.length; i++) {
+          temp.add(TextEditingController(text: contents[i] ?? ''));
+        }
+        textControllers.add(temp);
+      }
 
       setState(() {
         _isLoading = false;
@@ -110,17 +101,90 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   }
 
   addNewProblem() {
+    if (dropdownValue == null) {
+      // TODO: show "Please select a type" message
+
+      return;
+    }
+    List<TextEditingController> temp = List.generate(
+        ProblemTable.tableTitle[dropdownValue]!.length,
+        (index) => TextEditingController());
+
     setState(() {
+      _isLoading = true;
+
+      textControllers.add(temp);
+
       _problemList.add(ProblemDataModel(
-        problemType: dropdownValue,
+        level: info.level.toString().split('.').last,
+        category: info.category.toString().split('.').last,
+        cycle: info.cycle,
+        sets: info.sets,
+        chapter: info.chapter,
         sequence: _problemList.length + 1,
+        problemType: dropdownValue!,
       ));
+
+      _isLoading = false;
     });
   }
 
   save() async {
     try {
-      await testDataRepository.addTestDataList(_problemList);
+      setState(() {
+        _isLoading = true;
+      });
+
+      List<ProblemDataModel> problems = [];
+      int idx = 0;
+
+      for (var problem in _problemList) {
+        List<String> contents = [];
+        for (var controller in textControllers[idx]) {
+          String? text = controller.text;
+          if (text.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Center(child: Text('입력하지 않은 항목이 있습니다.')),
+                showCloseIcon: true,
+                closeIconColor: Colors.white,
+              ),
+            );
+            setState(() {
+              _isLoading = false;
+            });
+            return;
+          }
+          contents.add(text);
+        }
+
+        ProblemDataModel? data = convertListToProblemContents(
+          frameModel: problem,
+          contents: contents,
+        );
+
+        if (data == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Center(child: Text('입력하지 않은 항목이 있습니다.')),
+              showCloseIcon: true,
+              closeIconColor: Colors.white,
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        problems.add(data);
+        idx++;
+      }
+
+      await testDataRepository.postTestData(testDataList: problems);
+      setState(() {
+        _isLoading = false;
+      });
     } catch (e) {
       throw Exception(e);
     }
@@ -145,7 +209,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                       (previousValue, element) =>
                           previousValue +
                           (_selected[_problemList.indexOf(element)]
-                              ? '${element.id}\n'
+                              ? '${element.sequence} 번\n'
                               : '')),
                 ),
               ),
@@ -183,6 +247,16 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   }
 
   @override
+  void dispose() {
+    for (var controller in textControllers) {
+      for (var c in controller) {
+        c.dispose();
+      }
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
@@ -217,7 +291,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
               Flexible(
                 flex: 1,
                 child: MyCustomButton(
-                  text: 'Save',
+                  text: '저장',
                   onTap: () => save(),
                   color: const Color(0xFF3F99F7),
                 ),
@@ -234,6 +308,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
           ),
           UpperTable(
             info: info,
+            exampleList: _exampleData,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -282,8 +357,8 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                           orderedNumber: index + 1,
                           problemType: _problemList[index].problemType,
                           problemWidget: ProblemTable(
-                            problemType: _problemList[index].problemType,
-                            index: index,
+                            problem: _problemList[index],
+                            textController: textControllers[index],
                           ),
                         ),
                       ),
@@ -313,11 +388,10 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                 ),
                 SizedBox(
                   height: 50,
-                  width: 200,
+                  width: 300,
                   child: DropdownButton(
                     value: dropdownValue,
-                    items: dropdownTitle[info.category]!
-                        .entries
+                    items: dropdownTitle.entries
                         .map((e) => DropdownMenuItem(
                               value: e.key,
                               child: Padding(
@@ -353,12 +427,6 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                 )
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-            ),
-            child: ProblemTable(problemType: dropdownValue),
           ),
           const SizedBox(height: 10),
         ],
@@ -515,201 +583,6 @@ class TestTableElement extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class UpperTable extends StatelessWidget {
-  const UpperTable({
-    super.key,
-    required this.info,
-  });
-  final IntroInfo info;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 120,
-      width: 600,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 3),
-              child: Row(
-                children: [
-                  const SizedBox(
-                    width: 50,
-                    height: 30,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '레벨',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
-                        child: Text(
-                          info.level.toString().split('.').last,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 50,
-                    height: 30,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '사이클',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
-                        child: Text(
-                          info.cycle.toString(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 50,
-                    height: 30,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color(0xFFD9D9D9),
-                      ),
-                      child: Center(
-                        child: Text(
-                          '세트',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
-                        child: Text(
-                          info.sets.toString(),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Row(children: [
-              const SizedBox(
-                width: 50,
-                height: 30,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Color(0xFFD9D9D9),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '회차',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 50,
-                height: 30,
-                child: Center(
-                  child: Text(
-                    info.chapter.toString(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 50,
-                height: 30,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Color(0xFFD9D9D9),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '타이틀',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: SizedBox(
-                    child: Text(
-                      info.title ?? '',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ])
-          ],
-        ),
-      ),
     );
   }
 }

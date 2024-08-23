@@ -151,7 +151,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           title: title,
           wordDatas: wordList);
 
-      context.go('/quiz/add/${data.id}');
+      context.go('/quiz/add/${data.category}/${data.id}');
     } catch (e) {
       print(e);
     }
@@ -171,7 +171,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           title: title,
           wordDatas: wordList);
 
-      context.go('/test/add/${data.id}?cycle=${data.cycle}&sets=${data.sets}');
+      context.go('/test/add/${data.category}/${data.id}');
     } catch (e) {
       print(e);
     }

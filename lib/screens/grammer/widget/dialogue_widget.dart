@@ -8,7 +8,7 @@ import '../../../api/translate_service.dart';
 import '../../../model/grammer_data_model.dart';
 import '../../../model/translate_model.dart';
 import '../../../utils/parse_dialogue_line.dart';
-import '../grammar_provider.dart';
+import '../../../provider/grammar_provider.dart';
 
 // 제시문
 class DialogueWidget extends ConsumerStatefulWidget {

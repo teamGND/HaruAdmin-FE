@@ -7,7 +7,7 @@ import '../../../api/grammer_data_services.dart';
 import '../../../api/translate_service.dart';
 import '../../../model/grammer_data_model.dart';
 import '../../../model/translate_model.dart';
-import '../grammar_provider.dart';
+import '../../../provider/grammar_provider.dart';
 
 // 제시문
 class DescriptionWidget extends ConsumerStatefulWidget {

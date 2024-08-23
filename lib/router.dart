@@ -48,17 +48,17 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           name: '테스트 데이터 추가',
-          path: '/test/add/:introId?cycle&sets',
+          path: '/test/add/:category/:introId',
           builder: (context, state) => AddTestScreen(
+            state.pathParameters['category'],
             state.pathParameters['introId'],
-            state.uri.queryParameters['cycle'],
-            state.uri.queryParameters['sets'],
           ),
         ),
         GoRoute(
           name: '퀴즈 데이터 추가',
-          path: '/quiz/add/:introId',
+          path: '/quiz/add/:category/:introId',
           builder: (context, state) => AddQuizScreen(
+            state.pathParameters['category'],
             state.pathParameters['introId'],
           ),
         ),

@@ -1,7 +1,7 @@
 class TestDataEntity {
   String level;
   int cycle;
-  // int sets;
+  int set;
   int chapter;
   String? title;
   List<String>? exampleList;
@@ -10,7 +10,7 @@ class TestDataEntity {
   TestDataEntity({
     required this.level,
     required this.cycle,
-    // required this.sets,
+    required this.set,
     required this.chapter,
     required this.title,
     required this.exampleList,
@@ -21,7 +21,7 @@ class TestDataEntity {
     return TestDataEntity(
       level: json['level'],
       cycle: json['cycle'],
-      // sets: json['sets'],
+      set: json['set'],
       chapter: json['chapter'],
       title: json['title'],
       exampleList: json['exampleList'] != null
@@ -38,7 +38,7 @@ class TestDataEntity {
     return {
       'level': level,
       'cycle': cycle,
-      // 'sets': sets,
+      'set': set,
       'chapter': chapter,
       'title': title,
       'exampleList': exampleList,
@@ -49,7 +49,7 @@ class TestDataEntity {
   TestDataEntity copyWith({
     String? level,
     int? cycle,
-    // int? sets,
+    int? set,
     int? chapter,
     String? title,
     List<String>? exampleList,
@@ -58,7 +58,7 @@ class TestDataEntity {
     return TestDataEntity(
       level: level ?? this.level,
       cycle: cycle ?? this.cycle,
-      // sets: sets ?? this.sets,
+      set: set ?? this.set,
       chapter: chapter ?? this.chapter,
       title: title ?? this.title,
       exampleList: exampleList ?? this.exampleList,
@@ -71,7 +71,7 @@ class ProblemDataModel {
   int? id;
   String? level;
   int? cycle;
-  // int sets;
+  int? sets;
   String? category;
   int? chapter;
   int sequence;
@@ -94,7 +94,7 @@ class ProblemDataModel {
     this.id,
     this.level,
     this.cycle,
-    // required this.sets,
+    this.sets,
     this.category,
     this.chapter,
     required this.sequence,
@@ -119,7 +119,7 @@ class ProblemDataModel {
       id: json['id'],
       level: json['level'],
       cycle: json['cycle'],
-      // sets: json['sets'],
+      sets: json['sets'],
       category: json['category'],
       chapter: json['chapter'],
       sequence: json['sequence'],
@@ -145,7 +145,7 @@ class ProblemDataModel {
       'id': id,
       'level': level,
       'cycle': cycle,
-      // 'sets': sets,
+      'sets': sets,
       'category': category,
       'chapter': chapter,
       'sequence': sequence,
@@ -163,6 +163,85 @@ class ProblemDataModel {
       'exampleChanged': exampleChanged,
       'directionKor': directionKor,
       'audio': audio,
+    };
+  }
+
+  // copywith
+  ProblemDataModel copyWith({
+    int? id,
+    String? level,
+    int? cycle,
+    int? sets,
+    String? category,
+    int? chapter,
+    int? sequence,
+    int? problemType,
+    String? choice1,
+    String? choice2,
+    String? choice3,
+    String? choice4,
+    int? answerNumber,
+    String? picture,
+    String? pictureDescription,
+    String? questionString,
+    String? answerString,
+    String? exampleOriginal,
+    String? exampleChanged,
+    String? directionKor,
+    String? audio,
+  }) {
+    return ProblemDataModel(
+      id: id ?? this.id,
+      level: level ?? this.level,
+      cycle: cycle ?? this.cycle,
+      sets: sets ?? this.sets,
+      category: category ?? this.category,
+      chapter: chapter ?? this.chapter,
+      sequence: sequence ?? this.sequence,
+      problemType: problemType ?? this.problemType,
+      choice1: choice1 ?? this.choice1,
+      choice2: choice2 ?? this.choice2,
+      choice3: choice3 ?? this.choice3,
+      choice4: choice4 ?? this.choice4,
+      answerNumber: answerNumber ?? this.answerNumber,
+      picture: picture ?? this.picture,
+      pictureDescription: pictureDescription ?? this.pictureDescription,
+      questionString: questionString ?? this.questionString,
+      answerString: answerString ?? this.answerString,
+      exampleOriginal: exampleOriginal ?? this.exampleOriginal,
+      exampleChanged: exampleChanged ?? this.exampleChanged,
+      directionKor: directionKor ?? this.directionKor,
+      audio: audio ?? this.audio,
+    );
+  }
+}
+
+class LstReq {
+  final List<ProblemDataModel>? lstReq;
+
+  LstReq({this.lstReq});
+
+  LstReq.fromJson(Map<String, dynamic> json) : lstReq = json['lstReq'];
+
+  Map<String, dynamic> toJson() => {
+        'lstReq': lstReq?.map((e) => e.toJson()).toList(),
+      };
+}
+
+class PostTestDataResponse {
+  final List<int>? ids;
+
+  PostTestDataResponse({this.ids});
+
+  factory PostTestDataResponse.fromJson(Map<String, dynamic> json) {
+    return PostTestDataResponse(
+      ids: json['ids'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ids': ids,
     };
   }
 }

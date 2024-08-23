@@ -111,7 +111,9 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
           chapter: info.chapter!,
           cycle: info.cycle!,
           sets: info.sets!,
-          titleKor: convertWordListToString(title: info.title, words: wordList),
+          titleKor: (info.category == CATEGORY.WORD)
+              ? convertWordListToString(title: info.title, words: wordList)
+              : info.title,
         ));
         ref.watch(introProvider.notifier).update(dataId: response.introDataId);
 
@@ -132,8 +134,9 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
               cycle: info.cycle!,
               sets: info.sets!,
               chapter: info.chapter!,
-              titleKor:
-                  convertWordListToString(title: info.title, words: wordList),
+              titleKor: (info.category == CATEGORY.WORD)
+                  ? convertWordListToString(title: info.title, words: wordList)
+                  : info.title,
             ));
 
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

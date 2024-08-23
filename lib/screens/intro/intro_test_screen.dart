@@ -403,25 +403,15 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                           ),
                                         ),
                                         SizedBox(
-                                          height: _rowHeight,
-                                          child: (data.category == 'WORD' ||
-                                                  data.category == 'GRAMMAR')
-                                              ? TextButton(
-                                                  onPressed: () {
-                                                    updateWordGrammarChapter(
-                                                        data);
-                                                  },
-                                                  child: Text(
-                                                    data.titleKor ?? '',
-                                                  ))
-                                              : TextButton(
-                                                  onPressed: () {
-                                                    addTest(data);
-                                                  },
-                                                  child:
-                                                      Text(data.titleKor ?? ''),
-                                                ),
-                                        ),
+                                            height: _rowHeight,
+                                            child: TextButton(
+                                                onPressed: () {
+                                                  updateWordGrammarChapter(
+                                                      data);
+                                                },
+                                                child: Text(
+                                                  data.titleKor ?? '',
+                                                ))),
                                         SizedBox(
                                           height: _rowHeight,
                                           child: Center(

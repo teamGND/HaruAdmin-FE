@@ -6,6 +6,7 @@ import 'package:haru_admin/utils/convert_problem_list.dart';
 import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/buttons.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
+import 'package:haru_admin/widgets/problem_table_plaintext.dart';
 
 import '../../provider/intro_provider.dart';
 import '../../widgets/quiz_test_upper_table.dart';
@@ -27,10 +28,15 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
 
   final List<bool> _selected =
       List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
+  final List<bool> _selectedPrevious =
+      List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
   bool _isLoading = false;
   List<String> _exampleData = [];
   List<ProblemDataModel> _problemList = [];
+  List<ProblemDataModel> _previousProblemList = [];
   List<List<TextEditingController>> textControllers = [];
+  final List<List<String?>> _previousProblemContents = [];
+
   int? dropdownValue;
 
   /*
@@ -190,6 +196,122 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
     }
   }
 
+  void saveSelectPreviousTestProblems() {
+    List<ProblemDataModel> selectedPreviousData = [];
+    for (var i = 0; i < _previousProblemList.length; i++) {
+      if (_selectedPrevious[i]) {
+        selectedPreviousData.add(_previousProblemList[i].copyWith(
+            id: null,
+            level: info.level.toString().split('.').last,
+            category: info.category.toString().split('.').last,
+            cycle: info.cycle,
+            sets: info.sets,
+            chapter: info.chapter,
+            sequence: _problemList.length + 1 + i));
+      }
+    }
+
+    // textEditingController 추가
+    for (var problem in selectedPreviousData) {
+      List<TextEditingController> temp = [];
+      List<String?> contents = convertProblemContentsToList(problem);
+
+      for (var i = 0; i < contents.length; i++) {
+        temp.add(TextEditingController(text: contents[i] ?? ''));
+      }
+      textControllers.add(temp);
+    }
+
+    // 선택된 문제들을 _problemList에 추가
+    setState(() {
+      _problemList.addAll(selectedPreviousData);
+    });
+  }
+
+  void recallPreviousTestProblems() async {
+    try {
+      if (info.category == null || info.sets == null || info.cycle == null) {
+        return;
+      }
+      if (info.category == CATEGORY.TEST) {
+        _previousProblemList =
+            await testDataRepository.getCurrentSetsTest(sets: info.sets!);
+      } else if (info.category == CATEGORY.MIDTERM) {
+        _previousProblemList =
+            await testDataRepository.getCurrentCycleTest(cycle: info.cycle!);
+      } else {
+        return;
+      }
+      // 텍스트 컨트롤러 초기화
+      for (var problem in _previousProblemList) {
+        List<String?> contents = convertProblemContentsToList(problem);
+        _previousProblemContents.add(contents);
+      }
+
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+              return AlertDialog(
+                title: const Text(
+                  '이전 테스트 문제를 불러옵니다.',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                content: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: List.generate(
+                        _previousProblemList.length,
+                        (index) => ListTile(
+                          key: ValueKey(index),
+                          leading: Checkbox(
+                            value: _selectedPrevious[index],
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _selectedPrevious[index] = value!;
+                              });
+                            },
+                          ),
+                          title: TestTableElement(
+                            orderedNumber: index + 1,
+                            problemType:
+                                _previousProblemList[index].problemType,
+                            problemWidget: ProblemTablePlaintext(
+                              problem: _previousProblemList[index],
+                              texts: _previousProblemContents[index],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('취소'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      saveSelectPreviousTestProblems();
+                    },
+                    child: const Text('확인'),
+                  ),
+                ],
+              );
+            });
+          });
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
   void deleteSelected() {
     showDialog(
         context: context,
@@ -202,16 +324,14 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
             content: SizedBox(
               width: 400,
               height: 100,
-              child: SingleChildScrollView(
-                child: Text(
-                  _problemList.fold(
-                      "",
-                      (previousValue, element) =>
-                          previousValue +
-                          (_selected[_problemList.indexOf(element)]
-                              ? '${element.sequence} 번\n'
-                              : '')),
-                ),
+              child: Text(
+                _problemList.fold(
+                    "",
+                    (previousValue, element) =>
+                        previousValue +
+                        (_selected[_problemList.indexOf(element)]
+                            ? '${element.sequence} 번\n'
+                            : '')),
               ),
             ),
             actions: [
@@ -224,6 +344,24 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
               TextButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
+                  try {
+                    if (_problemList.isEmpty) {
+                      return;
+                    }
+                    List<int> selectedProblemIds = [];
+                    for (int idx = 0; idx < _problemList.length; idx++) {
+                      if (_selected[idx] && _problemList[idx].id != null) {
+                        selectedProblemIds.add(_problemList[idx].id!);
+                      }
+                    }
+
+                    for (var id in selectedProblemIds) {
+                      await testDataRepository.deleteTest(id: id);
+                    }
+                  } catch (e) {
+                    throw Exception(e);
+                  }
+
                   setState(() {
                     _problemList = _problemList
                         .where((element) =>
@@ -231,6 +369,13 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                         .toList();
                     _selected.fillRange(0, _selected.length, false);
                   });
+
+                  for (var controller in textControllers) {
+                    for (var c in controller) {
+                      c.dispose();
+                      textControllers.remove(c);
+                    }
+                  }
                 },
                 child: const Text('확인'),
               ),
@@ -291,7 +436,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
               Flexible(
                 flex: 1,
                 child: MyCustomButton(
-                  text: '저장',
+                  text: 'Save',
                   onTap: () => save(),
                   color: const Color(0xFF3F99F7),
                 ),
@@ -321,6 +466,18 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                   '선택 삭제',
                   style: TextStyle(
                     color: Colors.red,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  recallPreviousTestProblems();
+                },
+                child: const Text(
+                  '문제 불러오기',
+                  style: TextStyle(
+                    color: Colors.blue,
                   ),
                 ),
               ),

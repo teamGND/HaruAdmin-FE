@@ -76,4 +76,50 @@ class TestDataRepository {
     }
     return null;
   }
+
+  getCurrentSetsTest({required int sets}) async {
+    try {
+      final response = await dio.get(
+        '/test/sets/$sets',
+      );
+
+      if (response.statusCode == 200) {
+        List<ProblemDataModel> problemList = [];
+        for (var item in response.data) {
+          problemList.add(ProblemDataModel.fromJson(item));
+        }
+        return problemList;
+      }
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  getCurrentCycleTest({required int cycle}) async {
+    try {
+      final response = await dio.get(
+        '/test/cycle/$cycle',
+      );
+
+      if (response.statusCode == 200) {
+        List<ProblemDataModel> problemList = [];
+        for (var item in response.data) {
+          problemList.add(ProblemDataModel.fromJson(item));
+        }
+        return problemList;
+      }
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  deleteTest({required int id}) async {
+    try {
+      await dio.delete(
+        '/test/$id',
+      );
+    } catch (e) {
+      print("error : $e");
+    }
+  }
 }

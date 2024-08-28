@@ -24,6 +24,20 @@ class MetaGrammarDataRepository {
     }
   }
 
+  getMetaGrammarData({required int metaId}) async {
+    try {
+      final response = await dio.get(
+        '/grammar/meta/$metaId',
+      );
+
+      if (response.statusCode == 200) {
+        return MetaGrammarDataModel.fromJson(response.data);
+      }
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
   addNewMetaData({
     required AddMetaData data,
   }) {
@@ -37,13 +51,13 @@ class MetaGrammarDataRepository {
     }
   }
 
-  updateMetaData({
-    required AddMetaData data,
-    required int id,
+  updateMetaGrammarData({
+    required MetaGrammarDataModel data,
+    required int metaId,
   }) {
     try {
       dio.patch(
-        '/grammar/meta/$id',
+        '/grammar/meta/$metaId',
         data: data.toJson(),
       );
     } catch (e) {
@@ -51,9 +65,13 @@ class MetaGrammarDataRepository {
     }
   }
 
-  deleteMetaData(List<int> ids) async {
+  deleteMetaData({
+    required List<int>? metaIdList,
+  }) async {
     try {
-      final response = await dio.delete('/grammar/meta', data: ids);
+      final response = await dio.delete('/grammar/meta', data: {
+        'metaIdList': metaIdList,
+      });
 
       return response;
     } catch (e) {

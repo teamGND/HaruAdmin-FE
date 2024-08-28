@@ -139,6 +139,76 @@ class Sort {
   }
 }
 
+class MetaGrammarDataModel {
+  int? id;
+  String? chinese;
+  String? content;
+  String? english;
+  String? image;
+  String? russian;
+  String? title;
+  String? vietnam;
+
+  MetaGrammarDataModel({
+    this.id,
+    this.chinese,
+    this.content,
+    this.english,
+    this.image,
+    this.russian,
+    this.title,
+    this.vietnam,
+  });
+
+  factory MetaGrammarDataModel.fromJson(Map<String, dynamic> json) {
+    return MetaGrammarDataModel(
+      id: json['id'],
+      chinese: json['chinese'],
+      content: json['content'],
+      english: json['english'],
+      image: json['image'],
+      russian: json['russian'],
+      title: json['title'],
+      vietnam: json['vietnam'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'chinese': chinese,
+      'content': content,
+      'english': english,
+      'imgUrl': image,
+      'russian': russian,
+      'title': title,
+      'vietnam': vietnam,
+    };
+  }
+
+  MetaGrammarDataModel copyWith({
+    int? id,
+    String? chinese,
+    String? content,
+    String? english,
+    String? image,
+    String? russian,
+    String? title,
+    String? vietnam,
+  }) {
+    return MetaGrammarDataModel(
+      id: id ?? this.id,
+      chinese: chinese ?? this.chinese,
+      content: content ?? this.content,
+      english: english ?? this.english,
+      image: image ?? this.image,
+      russian: russian ?? this.russian,
+      title: title ?? this.title,
+      vietnam: vietnam ?? this.vietnam,
+    );
+  }
+}
+
 class AddMetaData {
   String? chinese;
   String? content;

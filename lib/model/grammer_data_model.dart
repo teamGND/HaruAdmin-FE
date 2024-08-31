@@ -261,10 +261,10 @@ class Sentence {
 }
 
 class GrammarChapterDataList {
-  String level;
-  int cycle;
-  int sets;
-  int chapter;
+  String? level;
+  int? cycle;
+  int? sets;
+  int? chapter;
   String? title;
   String? sentence;
   String? imageUrl;

@@ -5,7 +5,6 @@ import 'package:haru_admin/provider/intro_provider.dart';
 
 import '../../../api/grammer_data_services.dart';
 import '../../../api/translate_service.dart';
-import '../../../model/grammer_data_model.dart';
 import '../../../model/translate_model.dart';
 import '../../../provider/grammar_provider.dart';
 
@@ -40,6 +39,7 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
     '<Tiêu đề>\nSử dụng [dấu ngoặc vuông] để nhấn mạnh.\nThêm *dấu sao* để bình luận.',
     '<Заголовок>\nИспользуйте [квадратные скобки] для выделения.\nДобавьте *звездочки* для комментариев.',
   ];
+  String? imageUrl = '';
 
   Future<void> getImageUrl() async {
     int? chapter = ref.read(introProvider).chapter;
@@ -66,12 +66,12 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
         await grammarDataRepository
             .uploadFile(
           fileBytes: file.bytes!,
-          fileName: 'grammar_${chapter.toString()}',
+          fileName: 'grammar_description_${chapter.toString()}',
           fileType: file.extension!,
         )
             .then((value) {
-          ref.read(grammarDataProvider.notifier).getGrammarData(
-                grammarImageUrl: value,
+          ref.read(grammarDataProvider.notifier).updateDescriptionImageUrl(
+                value,
               );
         });
       } else {
@@ -133,6 +133,9 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
         });
       });
     }
+    setState(() {
+      imageUrl = ref.read(grammarDataProvider.notifier).getImageUrl;
+    });
   }
 
   @override
@@ -342,12 +345,9 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                             ),
                           ),
                         ),
-                        ref.read(grammarDataProvider.notifier).getImageUrl !=
-                                null
+                        (imageUrl != null && imageUrl != '')
                             ? Image.network(
-                                ref
-                                    .read(grammarDataProvider.notifier)
-                                    .getImageUrl,
+                                imageUrl!,
                                 fit: BoxFit.cover,
                               )
                             : const SizedBox(height: 10)

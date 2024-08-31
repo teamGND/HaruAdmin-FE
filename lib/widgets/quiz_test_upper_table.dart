@@ -9,7 +9,7 @@ class UpperTable extends StatelessWidget {
     required this.exampleList,
   });
   final IntroInfo info;
-  final List<String>? exampleList;
+  final List<String?>? exampleList;
 
   @override
   Widget build(BuildContext context) {
@@ -246,9 +246,9 @@ class UpperTable extends StatelessWidget {
                     height: 60,
                     child: Center(
                       child: Text(
-                        (exampleList == null || exampleList == [])
+                        (exampleList == [] || exampleList == null)
                             ? ''
-                            : exampleList!.join(', ').split('<').first,
+                            : exampleList!.join(', '),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

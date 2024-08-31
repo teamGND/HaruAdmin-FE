@@ -26,11 +26,12 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
   final TestDataRepository testDataRepository = TestDataRepository();
   IntroInfo info = IntroInfo(
     dataId: 0,
-    category: null,
-    level: null,
+    category: CATEGORY.WORD,
+    level: LEVEL.LEVEL1,
     cycle: 0,
     sets: 0,
     chapter: 0,
+    title: '',
   );
 
   final List<bool> _selected =
@@ -201,9 +202,20 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
           return;
         }
         List<ProblemDataModel>? tempList = value.problemList;
-        if (tempList != null) {
+        if (tempList != null && tempList.isNotEmpty) {
           tempList.sort((a, b) => a.sequence.compareTo(b.sequence));
+          // 텍스트 컨트롤러 초기화
+          for (var problem in tempList) {
+            List<TextEditingController> temp = [];
+            List<String?> contents = convertProblemContentsToList(problem);
+
+            for (var i = 0; i < contents.length; i++) {
+              temp.add(TextEditingController(text: contents[i] ?? ''));
+            }
+            textControllers.add(temp);
+          }
         }
+
         setState(() {
           _exampleData = value.exampleList;
           _problemList = tempList ?? [];
@@ -218,17 +230,6 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
           );
         });
       });
-
-      // 텍스트 컨트롤러 초기화
-      for (var problem in _problemList) {
-        List<TextEditingController> temp = [];
-        List<String?> contents = convertProblemContentsToList(problem);
-
-        for (var i = 0; i < contents.length; i++) {
-          temp.add(TextEditingController(text: contents[i] ?? ''));
-        }
-        textControllers.add(temp);
-      }
 
       setState(() {
         _isLoading = false;
@@ -500,6 +501,18 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              const SizedBox(width: 15),
+              Checkbox(
+                value: _selected.every((element) => element),
+                onChanged: (bool? value) {
+                  setState(() {
+                    for (int i = 0; i < _selected.length; i++) {
+                      _selected[i] = value!;
+                    }
+                  });
+                },
+              ),
+              const SizedBox(width: 10),
               TextButton(
                 onPressed: () {
                   deleteSelected();
@@ -551,28 +564,30 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
                         textControllers.insert(newIndex, item2);
                       });
                     },
-                    children: List.generate(
-                      _problemList.length,
-                      (index) => ListTile(
-                        key: ValueKey(index),
-                        leading: Checkbox(
-                          value: _selected[index],
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _selected[index] = value!;
-                            });
-                          },
-                        ),
-                        title: TestTableElement(
-                          orderedNumber: index + 1,
-                          problemType: _problemList[index].problemType,
-                          problemWidget: ProblemTable(
-                            problem: _problemList[index],
-                            textController: textControllers[index],
+                    children: (_problemList == [] || _problemList.isEmpty)
+                        ? const [Text('No data')]
+                        : List.generate(
+                            _problemList.length,
+                            (index) => ListTile(
+                              key: ValueKey(index),
+                              leading: Checkbox(
+                                value: _selected[index],
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    _selected[index] = value!;
+                                  });
+                                },
+                              ),
+                              title: TestTableElement(
+                                orderedNumber: index + 1,
+                                problemType: _problemList[index].problemType,
+                                problemWidget: ProblemTable(
+                                  problem: _problemList[index],
+                                  textController: textControllers[index],
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
                   ),
                 ),
           const Divider(

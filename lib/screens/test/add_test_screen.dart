@@ -26,11 +26,12 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   final TestDataRepository testDataRepository = TestDataRepository();
   IntroInfo info = IntroInfo(
     dataId: 0,
-    category: null,
-    level: null,
+    category: CATEGORY.TEST,
+    level: LEVEL.LEVEL1,
     cycle: 0,
     sets: 0,
     chapter: 0,
+    title: '',
   );
 
   final List<bool> _selected =
@@ -38,12 +39,11 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   final List<bool> _selectedPrevious =
       List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
   bool _isLoading = false;
-  List<String> _exampleData = [];
+  List<String?> _exampleData = [];
   List<ProblemDataModel> _problemList = [];
-  List<ProblemDataModel> _previousProblemList = [];
   List<List<TextEditingController>> textControllers = [];
-  final List<List<String?>> _previousProblemContents = [];
-  late Future<void> _testDataFuture;
+
+  List<ProblemDataModel> _previousProblemList = [];
 
   int? dropdownValue;
 
@@ -69,32 +69,34 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
     208: '208. 제시 문장이 문법적으로 옳은지 OX 퀴즈',
   };
 
-  Future<void> fetchTestData(int id) async {
+  Future<void> fetchTestData() async {
     try {
       setState(() {
         _isLoading = true;
       });
 
+      if (widget.introId == null || widget.category == null) {
+        return;
+      }
+      int introId = int.parse(widget.introId!);
       // 데이터 넣기
-      await testDataRepository.getTestData(id: id).then((value) {
-        if (widget.introId == null || widget.category == null) {
-          return;
-        }
-        List<ProblemDataModel> tempList = value.problemList;
-        if (tempList != [])
+      await testDataRepository.getTestData(id: introId).then((value) {
+        List<ProblemDataModel>? tempList = value.problemList;
+        if (tempList != null) {
           tempList.sort((a, b) => a.sequence.compareTo(b.sequence));
+        }
 
         setState(() {
           _exampleData = value.exampleList;
-          _problemList = tempList;
+          _problemList = tempList ?? [];
           info = info.copyWith(
-            dataId: id,
+            dataId: introId,
             category: categoryFromString(widget.category!),
             level: levelFromString(value.level),
             cycle: value.cycle,
             sets: value.set,
             chapter: value.chapter,
-            title: value.cateogry == 'TEST'
+            title: widget.category == 'TEST'
                 ? '테스트${value.set.toString()}'
                 : '중간평가${value.cycle.toString()}',
           );
@@ -116,7 +118,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      throw Exception(e);
+      print(e);
     }
   }
 
@@ -137,7 +139,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
 
       _problemList.add(ProblemDataModel(
         level: info.level.toString().split('.').last,
-        category: info.category.toString().split('.').last,
+        category: widget.category,
         cycle: info.cycle,
         sets: info.sets,
         chapter: info.chapter,
@@ -182,7 +184,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
           frameModel: problem.copyWith(
             sequence: idx + 1,
             level: info.level.toString().split('.').last,
-            category: info.category.toString().split('.').last,
+            category: widget.category,
             cycle: info.cycle,
             sets: info.sets,
             chapter: info.chapter,
@@ -224,7 +226,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
         selectedPreviousData.add(_previousProblemList[i].copyWith(
             id: null,
             level: info.level.toString().split('.').last,
-            category: info.category.toString().split('.').last,
+            category: widget.category,
             cycle: info.cycle,
             sets: info.sets,
             chapter: info.chapter,
@@ -251,22 +253,24 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
 
   void recallPreviousTestProblems() async {
     try {
-      if (info.category == null || info.sets == null || info.cycle == null) {
+      if (widget.category == null || info.sets == null || info.cycle == null) {
         return;
       }
-      if (info.category == CATEGORY.TEST) {
+      if (widget.category == 'TEST') {
         _previousProblemList =
             await testDataRepository.getCurrentSetsTest(sets: info.sets!);
-      } else if (info.category == CATEGORY.MIDTERM) {
+      } else if (widget.category == 'MIDTERM') {
         _previousProblemList =
             await testDataRepository.getCurrentCycleTest(cycle: info.cycle!);
       } else {
         return;
       }
-      // 텍스트 컨트롤러 초기화
+      // textEditingController 초기화
+      List<List<String?>> previousProblemContents = [];
       for (var problem in _previousProblemList) {
         List<String?> contents = convertProblemContentsToList(problem);
-        _previousProblemContents.add(contents);
+
+        previousProblemContents.add(contents);
       }
 
       showDialog(
@@ -302,7 +306,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                                 _previousProblemList[index].problemType,
                             problemWidget: ProblemTablePlaintext(
                               problem: _previousProblemList[index],
-                              texts: _previousProblemContents[index],
+                              texts: previousProblemContents[index],
                             ),
                           ),
                         ),
@@ -391,7 +395,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                       }
                     }
                     textControllers.clear();
-                    fetchTestData(int.parse(widget.introId!));
+                    fetchTestData();
                   } catch (e) {
                     throw Exception(e);
                   }
@@ -415,7 +419,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   @override
   void initState() {
     super.initState();
-    _testDataFuture = fetchTestData(int.parse(widget.introId!));
+    fetchTestData();
   }
 
   @override

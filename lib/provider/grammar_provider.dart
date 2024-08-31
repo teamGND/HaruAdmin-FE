@@ -87,11 +87,11 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
 
   get getMetaGrammars => state.metaGrammars;
 
-  updateDescriptionImageUrl(String imageUrl) {
+  updateDescriptionImageUrl(String? imageUrl) {
     state = state.copyWith(grammarImageUrl: imageUrl);
   }
 
-  updateDialogueAudioUrl(String audioUrl) {
+  updateDialogueAudioUrl(String? audioUrl) {
     state = state.copyWith(grammarAudioUrl: audioUrl);
   }
 

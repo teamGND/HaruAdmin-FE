@@ -7,7 +7,6 @@ import 'package:haru_admin/screens/grammer/add_grammer.dart';
 import 'package:haru_admin/screens/grammer/grammer.dart';
 import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/screens/intro/intro_test_screen.dart';
-import 'package:haru_admin/screens/meta/add_meta_screen.dart';
 import 'package:haru_admin/screens/meta/meta_screen.dart';
 import 'package:haru_admin/screens/mypage.dart';
 import 'package:haru_admin/screens/test/add_quiz_screen.dart';
@@ -73,11 +72,6 @@ final GoRouter router = GoRouter(
           name: '단어 데이터 추가',
           path: '/word/add',
           builder: (context, state) => const AddWordScreen(),
-        ),
-        GoRoute(
-          name: '메타 데이터 추가',
-          path: '/meta/add',
-          builder: (context, state) => const AddMeta(),
         ),
       ],
     ),

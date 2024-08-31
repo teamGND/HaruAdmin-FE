@@ -7,11 +7,14 @@ import 'package:haru_admin/provider/grammar_provider.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/screens/grammer/widget/meta_grammar_modal.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
+import 'package:just_audio/just_audio.dart';
 
 import '../../api/translate_service.dart';
 import '../../model/translate_model.dart';
-import '../../widgets/buttons.dart';
 import '../../provider/intro_provider.dart';
+import '../../utils/enum_type.dart';
+import '../../utils/escape_json_string.dart';
+import '../../widgets/buttons.dart';
 import 'widget/grammar_description_widget.dart';
 
 class AddGrammerScreen extends ConsumerStatefulWidget {
@@ -109,6 +112,29 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     } catch (e) {
       print(e);
       throw Exception(e);
+    }
+  }
+
+  playAudio({required String? audioUrl}) async {
+    if (audioUrl == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('오디오 파일이 없습니다.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+    try {
+      final player = AudioPlayer();
+      await player.setUrl(audioUrl);
+      await player.setVolume(0.5);
+      await player.pause();
+      await player.stop();
+      player.play();
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -333,18 +359,18 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     return sentences;
   }
 
-  fianlSave() async {
+  finalSave() async {
     try {
       List<Sentence> sentences = [
         Sentence(
           id: _representSentences[0].id,
           order: 0,
           sentenceType: "REPRESENT",
-          expression: koreanControllers[0].text,
-          expressionEng: englishControllers[0].text,
-          expressionChn: chineseControllers[0].text,
-          expressionVie: vietnamControllers[0].text,
-          expressionRus: russianControllers[0].text,
+          expression: escapeJsonString(koreanControllers[0].text),
+          expressionEng: escapeJsonString(englishControllers[0].text),
+          expressionChn: escapeJsonString(chineseControllers[0].text),
+          expressionVie: escapeJsonString(vietnamControllers[0].text),
+          expressionRus: escapeJsonString(russianControllers[0].text),
           voiceUrl: _representSentences[0].voiceUrl,
           characterType: 'BLACK',
         )
@@ -360,11 +386,16 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             sets: info.sets,
             chapter: info.chapter,
             title: titleController.text,
-            description: ref.read(grammarDataProvider).description,
-            descriptionEng: ref.read(grammarDataProvider).descriptionEng,
-            descriptionChn: ref.read(grammarDataProvider).descriptionChn,
-            descriptionVie: ref.read(grammarDataProvider).descriptionVie,
-            descriptionRus: ref.read(grammarDataProvider).descriptionRus,
+            description:
+                escapeJsonString(ref.read(grammarDataProvider).description),
+            descriptionEng:
+                escapeJsonString(ref.read(grammarDataProvider).descriptionEng),
+            descriptionChn:
+                escapeJsonString(ref.read(grammarDataProvider).descriptionChn),
+            descriptionVie:
+                escapeJsonString(ref.read(grammarDataProvider).descriptionVie),
+            descriptionRus:
+                escapeJsonString(ref.read(grammarDataProvider).descriptionRus),
             sentenceList: sentences,
             metaGrammars: _metaGrammar.map((e) => e.id).toList(),
             status: 'WAIT'),
@@ -385,9 +416,19 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
 
   Future<void> fetchGrammarData() async {
     try {
-      if (info.dataId != null) {
-        await grammerRepository.getGrammarData(id: info.dataId!).then((value) {
+      if (widget.grammarId != null) {
+        await grammerRepository
+            .getGrammarData(id: int.parse(widget.grammarId!))
+            .then((value) {
           setState(() {
+            info = IntroInfo(
+              category: CATEGORY.GRAMMAR,
+              level: levelFromString(value.level),
+              cycle: value.cycle,
+              sets: value.sets,
+              chapter: value.chapter,
+              title: value.title,
+            );
             _data = value;
             _representSentences = value.representSentences;
             _exampleSentences = value.exampleSentences;
@@ -485,7 +526,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   @override
   void initState() {
     super.initState();
-    info = ref.read(introProvider);
     _grammarDataFuture = fetchGrammarData();
   }
 
@@ -601,11 +641,21 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                             color: Colors.blueGrey,
                           ),
                         ),
+                        SizedBox(width: 30),
+                        Text(
+                          '** | 를 절대 쓰지 마세요 **',
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(
                       height: 500,
                       child: DialogueWidget(
+                        chapter: info.chapter.toString(),
                         dialogueControllers: [
                           koreanControllers.isNotEmpty
                               ? koreanControllers[0]
@@ -740,6 +790,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         SizedBox(width: 30),
                         Text(
                           '#4 번호 매기기는 @@사이에 숫자넣기\n#5 메타문법은 ^^ ^^ 사이에',
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                        SizedBox(width: 30),
+                        Text(
+                          '** | 를 절대 쓰지 마세요 **',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -924,7 +983,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                 const SizedBox(width: 10),
                 MyCustomButton(
                   text: '저장하기',
-                  onTap: () => fianlSave(),
+                  onTap: () => finalSave(),
                   color: const Color(0xFF3F99F7),
                 ),
               ],
@@ -1005,14 +1064,33 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           SizedBox(
             height: 40,
             child: Center(
-              child: IconButton(
-                onPressed: () {
-                  // 오디오 불러오기
-                  getAudioUrl(isRep: isRep, index: i);
-                },
-                icon: const Icon(Icons.volume_up_rounded),
-              ),
-            ),
+                child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    // 오디오 재생
+                    playAudio(
+                        audioUrl: isRep
+                            ? _representSentences[i].voiceUrl
+                            : _exampleSentences[i].voiceUrl);
+                  },
+                  icon: const Icon(
+                    Icons.volume_up_rounded,
+                    size: 16,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    // 오디오 불러오기
+                    getAudioUrl(isRep: isRep, index: i);
+                  },
+                  icon: const Icon(
+                    Icons.file_upload,
+                    size: 16,
+                  ),
+                ),
+              ],
+            )),
           ),
 
           // 4. ENG

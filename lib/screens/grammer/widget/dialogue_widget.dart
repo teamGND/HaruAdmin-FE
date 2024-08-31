@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/provider/intro_provider.dart';
+import 'package:just_audio/just_audio.dart';
 
 import '../../../api/translate_service.dart';
 import '../../../model/translate_model.dart';
@@ -11,11 +12,14 @@ import '../../../provider/grammar_provider.dart';
 
 // 제시문
 class DialogueWidget extends ConsumerStatefulWidget {
-  DialogueWidget({
+  const DialogueWidget({
     super.key,
     required this.dialogueControllers,
+    required this.chapter,
   });
   final List<TextEditingController> dialogueControllers;
+  final String? chapter;
+
   @override
   ConsumerState<DialogueWidget> createState() => DialogueWidgetState();
 }
@@ -46,10 +50,10 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
 
   // 제시문 오디오 파일 업로드
   void getAudioUrl() async {
-    int? chatper = ref.watch(introProvider.notifier).chapter;
-    String audioName = 'dialogue_chapter$chatper';
+    String? chapter = widget.chapter;
+    String audioName = 'dialogue_chapter$chapter';
 
-    if (chatper == null) {
+    if (chapter == null || chapter == '') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Center(child: Text('챕터를 선택해주세요.')),
@@ -74,7 +78,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
           fileType: file.extension!,
         )
             .then((value) {
-          ref.read(grammarDataProvider.notifier).updateDialogueAudioUrl(value!);
+          ref.read(grammarDataProvider.notifier).updateDialogueAudioUrl(value);
         });
       } else {
         // User canceled the picker
@@ -82,6 +86,29 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
     } catch (e) {
       print(e);
       throw Exception(e);
+    }
+  }
+
+  playAudio({required String? audioUrl}) async {
+    if (audioUrl == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('오디오 파일이 없습니다.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+    try {
+      final player = AudioPlayer();
+      await player.setUrl(audioUrl);
+      await player.setVolume(0.5);
+      await player.pause();
+      await player.stop();
+      player.play();
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -389,8 +416,15 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 20),
-                    Image.asset('assets/images/blue_head.png',
-                        width: 40, height: 40),
+                    GestureDetector(
+                      onTap: () async {
+                        String? audioUrl =
+                            ref.read(grammarDataProvider).grammarAudioUrl;
+                        await playAudio(audioUrl: audioUrl);
+                      },
+                      child: Image.asset('assets/images/blue_head.png',
+                          width: 40, height: 40),
+                    ),
                     const SizedBox(height: 10),
                     SizedBox(
                       width: 300,

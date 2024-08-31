@@ -8,6 +8,7 @@ import 'package:haru_admin/widgets/buttons.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
 
 import '../../provider/intro_provider.dart';
+import '../../utils/generate_word_quiz.dart';
 import '../../widgets/quiz_test_upper_table.dart';
 
 class AddQuizScreen extends ConsumerStatefulWidget {
@@ -20,10 +21,17 @@ class AddQuizScreen extends ConsumerStatefulWidget {
 }
 
 class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
-  static const int MAXIMUM_PROBLEM_CNT = 50;
+  static const int MAXIMUM_PROBLEM_CNT = 100;
 
   final TestDataRepository testDataRepository = TestDataRepository();
-  IntroInfo info = IntroInfo();
+  IntroInfo info = IntroInfo(
+    dataId: 0,
+    category: null,
+    level: null,
+    cycle: 0,
+    sets: 0,
+    chapter: 0,
+  );
 
   final List<bool> _selected =
       List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
@@ -31,6 +39,7 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
   List<String> _exampleData = [];
   List<ProblemDataModel> _problemList = [];
   List<List<TextEditingController>> textControllers = [];
+
   int? dropdownValue;
 
   /*
@@ -59,6 +68,127 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
     },
   };
 
+  autogenerate() {
+    // '단어 문제를 자동 생성합니다. 기존 문제는 덮어씌워 집니다.' 메시지 출력
+    List<int> wordsTypes = List.generate(_exampleData.length, (index) {
+      // 101 이나 102 둘 중하나
+      return index % 2 == 0 ? 101 : 102;
+    });
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+                title: const Text(
+                  '단어 문제를 자동 생성합니다. 기존 문제는 삭제, 덮어씌워지고 자동 저장됩니다.',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                // exampleData 단어, 2개의 체크 박스
+                content: SingleChildScrollView(
+                  child: Table(
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(2),
+                    },
+                    children: [
+                      for (var example in _exampleData)
+                        TableRow(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(example),
+                            ),
+                            // radio button
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  for (var type in [101, 102, 103, 104])
+                                    Row(
+                                      children: [
+                                        Radio(
+                                          value: type,
+                                          groupValue: wordsTypes[
+                                              _exampleData.indexOf(example)],
+                                          onChanged: (int? value) {
+                                            setState(() {
+                                              wordsTypes[_exampleData
+                                                  .indexOf(example)] = value!;
+                                            });
+                                          },
+                                        ),
+                                        Text(dropdownTitle[CATEGORY.WORD]![
+                                            type]!),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  MyCustomButton(
+                    text: '취소',
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    color: Colors.blue,
+                    colorBorder: true,
+                  ),
+                  MyCustomButton(
+                    text: '확인',
+                    onTap: () async {
+                      // 자동 생성 알고리즘 실행
+                      setState(() {
+                        _isLoading = true;
+                      });
+                      List<ProblemDataModel> problems = generateWordQuiz(
+                        words: _exampleData,
+                        wordsTypes: wordsTypes,
+                        frameModel: ProblemDataModel(
+                          sequence: 0, // 덮어씌우기
+                          problemType: 101, // 덮어씌우기
+                          level: info.level.toString().split('.').last,
+                          category: 'WORD',
+                          cycle: info.cycle,
+                          sets: info.sets,
+                          chapter: info.chapter,
+                        ),
+                      );
+                      // textController 초기화하고 다시 fetch
+
+                      for (var controller in textControllers) {
+                        for (var c in controller) {
+                          c.dispose();
+                        }
+                      }
+                      textControllers.clear();
+
+                      // 기존 데이터 다 지우기
+                      for (var problem in _problemList) {
+                        if (problem.id != null) {
+                          await testDataRepository.deleteTest(id: problem.id!);
+                        }
+                      }
+
+                      await testDataRepository.postTestData(
+                          testDataList: problems);
+                      await fetchTestData(int.parse(widget.introId!));
+
+                      // Navigator.of(context).pop();
+                    },
+                    color: Colors.blue,
+                  ),
+                ]);
+          });
+        });
+  }
+
   Future<void> fetchTestData(int id) async {
     try {
       setState(() {
@@ -67,22 +197,26 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
 
       // 데이터 넣기
       await testDataRepository.getTestData(id: id).then((value) {
-        setState(() {
-          _exampleData = value.exampleList;
-          _problemList = value.problemList;
-        });
         if (widget.introId == null || widget.category == null) {
           return;
         }
-        ref.read(introProvider.notifier).update(
-              dataId: int.parse(widget.introId!),
-              category: categoryFromString(widget.category!),
-              level: levelFromString(value.level),
-              cycle: value.cycle,
-              sets: value.set,
-              chapter: value.chapter,
-              title: value.title,
-            );
+        List<ProblemDataModel>? tempList = value.problemList;
+        if (tempList != null) {
+          tempList.sort((a, b) => a.sequence.compareTo(b.sequence));
+        }
+        setState(() {
+          _exampleData = value.exampleList;
+          _problemList = tempList ?? [];
+          info = info.copyWith(
+            dataId: id,
+            category: categoryFromString(widget.category!),
+            level: levelFromString(value.level),
+            cycle: value.cycle,
+            sets: value.set,
+            chapter: value.chapter,
+            title: value.title,
+          );
+        });
       });
 
       // 텍스트 컨트롤러 초기화
@@ -163,7 +297,14 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
         }
 
         ProblemDataModel? data = convertListToProblemContents(
-          frameModel: problem,
+          frameModel: problem.copyWith(
+            sequence: idx + 1,
+            level: info.level.toString().split('.').last,
+            category: info.category.toString().split('.').last,
+            cycle: info.cycle,
+            sets: info.sets,
+            chapter: info.chapter,
+          ),
           contents: contents,
         );
 
@@ -228,12 +369,44 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
               TextButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
+                  try {
+                    if (_problemList.isEmpty) {
+                      return;
+                    }
+                    List<int> selectedProblemIds = [];
+                    for (int idx = 0; idx < _problemList.length; idx++) {
+                      if (_selected[idx] && _problemList[idx].id != null) {
+                        selectedProblemIds.add(_problemList[idx].id!);
+                      }
+                    }
+
+                    for (var id in selectedProblemIds) {
+                      await testDataRepository.deleteTest(id: id);
+                      // delete from _problemList
+                    }
+
+                    // textController 초기화하고 다시 fetch
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    for (var controller in textControllers) {
+                      for (var c in controller) {
+                        c.dispose();
+                      }
+                    }
+                    textControllers.clear();
+                    fetchTestData(int.parse(widget.introId!));
+                  } catch (e) {
+                    throw Exception(e);
+                  }
+
                   setState(() {
-                    _problemList = _problemList
-                        .where((element) =>
-                            !_selected[_problemList.indexOf(element)])
-                        .toList();
-                    _selected.fillRange(0, _selected.length, false);
+                    // sequqence 업데이터
+                    for (int i = 0; i < _problemList.length; i++) {
+                      _problemList[i] =
+                          _problemList[i].copyWith(sequence: i + 1);
+                    }
+                    _selected.fillRange(0, MAXIMUM_PROBLEM_CNT, false);
                   });
                 },
                 child: const Text('확인'),
@@ -246,8 +419,7 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
   @override
   void initState() {
     super.initState();
-    info = ref.read(introProvider);
-    fetchTestData(info.dataId!);
+    fetchTestData(int.parse(widget.introId!));
   }
 
   @override
@@ -292,10 +464,21 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
                   ),
                 ),
               ),
+              info.category == CATEGORY.WORD
+                  ? Flexible(
+                      flex: 1,
+                      child: MyCustomButton(
+                        text: '자동 생성',
+                        onTap: () => autogenerate(),
+                        color: Colors.pink,
+                      ),
+                    )
+                  : const SizedBox(),
+              const SizedBox(width: 10),
               Flexible(
                 flex: 1,
                 child: MyCustomButton(
-                  text: 'Save',
+                  text: '저장하기',
                   onTap: () => save(),
                   color: const Color(0xFF3F99F7),
                 ),
@@ -340,9 +523,32 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
                         }
-                        final ProblemDataModel item =
-                            _problemList.removeAt(oldIndex);
+                        // sequence 변경
+                        for (var i = 0; i < _problemList.length; i++) {
+                          if (i == oldIndex) {
+                            _problemList[i] = _problemList[i].copyWith(
+                              sequence: newIndex + 1,
+                            );
+                          } else if (oldIndex < newIndex) {
+                            if (i > oldIndex && i <= newIndex) {
+                              _problemList[i] = _problemList[i].copyWith(
+                                sequence: i,
+                              );
+                            }
+                          } else {
+                            if (i < oldIndex && i >= newIndex) {
+                              _problemList[i] = _problemList[i].copyWith(
+                                sequence: i + 2,
+                              );
+                            }
+                          }
+                        }
+
+                        final item = _problemList.removeAt(oldIndex);
                         _problemList.insert(newIndex, item);
+
+                        final item2 = textControllers.removeAt(oldIndex);
+                        textControllers.insert(newIndex, item2);
                       });
                     },
                     children: List.generate(

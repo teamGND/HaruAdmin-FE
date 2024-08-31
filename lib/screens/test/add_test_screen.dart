@@ -24,7 +24,14 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   static const int MAXIMUM_PROBLEM_CNT = 50;
 
   final TestDataRepository testDataRepository = TestDataRepository();
-  IntroInfo info = IntroInfo();
+  IntroInfo info = IntroInfo(
+    dataId: 0,
+    category: null,
+    level: null,
+    cycle: 0,
+    sets: 0,
+    chapter: 0,
+  );
 
   final List<bool> _selected =
       List.generate(MAXIMUM_PROBLEM_CNT, (index) => false);
@@ -36,6 +43,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   List<ProblemDataModel> _previousProblemList = [];
   List<List<TextEditingController>> textControllers = [];
   final List<List<String?>> _previousProblemContents = [];
+  late Future<void> _testDataFuture;
 
   int? dropdownValue;
 
@@ -69,22 +77,28 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
 
       // 데이터 넣기
       await testDataRepository.getTestData(id: id).then((value) {
-        setState(() {
-          _exampleData = value.exampleList;
-          _problemList = value.problemList;
-        });
         if (widget.introId == null || widget.category == null) {
           return;
         }
-        ref.read(introProvider.notifier).update(
-              dataId: int.parse(widget.introId!),
-              category: categoryFromString(widget.category!),
-              level: levelFromString(value.level),
-              cycle: value.cycle,
-              sets: value.set,
-              chapter: value.chapter,
-              title: value.title,
-            );
+        List<ProblemDataModel> tempList = value.problemList;
+        if (tempList != [])
+          tempList.sort((a, b) => a.sequence.compareTo(b.sequence));
+
+        setState(() {
+          _exampleData = value.exampleList;
+          _problemList = tempList;
+          info = info.copyWith(
+            dataId: id,
+            category: categoryFromString(widget.category!),
+            level: levelFromString(value.level),
+            cycle: value.cycle,
+            sets: value.set,
+            chapter: value.chapter,
+            title: value.cateogry == 'TEST'
+                ? '테스트${value.set.toString()}'
+                : '중간평가${value.cycle.toString()}',
+          );
+        });
       });
 
       // 텍스트 컨트롤러 초기화
@@ -165,7 +179,14 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
         }
 
         ProblemDataModel? data = convertListToProblemContents(
-          frameModel: problem,
+          frameModel: problem.copyWith(
+            sequence: idx + 1,
+            level: info.level.toString().split('.').last,
+            category: info.category.toString().split('.').last,
+            cycle: info.cycle,
+            sets: info.sets,
+            chapter: info.chapter,
+          ),
           contents: contents,
         );
 
@@ -330,7 +351,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                     (previousValue, element) =>
                         previousValue +
                         (_selected[_problemList.indexOf(element)]
-                            ? '${element.sequence} 번\n'
+                            ? '${_problemList.indexOf(element) + 1} 번\n'
                             : '')),
               ),
             ),
@@ -357,25 +378,32 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
 
                     for (var id in selectedProblemIds) {
                       await testDataRepository.deleteTest(id: id);
+                      // delete from _problemList
                     }
+
+                    // textController 초기화하고 다시 fetch
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    for (var controller in textControllers) {
+                      for (var c in controller) {
+                        c.dispose();
+                      }
+                    }
+                    textControllers.clear();
+                    fetchTestData(int.parse(widget.introId!));
                   } catch (e) {
                     throw Exception(e);
                   }
 
                   setState(() {
-                    _problemList = _problemList
-                        .where((element) =>
-                            !_selected[_problemList.indexOf(element)])
-                        .toList();
-                    _selected.fillRange(0, _selected.length, false);
-                  });
-
-                  for (var controller in textControllers) {
-                    for (var c in controller) {
-                      c.dispose();
-                      textControllers.remove(c);
+                    // sequqence 업데이터
+                    for (int i = 0; i < _problemList.length; i++) {
+                      _problemList[i] =
+                          _problemList[i].copyWith(sequence: i + 1);
                     }
-                  }
+                    _selected.fillRange(0, MAXIMUM_PROBLEM_CNT, false);
+                  });
                 },
                 child: const Text('확인'),
               ),
@@ -387,8 +415,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
   @override
   void initState() {
     super.initState();
-    info = ref.read(introProvider);
-    fetchTestData(info.dataId!);
+    _testDataFuture = fetchTestData(int.parse(widget.introId!));
   }
 
   @override
@@ -483,19 +510,42 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
               ),
             ],
           ),
-          _isLoading
-              ? const CircularProgressIndicator()
-              : Expanded(
-                  child: ReorderableListView(
+          Expanded(
+            child: _isLoading
+                ? const CircularProgressIndicator()
+                : ReorderableListView(
                     header: const TestTableHeader(),
                     onReorder: (int oldIndex, int newIndex) {
                       setState(() {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
                         }
-                        final ProblemDataModel item =
-                            _problemList.removeAt(oldIndex);
+                        // sequence 변경
+                        for (var i = 0; i < _problemList.length; i++) {
+                          if (i == oldIndex) {
+                            _problemList[i] = _problemList[i].copyWith(
+                              sequence: newIndex + 1,
+                            );
+                          } else if (oldIndex < newIndex) {
+                            if (i > oldIndex && i <= newIndex) {
+                              _problemList[i] = _problemList[i].copyWith(
+                                sequence: i,
+                              );
+                            }
+                          } else {
+                            if (i < oldIndex && i >= newIndex) {
+                              _problemList[i] = _problemList[i].copyWith(
+                                sequence: i + 2,
+                              );
+                            }
+                          }
+                        }
+
+                        final item = _problemList.removeAt(oldIndex);
                         _problemList.insert(newIndex, item);
+
+                        final item2 = textControllers.removeAt(oldIndex);
+                        textControllers.insert(newIndex, item2);
                       });
                     },
                     children: List.generate(
@@ -521,16 +571,16 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                       ),
                     ),
                   ),
-                ),
+          ),
           const Divider(
-            color: Colors.black,
-            height: 2,
+            height: 1,
+            thickness: 1,
+            color: Colors.grey,
             indent: 10,
             endIndent: 10,
           ),
           SizedBox(
             height: 80,
-            width: 1000,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -83,26 +83,6 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
     }
   }
 
-  updateSelectedMetaData() async {
-    // 선택된 메타데이터를 업데이트하는 비동기 함수
-    try {
-      await metaGrammarDataRepository.updateMetaGrammarData(
-        metaId: _metaGrammarTitles[_selectedMetaDataIdx!].id!,
-        data: MetaGrammarDataModel(
-          id: _metaGrammarTitles[_selectedMetaDataIdx!].id,
-          title: titleController.text,
-          content: koreanControllers.text,
-          english: englishControllers.text,
-          chinese: chineseControllers.text,
-          vietnam: vietnamControllers.text,
-          russian: russianControllers.text,
-        ),
-      );
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
   addMetaGrammarData() {
     if (_metaGrammarTitles.length <= 1 ||
         _metaGrammarTitles[_metaGrammarTitles.length - 2].title != null) {
@@ -119,20 +99,50 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
     }
   }
 
-  saveMetaGrammarData() async {
+  saveMetaGrammarData({int? metaId}) async {
     // 새로운 메타데이터를 추가하는 함수
 
-    try {
-      await metaGrammarDataRepository.addNewMetaData(
-        data: AddMetaData(
-          title: titleController.text,
-          content: koreanControllers.text,
-          english: englishControllers.text,
-          chinese: chineseControllers.text,
-          vietnam: vietnamControllers.text,
-          russian: russianControllers.text,
+    if (titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('제목을 입력해주세요')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
         ),
       );
+      return;
+    }
+
+    try {
+      if (metaId != null) {
+        await metaGrammarDataRepository.updateMetaGrammarData(
+          metaId: _metaGrammarTitles[_selectedMetaDataIdx!].id!,
+          data: MetaGrammarDataModel(
+            id: _metaGrammarTitles[_selectedMetaDataIdx!].id,
+            title: titleController.text,
+            content: koreanControllers.text,
+            english: englishControllers.text,
+            chinese: chineseControllers.text,
+            vietnam: vietnamControllers.text,
+            russian: russianControllers.text,
+          ),
+        );
+
+        return;
+      } else {
+        await metaGrammarDataRepository.addNewMetaData(
+          data: AddMetaData(
+            title: titleController.text,
+            content: koreanControllers.text,
+            english: englishControllers.text,
+            chinese: chineseControllers.text,
+            vietnam: vietnamControllers.text,
+            russian: russianControllers.text,
+          ),
+        );
+      }
+
+      await fetchMetaListData();
     } catch (e) {
       throw Exception(e);
     }
@@ -517,11 +527,8 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
         MyCustomButton(
           text: '저장하기',
           onTap: () {
-            if (_metaGrammarTitles[_selectedMetaDataIdx!].id == null) {
-              saveMetaGrammarData();
-            } else {
-              updateSelectedMetaData();
-            }
+            saveMetaGrammarData(
+                metaId: _metaGrammarTitles[_selectedMetaDataIdx!].id);
           },
           color: const Color(0xFF3F99F7),
         ),

@@ -4,12 +4,14 @@ class MyCustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
   final Color color;
+  final bool colorBorder;
 
   const MyCustomButton({
     super.key,
     required this.text,
     required this.onTap,
     required this.color,
+    this.colorBorder = false,
   });
 
   @override
@@ -21,14 +23,18 @@ class MyCustomButton extends StatelessWidget {
         height: 50,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 5),
         decoration: BoxDecoration(
-          color: color,
+          color: colorBorder ? Colors.transparent : color,
           borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: colorBorder ? color : Colors.transparent,
+            width: 2,
+          ),
         ),
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colorBorder ? color : Colors.white,
               fontSize: 16,
             ),
           ),

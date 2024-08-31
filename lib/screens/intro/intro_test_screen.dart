@@ -258,7 +258,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           child: Column(
             children: [
               Text(
-                '인트로 & 퀴즈/테스트 데이터',
+                '회차 생성 & 퀴즈/테스트 추가',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 20),

@@ -5,17 +5,17 @@ import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/provider/intro_provider.dart';
 
 import '../../../api/translate_service.dart';
-import '../../../model/grammer_data_model.dart';
 import '../../../model/translate_model.dart';
 import '../../../utils/parse_dialogue_line.dart';
 import '../../../provider/grammar_provider.dart';
 
 // 제시문
 class DialogueWidget extends ConsumerStatefulWidget {
-  const DialogueWidget({
+  DialogueWidget({
     super.key,
+    required this.dialogueControllers,
   });
-
+  final List<TextEditingController> dialogueControllers;
   @override
   ConsumerState<DialogueWidget> createState() => DialogueWidgetState();
 }
@@ -34,13 +34,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   ];
 
   int _selectedLanguage = 0;
-  final List<TextEditingController> _dialogueController = [
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-  ];
+  List<TextEditingController> _dialogueController = [];
   final List<String> _inputText = ['', '', '', '', ''];
   final List<String> _hintText = [
     '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.\n{}로 화자를 표시하세요.',
@@ -135,6 +129,10 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   @override
   void initState() {
     super.initState();
+
+    setState(() {
+      _dialogueController = widget.dialogueControllers;
+    });
 
     for (int i = 0; i < _dialogueController.length; i++) {
       _dialogueController[i].addListener(() {

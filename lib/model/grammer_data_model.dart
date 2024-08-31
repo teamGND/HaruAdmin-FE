@@ -102,6 +102,7 @@ class AddGrammarData {
   String? descriptionVie;
   String? descriptionRus;
   List<Sentence>? sentenceList;
+  List<int>? metaGrammars;
   String? sentence;
   String? status;
 
@@ -118,6 +119,7 @@ class AddGrammarData {
     this.descriptionVie,
     this.descriptionRus,
     this.sentenceList,
+    this.metaGrammars,
     this.sentence,
     this.status,
   });
@@ -138,6 +140,7 @@ class AddGrammarData {
       sentenceList: jsondata['sentenceList']
           .map<Sentence>((sentence) => Sentence.fromJson(sentence))
           .toList(),
+      metaGrammars: jsondata['metaGrammars'],
       sentence: jsondata['sentence'],
       status: jsondata['status'],
     );
@@ -157,9 +160,47 @@ class AddGrammarData {
       'descriptionVie': descriptionVie,
       'descriptionRus': descriptionRus,
       'sentenceList': sentenceList?.map((e) => e.toJson()).toList(),
+      'metaGrammars': metaGrammars,
       'sentence': sentence,
       'status': status,
     };
+  }
+
+  // copyWith
+  AddGrammarData copyWith({
+    String? level,
+    int? cycle,
+    int? sets,
+    int? chapter,
+    String? title,
+    String? imageUrl,
+    String? description,
+    String? descriptionEng,
+    String? descriptionChn,
+    String? descriptionVie,
+    String? descriptionRus,
+    List<Sentence>? sentenceList,
+    List<int>? metaGrammars,
+    String? sentence,
+    String? status,
+  }) {
+    return AddGrammarData(
+      level: level ?? this.level,
+      cycle: cycle ?? this.cycle,
+      sets: sets ?? this.sets,
+      chapter: chapter ?? this.chapter,
+      title: title ?? this.title,
+      imageUrl: imageUrl ?? this.imageUrl,
+      description: description ?? this.description,
+      descriptionEng: descriptionEng ?? this.descriptionEng,
+      descriptionChn: descriptionChn ?? this.descriptionChn,
+      descriptionVie: descriptionVie ?? this.descriptionVie,
+      descriptionRus: descriptionRus ?? this.descriptionRus,
+      sentenceList: sentenceList ?? this.sentenceList,
+      metaGrammars: metaGrammars ?? this.metaGrammars,
+      sentence: sentence ?? this.sentence,
+      status: status ?? this.status,
+    );
   }
 }
 

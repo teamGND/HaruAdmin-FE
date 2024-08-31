@@ -1,8 +1,8 @@
 class TestDataEntity {
-  String level;
-  int cycle;
-  int set;
-  int chapter;
+  String? level;
+  int? cycle;
+  int? set;
+  int? chapter;
   String? title;
   List<String>? exampleList;
   List<ProblemDataModel>? problemList;

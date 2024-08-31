@@ -27,7 +27,7 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
     '세트',
     '회차',
     '타이틀',
-    '대표 문장',
+    '제시문 제목',
     '예시 개수',
   ];
 
@@ -179,7 +179,7 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
                         2: FlexColumnWidth(1), // 세트
                         3: FlexColumnWidth(1), // 회차
                         4: FlexColumnWidth(3), // 타이틀
-                        5: FlexColumnWidth(7), // 대표 문장
+                        5: FlexColumnWidth(7), // 제시문 제목
                         6: FlexColumnWidth(1), //  예시 개수
                       },
                       children: _buildTableRows(),
@@ -332,7 +332,7 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
               ),
             ),
             SizedBox(
-              // 6. 대표 문장
+              // 6. 제시문 제목
               height: 35,
               child: TextButton(
                 onPressed: () {
@@ -343,7 +343,11 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
                 },
                 child: Center(
                   child: grammarData.content![i].representSentences != ''
-                      ? Text(grammarData.content![i].representSentences!)
+                      ? Text(grammarData.content![i].representSentences!
+                          .split('<')
+                          .last
+                          .split('>')
+                          .first)
                       : const Text(
                           '입력하기',
                           style: TextStyle(

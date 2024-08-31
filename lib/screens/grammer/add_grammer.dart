@@ -112,11 +112,18 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     }
   }
 
-  addMetaGrammar() {
+  addMetaGrammar() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const MetaGrammarModal();
+        return MetaGrammarModal(
+          grammarId: int.parse(widget.grammarId!),
+          updateFunction: (List<MetaGrammar> metaGrammars) {
+            setState(() {
+              _metaGrammar = metaGrammars;
+            });
+          },
+        );
       },
     );
   }
@@ -209,11 +216,29 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     });
   }
 
-  translate({required isRep}) async {
-    List<ExampleSentence> datas =
-        isRep ? _representSentences.sublist(1) : _exampleSentences;
+  translate({required isRep, isDialogue = false}) async {
+    // 번역할 데이터 datas에 넣기
+    List<Sentence> datas = isRep ? saveRepSentences() : saveExSentences();
+    if (isDialogue) {
+      datas = [
+        Sentence(
+          id: _representSentences[0].id,
+          order: 0,
+          sentenceType: "REPRESENT",
+          expression: koreanControllers[0].text,
+          expressionEng: englishControllers[0].text,
+          expressionChn: chineseControllers[0].text,
+          expressionVie: vietnamControllers[0].text,
+          expressionRus: russianControllers[0].text,
+          voiceUrl: _representSentences[0].voiceUrl,
+          characterType: 'BLACK',
+        )
+      ];
+    }
 
+    // 한국어와 영어가 모두 입력되었는지 확인
     bool isKoreanFilled = datas.every((element) {
+      print(element.expression);
       if (element.expression == '' || element.expressionEng == '') {
         return false;
       }
@@ -232,26 +257,32 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     }
 
     try {
-      for (var data in datas) {
+      for (int i = 0; i < datas.length; i++) {
+        Sentence data = datas[i];
         TranslatedResponse? response = await translateRepository.translate(
           korean: data.expression!,
           english: data.expressionEng,
         );
         print(response);
         if (response != null) {
-          setState(() {
-            data.expressionEng = response.english;
-            data.expressionChn = response.chinese;
-            data.expressionVie = response.vietnam;
-            data.expressionRus = response.russian;
-          });
-        }
-        if (isRep) {
-          for (int i = 0; i < datas.length; i++) {
-            englishControllers[i + 1].text = datas[i].expressionEng ?? '';
-            chineseControllers[i + 1].text = datas[i].expressionChn ?? '';
-            vietnamControllers[i + 1].text = datas[i].expressionVie ?? '';
-            russianControllers[i + 1].text = datas[i].expressionRus ?? '';
+          if (isRep) {
+            setState(() {
+              if (data.expressionEng != null) {
+                englishControllers[i + 1].text = response.english ?? '';
+              }
+              chineseControllers[i + 1].text = response.chinese ?? '';
+              vietnamControllers[i + 1].text = response.vietnam ?? '';
+              russianControllers[i + 1].text = response.russian ?? '';
+            });
+          } else {
+            setState(() {
+              if (data.expressionEng != null) {
+                exampleEnglishControllers[i].text = response.english ?? '';
+              }
+              exampleChineseControllers[i].text = response.chinese ?? '';
+              exampleVietnamControllers[i].text = response.vietnam ?? '';
+              exampleRussianControllers[i].text = response.russian ?? '';
+            });
           }
         } else {}
       }
@@ -262,51 +293,64 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   }
 
   confirm() {}
-  save() async {
-    try {
-      // 0번째 인덱스는 제시문
-      _representSentences[0] = ExampleSentence(
-        id: _representSentences[0].id,
-        order: 0,
-        expression: ref.read(grammarDataProvider).dialogue,
-        expressionEng: ref.read(grammarDataProvider).dialogueEng,
-        expressionChn: ref.read(grammarDataProvider).dialogueChn,
-        expressionVie: ref.read(grammarDataProvider).dialogueVie,
-        expressionRus: ref.read(grammarDataProvider).dialogueRus,
+  List<Sentence> saveRepSentences() {
+    // 0번째 인덱스는 제시문
+    List<Sentence> sentences = [];
+    for (int i = 1; i < _representSentences.length; i++) {
+      sentences.add(Sentence(
+        id: _representSentences[i].id,
+        order: i,
+        sentenceType: "REPRESENT",
+        expression: koreanControllers[i].text,
+        expressionEng: englishControllers[i].text,
+        expressionChn: chineseControllers[i].text,
+        expressionVie: vietnamControllers[i].text,
+        expressionRus: russianControllers[i].text,
+        voiceUrl: _representSentences[i].voiceUrl,
         characterType: 'BLACK',
-        voiceUrl: ref.read(grammarDataProvider).grammarAudioUrl,
-      );
+      ));
+    }
+    return sentences;
+  }
 
-      List<Sentence> sentences = [];
-      for (int i = 0; i < _representSentences.length; i++) {
-        sentences.add(Sentence(
-          id: _representSentences[i].id,
-          order: i,
+  List<Sentence> saveExSentences() {
+    List<Sentence> sentences = [];
+
+    for (int i = 0; i < _exampleSentences.length; i++) {
+      sentences.add(Sentence(
+        id: _exampleSentences[i].id,
+        order: i + 1,
+        sentenceType: "EXAMPLE",
+        expression: exampleTitleControllers[i].text,
+        expressionEng: exampleEnglishControllers[i].text,
+        expressionChn: exampleChineseControllers[i].text,
+        expressionVie: exampleVietnamControllers[i].text,
+        expressionRus: exampleRussianControllers[i].text,
+        voiceUrl: _exampleSentences[i].voiceUrl,
+        characterType: 'YELLOW',
+      ));
+    }
+    return sentences;
+  }
+
+  fianlSave() async {
+    try {
+      List<Sentence> sentences = [
+        Sentence(
+          id: _representSentences[0].id,
+          order: 0,
           sentenceType: "REPRESENT",
-          expression: _representSentences[i].expression,
-          expressionEng: _representSentences[i].expressionEng,
-          expressionChn: _representSentences[i].expressionChn,
-          expressionVie: _representSentences[i].expressionVie,
-          expressionRus: _representSentences[i].expressionRus,
-          voiceUrl: _representSentences[i].voiceUrl,
+          expression: koreanControllers[0].text,
+          expressionEng: englishControllers[0].text,
+          expressionChn: chineseControllers[0].text,
+          expressionVie: vietnamControllers[0].text,
+          expressionRus: russianControllers[0].text,
+          voiceUrl: _representSentences[0].voiceUrl,
           characterType: 'BLACK',
-        ));
-      }
-      for (int i = 0; i < _exampleSentences.length; i++) {
-        sentences.add(Sentence(
-          id: _exampleSentences[i].id,
-          order: i + 1,
-          sentenceType: "EXAMPLE",
-          expression: _exampleSentences[i].expression,
-          expressionEng: _exampleSentences[i].expressionEng,
-          expressionChn: _exampleSentences[i].expressionChn,
-          expressionVie: _exampleSentences[i].expressionVie,
-          expressionRus: _exampleSentences[i].expressionRus,
-          voiceUrl: _exampleSentences[i].voiceUrl,
-          characterType: 'YELLOW',
-        ));
-      }
-
+        )
+      ];
+      sentences.addAll(saveRepSentences());
+      sentences.addAll(saveExSentences());
       await grammerRepository
           .updateGrammarData(
         id: info.dataId!,
@@ -322,6 +366,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             descriptionVie: ref.read(grammarDataProvider).descriptionVie,
             descriptionRus: ref.read(grammarDataProvider).descriptionRus,
             sentenceList: sentences,
+            metaGrammars: _metaGrammar.map((e) => e.id).toList(),
             status: 'WAIT'),
       )
           .then((value) {
@@ -348,7 +393,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             _exampleSentences = value.exampleSentences;
             _metaGrammar = value.metaGrammars;
 
-            if (_representSentences.isEmpty) {
+            if (value.representSentences.length == 0) {
               // 제시문이 없을 경우. 대표 문장 0번째 인덱스에 추가
               _representSentences.add(ExampleSentence(
                 order: 0,
@@ -364,7 +409,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         });
 
         // 제시문
-        ref.read(grammarDataProvider.notifier).updateDialogue(
+        await ref.read(grammarDataProvider.notifier).updateDialogue(
             dialogueId: _representSentences[0].id,
             dialogue: _representSentences[0].expression,
             dialogueEng: _representSentences[0].expressionEng,
@@ -558,9 +603,27 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(
+                    SizedBox(
                       height: 500,
-                      child: DialogueWidget(),
+                      child: DialogueWidget(
+                        dialogueControllers: [
+                          koreanControllers.isNotEmpty
+                              ? koreanControllers[0]
+                              : TextEditingController(),
+                          englishControllers.isNotEmpty
+                              ? englishControllers[0]
+                              : TextEditingController(),
+                          chineseControllers.isNotEmpty
+                              ? chineseControllers[0]
+                              : TextEditingController(),
+                          vietnamControllers.isNotEmpty
+                              ? vietnamControllers[0]
+                              : TextEditingController(),
+                          russianControllers.isNotEmpty
+                              ? russianControllers[0]
+                              : TextEditingController(),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 15),
                     Row(
@@ -608,7 +671,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         MyCustomButton(
                           text: '추가',
                           onTap: () => addRepresentiveSentence(),
-                          color: Colors.blue,
+                          color: Colors.orange,
+                          colorBorder: true,
                         ),
                         const SizedBox(width: 20),
                         MyCustomButton(
@@ -616,7 +680,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           onTap: () => deleteSelectedRepresentiveSentence(),
                           color: Colors.orange,
                         ),
-                        const SizedBox(width: 20),
+                        const Spacer(),
                         MyCustomButton(
                           text: '번역',
                           onTap: () {
@@ -624,6 +688,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           },
                           color: const Color(0XFF484848),
                         ),
+                        const SizedBox(width: 20),
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -702,12 +767,63 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         const SizedBox(width: 20),
                         MyCustomButton(
-                          text: '새로 추가',
+                          text: '가져오기',
                           onTap: () => addMetaGrammar(),
-                          color: Colors.blue,
+                          color: Colors.orange,
+                          colorBorder: true,
                         ),
                       ],
                     ),
+                    _metaGrammar.isNotEmpty && _metaGrammar != []
+                        ?
+                        // 메타 문법이 있을 경우
+                        SizedBox(
+                            height: 50,
+                            width: MediaQuery.of(context).size.width,
+                            child: ListView.builder(
+                              itemCount: _metaGrammar.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Container(
+                                  height: 50,
+                                  width: MediaQuery.of(context).size.width,
+                                  padding: const EdgeInsets.all(10),
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 10),
+                                      Flexible(
+                                        flex: 1,
+                                        child: Text(
+                                          '${_metaGrammar[index].id.toString()}. ',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Flexible(
+                                        flex: 4,
+                                        child: Text(
+                                          _metaGrammar[index].title,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                        : const Text(
+                            '해당 회차에서 참조하는 메타 문법이 없습니다.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
                     const SizedBox(height: 40),
                     Row(
                       children: [
@@ -744,7 +860,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         MyCustomButton(
                           text: '추가',
                           onTap: () => addExampleSentence(),
-                          color: Colors.blue,
+                          color: Colors.orange,
+                          colorBorder: true,
                         ),
                         const SizedBox(width: 20),
                         MyCustomButton(
@@ -752,14 +869,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           onTap: () => deleteSelectedRepresentiveSentence(),
                           color: Colors.orange,
                         ),
-                        const SizedBox(width: 20),
+                        const Spacer(),
                         MyCustomButton(
                           text: '번역',
                           onTap: () {
-                            translate(isRep: true);
+                            translate(isRep: false);
                           },
                           color: const Color(0XFF484848),
                         ),
+                        const SizedBox(width: 20),
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -806,7 +924,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                 const SizedBox(width: 10),
                 MyCustomButton(
                   text: '저장하기',
-                  onTap: () => save(),
+                  onTap: () => fianlSave(),
                   color: const Color(0xFF3F99F7),
                 ),
               ],

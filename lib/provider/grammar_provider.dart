@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haru_admin/model/grammer_data_model.dart';
 
 class GrammarData {
   // [1] 제시문 - 대표문장 순서 '0'에 해당
@@ -18,21 +19,24 @@ class GrammarData {
   String? grammarImageUrl;
   String? grammarAudioUrl;
 
-  GrammarData({
-    this.dialogueId,
-    this.dialogue,
-    this.dialogueEng,
-    this.dialogueChn,
-    this.dialogueVie,
-    this.dialogueRus,
-    this.description,
-    this.descriptionEng,
-    this.descriptionChn,
-    this.descriptionVie,
-    this.descriptionRus,
-    this.grammarImageUrl,
-    this.grammarAudioUrl,
-  });
+  // [3] 메타 문법 ids
+  List<MetaGrammar>? metaGrammars;
+
+  GrammarData(
+      {this.dialogueId,
+      this.dialogue,
+      this.dialogueEng,
+      this.dialogueChn,
+      this.dialogueVie,
+      this.dialogueRus,
+      this.description,
+      this.descriptionEng,
+      this.descriptionChn,
+      this.descriptionVie,
+      this.descriptionRus,
+      this.grammarImageUrl,
+      this.grammarAudioUrl,
+      this.metaGrammars});
 
   GrammarData copyWith({
     int? dialogueId,
@@ -48,6 +52,7 @@ class GrammarData {
     String? descriptionRus,
     String? grammarImageUrl,
     String? grammarAudioUrl,
+    List<MetaGrammar>? metaGrammars,
   }) {
     return GrammarData(
       dialogueId: dialogueId ?? this.dialogueId,
@@ -63,6 +68,7 @@ class GrammarData {
       descriptionRus: descriptionRus ?? this.descriptionRus,
       grammarImageUrl: grammarImageUrl ?? this.grammarImageUrl,
       grammarAudioUrl: grammarAudioUrl ?? this.grammarAudioUrl,
+      metaGrammars: metaGrammars ?? this.metaGrammars,
     );
   }
 }
@@ -78,6 +84,8 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
   get getImageUrl => state.grammarImageUrl;
 
   get getAudioUrl => state.grammarAudioUrl;
+
+  get getMetaGrammars => state.metaGrammars;
 
   updateDescriptionImageUrl(String imageUrl) {
     state = state.copyWith(grammarImageUrl: imageUrl);
@@ -121,6 +129,10 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
       descriptionRus: descriptionRus,
       grammarImageUrl: grammarImageUrl,
     );
+  }
+
+  updateMetaGrammars(List<MetaGrammar> metaGrammars) {
+    state = state.copyWith(metaGrammars: metaGrammars);
   }
 }
 

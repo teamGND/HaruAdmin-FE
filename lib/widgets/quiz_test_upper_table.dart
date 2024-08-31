@@ -246,7 +246,9 @@ class UpperTable extends StatelessWidget {
                     height: 60,
                     child: Center(
                       child: Text(
-                        exampleList == null ? '' : exampleList!.join(', '),
+                        (exampleList == null || exampleList == [])
+                            ? ''
+                            : exampleList!.join(', ').split('<').first,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

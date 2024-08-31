@@ -29,7 +29,7 @@ ProblemDataModel? convertListToProblemContents({
     case 102:
       {
         return frameModel.copyWith(
-          problemType: 101,
+          problemType: frameModel.problemType,
           choice1: contents[0],
           choice2: contents[1],
           choice3: contents[2],
@@ -40,14 +40,14 @@ ProblemDataModel? convertListToProblemContents({
     case 104:
       {
         return frameModel.copyWith(
-          problemType: 103,
+          problemType: frameModel.problemType,
           answerString: contents[0],
         );
       }
     case 201:
       {
         return frameModel.copyWith(
-          problemType: 201,
+          problemType: frameModel.problemType,
           picture: contents[0],
           pictureDescription: contents[1],
           questionString: contents[2],
@@ -57,7 +57,7 @@ ProblemDataModel? convertListToProblemContents({
     case 202:
       {
         return frameModel.copyWith(
-          problemType: 202,
+          problemType: frameModel.problemType,
           questionString: contents[0],
           answerString: contents[1],
         );
@@ -66,7 +66,7 @@ ProblemDataModel? convertListToProblemContents({
     case 204:
       {
         return frameModel.copyWith(
-          problemType: 203,
+          problemType: frameModel.problemType,
           questionString: contents[0],
           choice1: contents[1],
           choice2: contents[2],
@@ -77,7 +77,7 @@ ProblemDataModel? convertListToProblemContents({
     case 205:
       {
         return frameModel.copyWith(
-          problemType: 205,
+          problemType: frameModel.problemType,
           exampleOriginal: contents[0],
           exampleChanged: contents[1],
           questionString: contents[2],
@@ -87,7 +87,7 @@ ProblemDataModel? convertListToProblemContents({
     case 206:
       {
         return frameModel.copyWith(
-          problemType: 206,
+          problemType: frameModel.problemType,
           questionString: contents[0],
           answerString: contents[1],
         );
@@ -95,7 +95,7 @@ ProblemDataModel? convertListToProblemContents({
     case 207:
       {
         return frameModel.copyWith(
-          problemType: 207,
+          problemType: frameModel.problemType,
           audio: contents[0],
           answerString: contents[1],
         );
@@ -103,7 +103,7 @@ ProblemDataModel? convertListToProblemContents({
     case 208:
       {
         return frameModel.copyWith(
-          problemType: 208,
+          problemType: frameModel.problemType,
           questionString: contents[0],
           exampleChanged: contents[1],
           answerNumber: stringNumberToInteger(contents[2], false, isOX: true),

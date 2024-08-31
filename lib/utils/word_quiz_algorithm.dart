@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../model/test_data_model.dart';
+
 ///
 ///   단어 퀴즈 타입
 /// type1 - 그림보고 어휘 (3)  ['', '', '']
@@ -9,51 +11,30 @@ import 'dart:math';
 
 /// 3지 선다
 
-/// type| 1, 2, 3
+/// type| 101, 102, 103, 104
 /// ---------
 /// 6   | 3, 2, 1
 /// 7   | 3, 2, 2
 /// 8   | 3, 3, 2
 /// 9   | 3, 3, 3
 /// 10  | 4, 3, 3
+///
+/// 이 알고리즘의 기능은 다음과 같습니다.
+/// 1. 단어 리스트를 받습니다. (wordList)
+/// 이 때, 특정 단어를 type3나 type4로 지정하고 싶다면 desinatedType3List, desinatedType4List에 해당 단어 인덱스를 넣어주세요.
+/// 특정 단어를 지정하지 않는다면 null을 넣어주세요.
+///
+///
 
-class WordQuiz {
-  int quizType; // 퀴즈 타입 1, 2, 3 중에 하나
-  String answerWord;
-  String? optionWord1;
-  String? optionWord2;
-
-  WordQuiz({
-    required this.quizType, // 퀴즈 타입 1, 2, 3 중에 하나
-    required this.answerWord,
-    this.optionWord1, // null if it's not Type 1,2 word problem
-    this.optionWord2, // null if it's not Type 1,2 word problem
-  });
-
-  WordQuiz copyWith({
-    int? quizType,
-    String? answerWord,
-    String? optionWord1,
-    String? optionWord2,
-  }) {
-    return WordQuiz(
-      quizType: quizType ?? this.quizType,
-      answerWord: answerWord ?? this.answerWord,
-      optionWord1: optionWord1 ?? this.optionWord1,
-      optionWord2: optionWord2 ?? this.optionWord2,
-    );
-  }
-}
-
-List<WordQuiz> makeWordQuiz({
+List<ProblemDataModel> makeWordQuiz({
   required List<String> wordList,
 }) {
   // Map<총 문항 개수, 타입별 문항 개수>
   Map<int, List<int>> quizTypeCnts = {
-    0: [0, 0, 0],
-    5: [2, 2, 1],
-    6: [3, 2, 1],
-    7: [3, 2, 2],
+    0: [0, 0, 0, 0],
+    5: [2, 2, 1, 0],
+    6: [3, 2, 1, 0],
+    7: [3, 2, 1, 1],
     8: [3, 3, 2],
     9: [3, 3, 3],
     10: [4, 3, 3],
@@ -65,33 +46,33 @@ List<WordQuiz> makeWordQuiz({
   // 단어 리스트 번호 랜덤돌리기
   List<int> quizNumber = generateShuffledList(quizLength);
 
-  List<WordQuiz> result = [];
-  for (int i = 0; i < quizLength; i++) {
-    for (int t = 0; t < quizTypeCnt.length; t++) {
-      /* 타입 1부터 문제 하나씩 만들기 */
-      if (quizTypeCnt[t] == 0) continue;
+  List<ProblemDataModel> result = [];
+  // for (int i = 0; i < quizLength; i++) {
+  //   for (int t = 0; t < quizTypeCnt.length; t++) {
+  //     /* 타입 1부터 문제 하나씩 만들기 */
+  //     if (quizTypeCnt[t] == 0) continue;
 
-      int answerN = quizNumber[i];
+  //     int answerN = quizNumber[i];
 
-      WordQuiz quiz = WordQuiz(
-        quizType: t,
-        answerWord: wordList[answerN],
-      );
+  //     WordQuiz quiz = WordQuiz(
+  //       quizType: t,
+  //       answerWord: wordList[answerN],
+  //     );
 
-      if (t == 0 || t == 1) {
-        int optionN1 = (quizNumber[i] - 1) % quizLength;
-        int optionN2 = (quizNumber[i] + 1) % quizLength;
+  //     if (t == 0 || t == 1) {
+  //       int optionN1 = (quizNumber[i] - 1) % quizLength;
+  //       int optionN2 = (quizNumber[i] + 1) % quizLength;
 
-        quiz = quiz.copyWith(
-          optionWord1: wordList[optionN1],
-          optionWord2: wordList[optionN2],
-        );
-      }
-      result.add(quiz);
-      quizTypeCnt[t]--;
-      break;
-    }
-  }
+  //       quiz = quiz.copyWith(
+  //         optionWord1: wordList[optionN1],
+  //         optionWord2: wordList[optionN2],
+  //       );
+  //     }
+  //     result.add(quiz);
+  //     quizTypeCnt[t]--;
+  //     break;
+  //   }
+  // }
 
   return result;
 }

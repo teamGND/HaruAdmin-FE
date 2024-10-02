@@ -415,7 +415,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                         SizedBox(
                                           height: _rowHeight,
                                           child: Center(
-                                            child: Text(data.state ?? 'EMPTY'),
+                                            child: Text(data.status ?? '?'),
                                           ),
                                         ),
                                         SizedBox(

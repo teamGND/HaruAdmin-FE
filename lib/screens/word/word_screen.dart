@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/api/word_data_services.dart';
@@ -7,29 +6,21 @@ import 'package:haru_admin/utils/enum_type.dart';
 
 import '../../provider/intro_provider.dart';
 
-class Word extends ConsumerStatefulWidget {
-  const Word({super.key});
+class WordScreen extends StatefulWidget {
+  const WordScreen({super.key});
 
   @override
-  ConsumerState<Word> createState() => _WordState();
+  State<WordScreen> createState() => _WordState();
 }
 
-class _WordState extends ConsumerState<Word> {
+class _WordState extends State<WordScreen> {
   final int _pageSize = 8;
   int _currentPage = 0;
   late WordDataList wordData;
   LEVEL dropdownValue = LEVEL.LEVEL1;
   double TABLE_ROW_HEIGHT = 50;
 
-  final tabletitle = [
-    'No.',
-    '사이클',
-    '세트',
-    '회차',
-    '타이틀',
-    '학습 내용',
-    '단어수',
-  ];
+  final tabletitle = ['No.', '사이클', '세트', '회차', '타이틀', '학습 내용', '단어수', '상태'];
 
   late Future<void> _wordListDataFuture;
 
@@ -39,19 +30,8 @@ class _WordState extends ConsumerState<Word> {
     _wordListDataFuture = fetchData();
   }
 
-  void addChapter({index}) {
-    ref.read(introProvider.notifier).update(
-          dataId: wordData.content[index].id,
-          chapter: wordData.content[index].chapter,
-          cycle: wordData.content[index].cycle,
-          sets: wordData.content[index].sets,
-          category: CATEGORY.WORD,
-          level: dropdownValue,
-          title: wordData.content[index].title,
-          wordDatas: wordData.content[index].content?.split(','),
-        );
-
-    context.go('/word/add');
+  void updateChapter({index}) {
+    context.go('/word/add/${wordData.content[index].id}');
   }
 
   Future<void> fetchData() async {
@@ -168,7 +148,7 @@ class _WordState extends ConsumerState<Word> {
                                     4: FlexColumnWidth(3), // 타이틀
                                     5: FlexColumnWidth(7), // 단어 리스트
                                     6: FlexColumnWidth(1),
-                                    7: FlexColumnWidth(2),
+                                    7: FlexColumnWidth(1),
                                   },
                                   children: [
                                     TableRow(
@@ -237,7 +217,7 @@ class _WordState extends ConsumerState<Word> {
                                             height: TABLE_ROW_HEIGHT,
                                             child: TextButton(
                                               onPressed: () {
-                                                addChapter(index: index);
+                                                updateChapter(index: index);
                                               },
                                               child: Center(
                                                 child: data.content != ''
@@ -260,6 +240,14 @@ class _WordState extends ConsumerState<Word> {
                                             child: Center(
                                               child: Text(
                                                   data.wordCount.toString()),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            // 단어 개수
+                                            height: TABLE_ROW_HEIGHT,
+                                            child: Center(
+                                              child: Text(
+                                                  data.quizStatus.toString()),
                                             ),
                                           ),
                                         ],

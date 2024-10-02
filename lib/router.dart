@@ -4,7 +4,7 @@ import 'package:haru_admin/screens/admin.dart';
 import 'package:haru_admin/screens/authentication/login_page.dart';
 import 'package:haru_admin/screens/authentication/signup_page.dart';
 import 'package:haru_admin/screens/grammer/add_grammer.dart';
-import 'package:haru_admin/screens/grammer/grammer.dart';
+import 'package:haru_admin/screens/grammer/grammer_screen.dart';
 import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/screens/intro/intro_test_screen.dart';
 import 'package:haru_admin/screens/meta/meta_screen.dart';
@@ -70,8 +70,10 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           name: '단어 데이터 추가',
-          path: '/word/add',
-          builder: (context, state) => const AddWordScreen(),
+          path: '/word/add/:wordId',
+          builder: (context, state) => AddWordScreen(
+            state.pathParameters['wordId'],
+          ),
         ),
       ],
     ),
@@ -94,12 +96,12 @@ Map<String, List<GoRoute>> sidebarRoutes = {
     GoRoute(
       name: '단어 데이터',
       path: '/word',
-      builder: (context, state) => const Word(),
+      builder: (context, state) => const WordScreen(),
     ),
     GoRoute(
       name: '문법 데이터',
       path: '/grammar',
-      builder: (context, state) => const GrammerData(),
+      builder: (context, state) => const GrammerScreen(),
     ),
     GoRoute(
       name: '메타 데이터',

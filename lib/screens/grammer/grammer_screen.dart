@@ -8,14 +8,14 @@ import 'package:haru_admin/widgets/buttons.dart';
 
 import '../../provider/intro_provider.dart';
 
-class GrammerData extends ConsumerStatefulWidget {
-  const GrammerData({super.key});
+class GrammerScreen extends ConsumerStatefulWidget {
+  const GrammerScreen({super.key});
 
   @override
-  ConsumerState<GrammerData> createState() => _GrammerDataState();
+  ConsumerState<GrammerScreen> createState() => _GrammerDataState();
 }
 
-class _GrammerDataState extends ConsumerState<GrammerData> {
+class _GrammerDataState extends ConsumerState<GrammerScreen> {
   final int _pageSize = 8;
   int _currentPage = 0;
   late GrammarDataList grammarData;
@@ -29,6 +29,7 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
     '타이틀',
     '제시문 제목',
     '예시 개수',
+    '상태',
   ];
 
   final descriptionTitle = [
@@ -70,24 +71,19 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
     int? index,
     int grammarId = 0,
   }) {
-    if (index == null && grammarData.content != null) {
+    if (index == null) {
       ref.watch(introProvider.notifier).update(
             level: dropdownValue,
-            chapter: grammarData.content!.last.chapter + 1,
-          );
-    } else if (index == null) {
-      ref.watch(introProvider.notifier).update(
-            level: dropdownValue,
-            chapter: 1,
+            chapter: grammarData.content.last.chapter + 1,
           );
     } else {
       ref.watch(introProvider.notifier).update(
-            dataId: grammarData.content![index].id,
+            dataId: grammarData.content[index].id,
             level: dropdownValue,
-            cycle: grammarData.content![index].cycle,
-            sets: grammarData.content![index].sets,
-            chapter: grammarData.content![index].chapter,
-            title: grammarData.content![index].title,
+            cycle: grammarData.content[index].cycle,
+            sets: grammarData.content[index].sets,
+            chapter: grammarData.content[index].chapter,
+            title: grammarData.content[index].title,
           );
     }
 
@@ -163,8 +159,6 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (grammarData.content == null) {
-                return const Center(child: Text('데이터가 없습니다.'));
               } else {
                 return Column(
                   children: [
@@ -181,67 +175,55 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
                         4: FlexColumnWidth(3), // 타이틀
                         5: FlexColumnWidth(7), // 제시문 제목
                         6: FlexColumnWidth(1), //  예시 개수
+                        7: FlexColumnWidth(
+                            1), // 상태(status) - APPROVE, DELETE, WAIT
                       },
                       children: _buildTableRows(),
                     ),
                     const SizedBox(height: 20),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.2,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _currentPage != 0
-                                  ? GestureDetector(
-                                      onTap: () {
-                                        goToPage(_currentPage - 1);
-                                      },
-                                      child: const SizedBox(
-                                          width: 50, child: Text('< 이전')))
-                                  : const SizedBox(width: 50),
-                              Container(
-                                padding: const EdgeInsets.all(5),
-                                width: 50,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    border: Border.all(
-                                      color: Colors.black,
-                                      width: 1,
-                                    )),
-                                child: Text(
-                                  (_currentPage + 1).toString(),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              _currentPage != grammarData.totalPages
-                                  ? GestureDetector(
-                                      onTap: () {
-                                        goToPage(_currentPage + 1);
-                                      },
-                                      child: const SizedBox(
-                                          width: 50, child: Text('다음 >')),
-                                    )
-                                  : const SizedBox(width: 50),
-                              GestureDetector(
+                        _currentPage != 0
+                            ? GestureDetector(
                                 onTap: () {
-                                  goToPage(grammarData.totalPages - 1);
+                                  goToPage(_currentPage - 1);
                                 },
-                                child: const Text('맨뒤로 >>'),
-                              ),
-                            ],
+                                child: const SizedBox(
+                                    width: 50, child: Text('< 이전')))
+                            : const SizedBox(width: 50),
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 5),
+                          padding: const EdgeInsets.all(5),
+                          width: 50,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1,
+                              )),
+                          child: Text(
+                            (_currentPage + 1).toString(),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        // MyCustomButton(
-                        //   text: '회차추가',
-                        //   onTap: () => addChapter(),
-                        //   color: Colors.blue,
-                        // ),
+                        _currentPage != grammarData.totalPages
+                            ? GestureDetector(
+                                onTap: () {
+                                  goToPage(_currentPage + 1);
+                                },
+                                child: const SizedBox(
+                                    width: 50, child: Text('다음 >')),
+                              )
+                            : const SizedBox(width: 50),
+                        GestureDetector(
+                          onTap: () {
+                            goToPage(grammarData.totalPages - 1);
+                          },
+                          child: const Text('맨뒤로 >>'),
+                        ),
                       ],
                     ),
                   ],
@@ -287,7 +269,7 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
       return rows;
     }
 
-    for (int i = 0; i < grammarData.content!.length; i++) {
+    for (int i = 0; i < grammarData.content.length; i++) {
       rows.add(
         TableRow(
           decoration: const BoxDecoration(
@@ -307,28 +289,28 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
               // 2. 사이클
               height: 35,
               child: Center(
-                child: Text(grammarData.content![i].cycle.toString()),
+                child: Text(grammarData.content[i].cycle.toString()),
               ),
             ),
             SizedBox(
               // 3. 세트
               height: 35,
               child: Center(
-                child: Text(grammarData.content![i].sets.toString()),
+                child: Text(grammarData.content[i].sets.toString()),
               ),
             ),
             SizedBox(
               // 4. 회차
               height: 35,
               child: Center(
-                child: Text(grammarData.content![i].chapter.toString()),
+                child: Text(grammarData.content[i].chapter.toString()),
               ),
             ),
             SizedBox(
               // 5. 타이틀
               height: 35,
               child: Center(
-                child: Text(grammarData.content![i].title!),
+                child: Text(grammarData.content[i].title!),
               ),
             ),
             SizedBox(
@@ -338,12 +320,12 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
                 onPressed: () {
                   addChapter(
                     index: i,
-                    grammarId: grammarData.content!.last.id,
+                    grammarId: grammarData.content.last.id,
                   );
                 },
                 child: Center(
-                  child: grammarData.content![i].representSentences != ''
-                      ? Text(grammarData.content![i].representSentences!
+                  child: grammarData.content[i].representSentences != ''
+                      ? Text(grammarData.content[i].representSentences!
                           .split('<')
                           .last
                           .split('>')
@@ -363,7 +345,14 @@ class _GrammerDataState extends ConsumerState<GrammerData> {
               height: 35,
               child: Center(
                 child: Text(
-                    grammarData.content![i].exampleSentenceNumber.toString()),
+                    grammarData.content[i].exampleSentenceNumber.toString()),
+              ),
+            ),
+            SizedBox(
+              // 단어 개수
+              height: 35,
+              child: Center(
+                child: Text(grammarData.content[i].status.toString()),
               ),
             ),
           ],

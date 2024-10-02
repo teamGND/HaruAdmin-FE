@@ -564,30 +564,28 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
                         textControllers.insert(newIndex, item2);
                       });
                     },
-                    children: (_problemList == [] || _problemList.isEmpty)
-                        ? const [Text('No data')]
-                        : List.generate(
-                            _problemList.length,
-                            (index) => ListTile(
-                              key: ValueKey(index),
-                              leading: Checkbox(
-                                value: _selected[index],
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    _selected[index] = value!;
-                                  });
-                                },
-                              ),
-                              title: TestTableElement(
-                                orderedNumber: index + 1,
-                                problemType: _problemList[index].problemType,
-                                problemWidget: ProblemTable(
-                                  problem: _problemList[index],
-                                  textController: textControllers[index],
-                                ),
-                              ),
-                            ),
+                    children: List.generate(
+                      _problemList.length,
+                      (index) => ListTile(
+                        key: ValueKey(index),
+                        leading: Checkbox(
+                          value: _selected[index],
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _selected[index] = value!;
+                            });
+                          },
+                        ),
+                        title: TestTableElement(
+                          orderedNumber: index + 1,
+                          problemType: _problemList[index].problemType,
+                          problemWidget: ProblemTable(
+                            problem: _problemList[index],
+                            textController: textControllers[index],
                           ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
           const Divider(

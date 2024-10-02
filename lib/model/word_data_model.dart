@@ -202,17 +202,32 @@ class WordChapterData {
     };
   }
 
-  WordChapterData.copyWith(WordChapterData data)
-      : id = data.id,
-        order = data.order,
-        title = data.title,
-        imgUrl = data.imgUrl,
-        voiceUrl = data.voiceUrl,
-        english = data.english,
-        chinese = data.chinese,
-        vietnam = data.vietnam,
-        russian = data.russian,
-        description = data.description;
+  // copyWith
+  WordChapterData copyWith({
+    int? id,
+    int? order,
+    String? title,
+    String? imgUrl,
+    String? voiceUrl,
+    String? english,
+    String? chinese,
+    String? vietnam,
+    String? russian,
+    String? description,
+  }) {
+    return WordChapterData(
+      id: id ?? this.id,
+      order: order ?? this.order,
+      title: title ?? this.title,
+      imgUrl: imgUrl ?? this.imgUrl,
+      voiceUrl: voiceUrl ?? this.voiceUrl,
+      english: english ?? this.english,
+      chinese: chinese ?? this.chinese,
+      vietnam: vietnam ?? this.vietnam,
+      russian: russian ?? this.russian,
+      description: description ?? this.description,
+    );
+  }
 }
 
 class PatchWordChapterData {
@@ -221,7 +236,8 @@ class PatchWordChapterData {
   int? chapter;
   int? sets;
   int? cycle;
-  List<WordChapterData> word;
+  List<PatchWordChapterDataComponent> word;
+  String? status; // 확정 상태
 
   PatchWordChapterData({
     required this.level,
@@ -230,6 +246,7 @@ class PatchWordChapterData {
     required this.sets,
     required this.cycle,
     required this.word,
+    required this.status, // APPROVE, DELETE, WAIT
   });
 
   Map<String, dynamic> toJson() {
@@ -241,6 +258,90 @@ class PatchWordChapterData {
       'sets': sets,
       'cycle': cycle,
       'word': wordList,
+      'status': status,
     };
+  }
+}
+
+class PatchWordChapterDataComponent {
+  int? id;
+  int order;
+  String title;
+  String? imageUrl;
+  String? voiceUrl;
+  String? english;
+  String? chinese;
+  String? vietnam;
+  String? russian;
+  String? description;
+
+  PatchWordChapterDataComponent({
+    this.id,
+    required this.order,
+    required this.title,
+    this.imageUrl,
+    this.voiceUrl,
+    this.english,
+    this.chinese,
+    this.vietnam,
+    this.russian,
+    this.description,
+  });
+
+  factory PatchWordChapterDataComponent.fromJson(Map<String, dynamic> json) {
+    return PatchWordChapterDataComponent(
+      id: json['id'],
+      order: json['order'],
+      title: json['title'],
+      imageUrl: json['imageUrl'],
+      voiceUrl: json['voiceUrl'],
+      english: json['english'],
+      chinese: json['chinese'],
+      vietnam: json['vietnam'],
+      russian: json['russian'],
+      description: json['description'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'order': order,
+      'title': title,
+      'imageUrl': imageUrl,
+      'voiceUrl': voiceUrl,
+      'english': english,
+      'chinese': chinese,
+      'vietnam': vietnam,
+      'russian': russian,
+      'description': description,
+    };
+  }
+
+  // copyWith
+  PatchWordChapterDataComponent copyWith({
+    int? id,
+    int? order,
+    String? title,
+    String? imageUrl,
+    String? voiceUrl,
+    String? english,
+    String? chinese,
+    String? vietnam,
+    String? russian,
+    String? description,
+  }) {
+    return PatchWordChapterDataComponent(
+      id: id ?? this.id,
+      order: order ?? this.order,
+      title: title ?? this.title,
+      imageUrl: imageUrl ?? this.imageUrl,
+      voiceUrl: voiceUrl ?? this.voiceUrl,
+      english: english ?? this.english,
+      chinese: chinese ?? this.chinese,
+      vietnam: vietnam ?? this.vietnam,
+      russian: russian ?? this.russian,
+      description: description ?? this.description,
+    );
   }
 }

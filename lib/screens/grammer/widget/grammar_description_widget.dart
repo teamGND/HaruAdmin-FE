@@ -42,18 +42,7 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
   String? imageUrl = '';
 
   Future<void> getImageUrl() async {
-    int? chapter = ref.read(introProvider).chapter;
-
-    if (chapter == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Center(child: Text('챕터를 선택해주세요.')),
-          showCloseIcon: true,
-          closeIconColor: Colors.white,
-        ),
-      );
-      return;
-    }
+    IntroInfo info = ref.read(introProvider);
 
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -66,7 +55,8 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
         await grammarDataRepository
             .uploadFile(
           fileBytes: file.bytes!,
-          fileName: 'grammar_description_${chapter.toString()}',
+          fileName:
+              'grammar_description_${info.level}_${info.cycle.toString()}_${info.sets.toString()}_${info.chapter.toString()}',
           fileType: file.extension!,
         )
             .then((value) {

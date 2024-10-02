@@ -77,7 +77,7 @@ class GrammerDataRepository {
       final response = await dio4File.post('/grammar/file', data: formData);
 
       if (response.statusCode == 200) {
-        String? fileUrl = response.data['fileUrl'];
+        String? fileUrl = response.data;
         if (fileUrl != null) {
           return fileUrl;
         } else {

@@ -1,7 +1,7 @@
 import 'package:haru_admin/model/intro_data_model.dart';
 
 class GrammarDataList {
-  final List<GrammarDataListComponent>? content;
+  final List<GrammarDataListComponent> content;
   final bool empty;
   final bool first;
   final bool last;

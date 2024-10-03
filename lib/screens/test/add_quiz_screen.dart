@@ -215,9 +215,13 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
             textControllers.add(temp);
           }
         }
+        // '<' 포함하는 예문은 제외
+        List<String> exmapleSentences = value.exampleList.where((element) {
+          return !element.contains('<');
+        }).toList();
 
         setState(() {
-          _exampleData = value.exampleList;
+          _exampleData = exmapleSentences;
           _problemList = tempList ?? [];
           info = info.copyWith(
             dataId: id,
@@ -279,20 +283,26 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
 
       for (var problem in _problemList) {
         List<String> contents = [];
-        for (var controller in textControllers[idx]) {
-          String? text = controller.text;
+        // for (var controller in textControllers[idx]) {
+        for (int i = 0; i < textControllers[idx].length; i++) {
+          String? text = textControllers[idx][i].text;
           if (text.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Center(child: Text('입력하지 않은 항목이 있습니다.')),
-                showCloseIcon: true,
-                closeIconColor: Colors.white,
-              ),
-            );
-            setState(() {
-              _isLoading = false;
-            });
-            return;
+            if ((problem.problemType == 203 && i == 3) ||
+                (problem.problemType == 201 && i == 1)) {
+              // null 허용
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Center(child: Text('입력하지 않은 항목이 있습니다.')),
+                  showCloseIcon: true,
+                  closeIconColor: Colors.white,
+                ),
+              );
+              setState(() {
+                _isLoading = false;
+              });
+              return;
+            }
           }
           contents.add(text);
         }

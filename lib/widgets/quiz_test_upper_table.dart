@@ -241,10 +241,11 @@ class UpperTable extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: SizedBox(
-                    width: 50,
-                    height: 60,
-                    child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 50,
+                      height: 42,
                       child: Text(
                         (exampleList == [] || exampleList == null)
                             ? ''

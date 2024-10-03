@@ -5,6 +5,7 @@ import 'package:haru_admin/api/translate_service.dart';
 import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/model/translate_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
+import 'package:haru_admin/utils/enum_type.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -12,7 +13,9 @@ import '../../widgets/buttons.dart';
 import '../../provider/intro_provider.dart';
 
 class AddWordScreen extends ConsumerStatefulWidget {
-  const AddWordScreen({super.key});
+  const AddWordScreen(this.wordId, {super.key});
+
+  final String? wordId;
 
   @override
   ConsumerState<AddWordScreen> createState() => _AddWordScreenState();
@@ -30,8 +33,9 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
   // 회차 데이터 가져오기
   IntroInfo info = IntroInfo();
-  List<WordChapterData> _datas = [];
+  List<PatchWordChapterDataComponent> _datas = [];
   final List<bool> _isChecked = List<bool>.filled(10, false);
+  bool _isWaiting = false;
 
   List<Map<String, double>> tabletitle = [
     {'': 50},
@@ -122,6 +126,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
             sets: info.sets,
             cycle: info.cycle,
             word: _datas,
+            status: 'WAIT',
           ),
         )
             .then((value) {
@@ -192,7 +197,89 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     }
   }
 
-  void confirm() {}
+  void confirm() async {
+    // (description 제외) 모든 데이터 null 값 체크
+    bool isAllNull = _datas.every((element) {
+      if (element.title.isEmpty ||
+          element.title == '' ||
+          element.english == '' ||
+          element.chinese == '' ||
+          element.vietnam == '' ||
+          element.russian == '' ||
+          // element.imgUrl == null ||
+          element.voiceUrl == null) {
+        return false;
+      }
+      return true;
+    });
+
+    if (isAllNull == false) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Center(child: Text('모든 데이터를 입력해주세요. \'저장하기\'를 먼저 해주세요.')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+      return;
+    }
+
+    // CONFRIM 확정하겠냐는 dialog
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('데이터를 유저 앱에 반영합니다.'),
+          content: const Text(
+              '체크리스트\n1. 단어의 맞춤법을 확인했나요?\n2. 영어, 중국어, 베트남어, 러시아어 - 번역을 검토했나요?\n3. 이미지가 정확한지 확인했나요?\n4. 음성이 정확한지 확인했나요?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  // 확정하면 데이터 저장
+                  await wordRepository
+                      .saveWordData(
+                    id: info.dataId!,
+                    data: PatchWordChapterData(
+                        level: info.level.toString().split('.').last,
+                        title: info.title,
+                        chapter: info.chapter,
+                        sets: info.sets,
+                        cycle: info.cycle,
+                        word: _datas,
+                        status: 'APPROVE'),
+                  )
+                      .then((value) {
+                    if (value != null) {
+                      Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Center(child: Text('유저 앱 반영 완료 🤠')),
+                          showCloseIcon: true,
+                          closeIconColor: Colors.white,
+                        ),
+                      );
+                    }
+                  });
+                } catch (e) {
+                  throw Exception(e);
+                }
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void getImageUrl(int index) async {
     if (_datas[index].title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -212,7 +299,9 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
       if (result != null) {
         PlatformFile file = result.files.first;
-
+        setState(() {
+          _isWaiting = true;
+        });
         await wordRepository
             .uploadFile(
           fileBytes: file.bytes!,
@@ -221,12 +310,14 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
         )
             .then((value) {
           setState(() {
-            _datas = _datas.map((data) {
+            _datas = _datas.map((PatchWordChapterDataComponent data) {
               if (data.order == index + 1) {
-                data.imgUrl = value;
+                return data.copyWith(imageUrl: value);
               }
               return data;
             }).toList();
+
+            _isWaiting = false;
           });
         });
       } else {
@@ -307,9 +398,36 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
   Future<void> fetchWordData() async {
     try {
-      if (info.dataId != null) {
-        await wordRepository.getWordData(id: info.dataId!).then((value) {
-          _datas = value.wordDataList;
+      if (widget.wordId != null) {
+        await wordRepository
+            .getWordData(id: int.parse(widget.wordId!))
+            .then((value) {
+          _datas = value.wordDataList.map((data) {
+            return PatchWordChapterDataComponent(
+              id: data.id,
+              order: data.order,
+              title: data.title,
+              imageUrl: data.imgUrl,
+              voiceUrl: data.voiceUrl,
+              english: data.english,
+              chinese: data.chinese,
+              vietnam: data.vietnam,
+              russian: data.russian,
+              description: data.description,
+            );
+          }).toList();
+
+          setState(() {
+            info = IntroInfo(
+              dataId: value.id,
+              level: levelFromString(value.level),
+              category: CATEGORY.WORD,
+              cycle: value.cycle,
+              sets: value.sets,
+              chapter: value.chapter,
+              title: value.title,
+            );
+          });
         });
 
         // 순서 0 일때
@@ -344,7 +462,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   @override
   void initState() {
     super.initState();
-    info = ref.read(introProvider);
     _wordDataFuture = fetchWordData();
   }
 
@@ -478,25 +595,36 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                     // 4. 이미지
                                     TableComponent(
                                       width: tabletitle[3].values.first,
-                                      child: _datas[index].imgUrl != null
-                                          ? Image.network(
-                                              _datas[index].imgUrl!,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : TextButton(
-                                              onPressed: () {
-                                                // 이미지 불러오기
-                                                getImageUrl(index);
-                                              },
-                                              child: const Text(
-                                                '불러오기',
-                                                style: TextStyle(
-                                                  color: Colors.blue,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 10,
-                                                ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          (_isWaiting == false &&
+                                                  _datas[index].imageUrl !=
+                                                      null)
+                                              ? Image.network(
+                                                  _datas[index].imageUrl!,
+                                                  width: 60,
+                                                  height: 60,
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : const SizedBox(),
+                                          TextButton(
+                                            onPressed: () {
+                                              // 이미지 불러오기
+                                              getImageUrl(index);
+                                            },
+                                            child: const Text(
+                                              '불러오기',
+                                              style: TextStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 10,
                                               ),
                                             ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     // 5. 음성
                                     TableComponent(
@@ -657,13 +785,13 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                     ),
                     const Expanded(child: SizedBox()),
                     MyCustomButton(
-                      text: 'Confirm',
+                      text: 'CONFIRM',
                       onTap: () => confirm(),
                       color: const Color(0xFFFF7D53),
                     ),
                     const SizedBox(width: 10),
                     MyCustomButton(
-                      text: '번역 불러오기',
+                      text: '번역하기',
                       onTap: () => translate(),
                       color: const Color(0xFF484848),
                     ),

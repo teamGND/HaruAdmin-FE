@@ -13,7 +13,6 @@ import '../../api/translate_service.dart';
 import '../../model/translate_model.dart';
 import '../../provider/intro_provider.dart';
 import '../../utils/enum_type.dart';
-import '../../utils/escape_json_string.dart';
 import '../../widgets/buttons.dart';
 import 'widget/grammar_description_widget.dart';
 
@@ -289,7 +288,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           korean: data.expression!,
           english: data.expressionEng,
         );
-        print(response);
         if (response != null) {
           if (isRep) {
             setState(() {
@@ -318,7 +316,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     }
   }
 
-  confirm() {}
   List<Sentence> saveRepSentences() {
     // 0번째 인덱스는 제시문
     List<Sentence> sentences = [];
@@ -359,55 +356,84 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     return sentences;
   }
 
-  finalSave() async {
+  confirm() async {
+    // CONFRIM 확정하겠냐는 dialog
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('데이터를 유저 앱에 반영합니다.'),
+          content: const Text(
+              '체크리스트\n1. 단어의 맞춤법을 확인했나요?\n2. 영어, 중국어, 베트남어, 러시아어 - 번역을 검토했나요?\n3. 이미지가 정확한지 확인했나요?\n4. 음성이 정확한지 확인했나요?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await finalSave(true);
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  finalSave(bool isConfirm) async {
     try {
       List<Sentence> sentences = [
         Sentence(
           id: _representSentences[0].id,
           order: 0,
           sentenceType: "REPRESENT",
-          expression: escapeJsonString(koreanControllers[0].text),
-          expressionEng: escapeJsonString(englishControllers[0].text),
-          expressionChn: escapeJsonString(chineseControllers[0].text),
-          expressionVie: escapeJsonString(vietnamControllers[0].text),
-          expressionRus: escapeJsonString(russianControllers[0].text),
+          expression: koreanControllers[0].text,
+          expressionEng: englishControllers[0].text,
+          expressionChn: chineseControllers[0].text,
+          expressionVie: vietnamControllers[0].text,
+          expressionRus: russianControllers[0].text,
           voiceUrl: _representSentences[0].voiceUrl,
           characterType: 'BLACK',
         )
       ];
       sentences.addAll(saveRepSentences());
       sentences.addAll(saveExSentences());
+
+      final data = AddGrammarData(
+          level: info.level.toString().split('.')[1],
+          cycle: info.cycle,
+          sets: info.sets,
+          chapter: info.chapter,
+          title: titleController.text,
+          description: ref.read(grammarDataProvider).description,
+          descriptionEng: ref.read(grammarDataProvider).descriptionEng,
+          descriptionChn: ref.read(grammarDataProvider).descriptionChn,
+          descriptionVie: ref.read(grammarDataProvider).descriptionVie,
+          descriptionRus: ref.read(grammarDataProvider).descriptionRus,
+          sentenceList: sentences,
+          metaGrammars: _metaGrammar.map((e) => e.id).toList(),
+          status: isConfirm ? 'APPROVE' : 'WAIT');
+
       await grammerRepository
           .updateGrammarData(
-        id: info.dataId!,
-        data: AddGrammarData(
-            level: info.level.toString().split('.').last,
-            cycle: info.cycle,
-            sets: info.sets,
-            chapter: info.chapter,
-            title: titleController.text,
-            description:
-                escapeJsonString(ref.read(grammarDataProvider).description),
-            descriptionEng:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionEng),
-            descriptionChn:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionChn),
-            descriptionVie:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionVie),
-            descriptionRus:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionRus),
-            sentenceList: sentences,
-            metaGrammars: _metaGrammar.map((e) => e.id).toList(),
-            status: 'WAIT'),
+        id: int.parse(widget.grammarId!),
+        data: data,
       )
-          .then((value) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Center(child: Text('저장 완료')),
-            showCloseIcon: true,
-            closeIconColor: Colors.white,
-          ),
-        );
+          .then((value) async {
+        await fetchGrammarData().then((value) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Center(child: Text(isConfirm ? '유저 앱 반영 완료 🤠' : '저장 완료')),
+              showCloseIcon: true,
+              closeIconColor: Colors.white,
+            ),
+          );
+        });
       });
     } catch (e) {
       print(e);
@@ -745,6 +771,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: SizedBox(
+                        height: 200,
                         width: MediaQuery.of(context).size.width,
                         child: Table(
                           border: TableBorder.all(
@@ -753,12 +780,12 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           ),
                           columnWidths: const {
                             0: FlexColumnWidth(1), // 순서
-                            1: FlexColumnWidth(3), // 문장
-                            2: FlexColumnWidth(1), // 음성 file
-                            3: FlexColumnWidth(3), // eng
-                            4: FlexColumnWidth(3), // chn
-                            5: FlexColumnWidth(3), // vie
-                            6: FlexColumnWidth(3), // rus
+                            1: FlexColumnWidth(6), // 문장
+                            2: FlexColumnWidth(2), // 음성 file
+                            3: FlexColumnWidth(6), // eng
+                            4: FlexColumnWidth(6), // chn
+                            5: FlexColumnWidth(6), // vie
+                            6: FlexColumnWidth(6), // rus
                           },
                           children: _buildTableRows(true),
                         ),
@@ -943,23 +970,32 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: SizedBox(
+                        height: 450,
                         width: MediaQuery.of(context).size.width,
-                        child: Table(
-                          border: TableBorder.all(
-                            color: const Color(0xFFB9B9B9),
-                            width: 1,
-                          ),
-                          columnWidths: const {
-                            0: FlexColumnWidth(1), // 순서
-                            1: FlexColumnWidth(3), // 문장
-                            2: FlexColumnWidth(1), // 음성 file
-                            3: FlexColumnWidth(3), // eng
-                            4: FlexColumnWidth(3), // chn
-                            5: FlexColumnWidth(3), // vie
-                            6: FlexColumnWidth(3), // rus
-                          },
-                          children: _buildTableRows(false),
-                        ),
+                        child: _buildTableRows(false).isEmpty
+                            ? const Center(
+                                child: Text('예시 문장이 없습니다.',
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey)),
+                              )
+                            : Table(
+                                border: TableBorder.all(
+                                  color: const Color(0xFFB9B9B9),
+                                  width: 1,
+                                ),
+                                columnWidths: const {
+                                  0: FlexColumnWidth(1), // 순서
+                                  1: FlexColumnWidth(6), // 문장
+                                  2: FlexColumnWidth(2), // 음성 file
+                                  3: FlexColumnWidth(6), // eng
+                                  4: FlexColumnWidth(6), // chn
+                                  5: FlexColumnWidth(6), // vie
+                                  6: FlexColumnWidth(6), // rus
+                                },
+                                children: _buildTableRows(false),
+                              ),
                       ),
                     )
                   ],
@@ -976,14 +1012,14 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               children: [
                 const Expanded(child: SizedBox()),
                 MyCustomButton(
-                  text: 'Confirm',
+                  text: 'CONFRIM',
                   onTap: () => confirm(),
                   color: const Color(0xFFFF7D53),
                 ),
                 const SizedBox(width: 10),
                 MyCustomButton(
                   text: '저장하기',
-                  onTap: () => finalSave(),
+                  onTap: () => finalSave(false),
                   color: const Color(0xFF3F99F7),
                 ),
               ],

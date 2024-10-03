@@ -38,8 +38,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   ];
 
   int _selectedLanguage = 0;
-  List<TextEditingController> _dialogueController = [];
-  final List<String> _inputText = ['', '', '', '', ''];
   final List<String> _hintText = [
     '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.\n{}로 화자를 표시하세요.',
     '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.\nUse {} to indicate the speaker.',
@@ -115,18 +113,18 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   // 저장
   save() {
     ref.read(grammarDataProvider.notifier).updateDialogue(
-          dialogue: _dialogueController[0].text,
-          dialogueEng: _dialogueController[1].text,
-          dialogueChn: _dialogueController[2].text,
-          dialogueVie: _dialogueController[3].text,
-          dialogueRus: _dialogueController[4].text,
+          dialogue: widget.dialogueControllers[0].text,
+          dialogueEng: widget.dialogueControllers[1].text,
+          dialogueChn: widget.dialogueControllers[2].text,
+          dialogueVie: widget.dialogueControllers[3].text,
+          dialogueRus: widget.dialogueControllers[4].text,
         );
   }
 
   // 번역
   translate() async {
     try {
-      bool isKoreanFilled = _dialogueController[0].text.isNotEmpty;
+      bool isKoreanFilled = widget.dialogueControllers[0].text.isNotEmpty;
 
       if (isKoreanFilled == false) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -140,14 +138,14 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
       }
 
       TranslatedResponse? response = await translateRepository.translate(
-        korean: _dialogueController[0].text,
-        english: _dialogueController[1].text,
+        korean: widget.dialogueControllers[0].text,
+        english: widget.dialogueControllers[1].text,
       );
       print(response);
-      _dialogueController[1].text = response?.english ?? '';
-      _dialogueController[2].text = response?.chinese ?? '';
-      _dialogueController[3].text = response?.vietnam ?? '';
-      _dialogueController[4].text = response?.russian ?? '';
+      widget.dialogueControllers[1].text = response?.english ?? '';
+      widget.dialogueControllers[2].text = response?.chinese ?? '';
+      widget.dialogueControllers[3].text = response?.vietnam ?? '';
+      widget.dialogueControllers[4].text = response?.russian ?? '';
     } catch (e) {
       print("error : $e");
     }
@@ -157,35 +155,16 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   void initState() {
     super.initState();
 
-    setState(() {
-      _dialogueController = widget.dialogueControllers;
-    });
-
-    for (int i = 0; i < _dialogueController.length; i++) {
-      _dialogueController[i].addListener(() {
-        setState(() {
-          _inputText[i] = _dialogueController[i].text;
-        });
-      });
-    }
-
-    _dialogueController[0].text = ref.read(grammarDataProvider).dialogue ?? '';
-    _dialogueController[1].text =
+    widget.dialogueControllers[0].text =
+        ref.read(grammarDataProvider).dialogue ?? '';
+    widget.dialogueControllers[1].text =
         ref.read(grammarDataProvider).dialogueEng ?? '';
-    _dialogueController[2].text =
+    widget.dialogueControllers[2].text =
         ref.read(grammarDataProvider).dialogueChn ?? '';
-    _dialogueController[3].text =
+    widget.dialogueControllers[3].text =
         ref.read(grammarDataProvider).dialogueVie ?? '';
-    _dialogueController[4].text =
+    widget.dialogueControllers[4].text =
         ref.read(grammarDataProvider).dialogueRus ?? '';
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _dialogueController) {
-      controller.dispose();
-    }
-    super.dispose();
   }
 
   @override
@@ -259,7 +238,8 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                 const EdgeInsets.symmetric(horizontal: 5),
                             hintText: _hintText[_selectedLanguage],
                           ),
-                          controller: _dialogueController[_selectedLanguage],
+                          controller:
+                              widget.dialogueControllers[_selectedLanguage],
                         ),
                       ),
                       SizedBox(
@@ -272,7 +252,8 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                 characterTypes.length,
                                 (index) => GestureDetector(
                                   onTap: () {
-                                    _dialogueController[_selectedLanguage]
+                                    widget
+                                        .dialogueControllers[_selectedLanguage]
                                         .text += '{${characterTypes[index]}}';
                                   },
                                   child: Padding(
@@ -431,8 +412,8 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                       height: 400,
                       child: RichText(
                         text: TextSpan(
-                          children:
-                              parseDialogueLine(_inputText[_selectedLanguage]),
+                          children: parseDialogueLine(widget
+                              .dialogueControllers[_selectedLanguage].text),
                           style: const TextStyle(
                               color: Colors.black, fontSize: 10),
                         ),

@@ -131,7 +131,7 @@ class IntroListComponentData {
   final int? adminId;
   final String? titleKor;
   final String? contentKor;
-  final String? state;
+  final String? status;
 
   IntroListComponentData({
     required this.id,
@@ -143,7 +143,7 @@ class IntroListComponentData {
     this.adminId,
     this.titleKor,
     this.contentKor,
-    this.state,
+    this.status,
   });
 
   factory IntroListComponentData.fromJson(Map<String, dynamic> json) {
@@ -157,7 +157,7 @@ class IntroListComponentData {
       adminId: json['adminId'],
       titleKor: json['titleKor'],
       contentKor: json['contentKor'],
-      state: json['state'],
+      status: json['status'],
     );
   }
 
@@ -172,7 +172,7 @@ class IntroListComponentData {
     int? adminId,
     String? titleKor,
     String? contentKor,
-    String? state,
+    String? status,
   }) {
     return IntroListComponentData(
       id: id ?? this.id,
@@ -184,7 +184,7 @@ class IntroListComponentData {
       adminId: adminId ?? this.adminId,
       titleKor: titleKor ?? this.titleKor,
       contentKor: contentKor ?? this.contentKor,
-      state: state ?? this.state,
+      status: status ?? this.status,
     );
   }
 }

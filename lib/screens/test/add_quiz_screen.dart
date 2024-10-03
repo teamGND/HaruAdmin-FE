@@ -272,9 +272,7 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
     });
   }
 
-  save({
-    bool isConfirm = false,
-  }) async {
+  save({required bool isConfirm}) async {
     try {
       setState(() {
         _isLoading = true;
@@ -508,7 +506,7 @@ class _AddQuizScreenState extends ConsumerState<AddQuizScreen> {
                 flex: 1,
                 child: MyCustomButton(
                   text: '저장하기',
-                  onTap: () => save(),
+                  onTap: () => save(isConfirm: false),
                   color: const Color(0xFF3F99F7),
                 ),
               ),

@@ -151,7 +151,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
     });
   }
 
-  save({bool isConfirm = false}) async {
+  save({required bool isConfirm}) async {
     try {
       setState(() {
         _isLoading = true;
@@ -495,7 +495,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                 flex: 1,
                 child: MyCustomButton(
                   text: 'Save',
-                  onTap: () => save(),
+                  onTap: () => save(isConfirm: false),
                   color: const Color(0xFF3F99F7),
                 ),
               ),
@@ -504,7 +504,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                   flex: 1,
                   child: MyCustomButton(
                     text: 'Confirm',
-                    onTap: () => save(),
+                    onTap: () => save(isConfirm: true),
                     color: const Color(0xFFFF7D53),
                   )),
             ],

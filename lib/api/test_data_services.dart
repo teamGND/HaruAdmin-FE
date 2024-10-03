@@ -128,7 +128,7 @@ class TestDataRepository {
   }) async {
     try {
       await dio.post(
-        '/test/approve/:level/:cycle/:set/:chapter',
+        '/test/approve/$level/$cycle/$set/$chapter',
       );
     } catch (e) {
       print("error : $e");

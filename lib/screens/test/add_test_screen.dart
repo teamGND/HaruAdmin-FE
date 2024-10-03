@@ -151,7 +151,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
     });
   }
 
-  save() async {
+  save({bool isConfirm = false}) async {
     try {
       setState(() {
         _isLoading = true;
@@ -216,6 +216,23 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
       }
 
       await testDataRepository.postTestData(testDataList: problems);
+      if (isConfirm) {
+        await testDataRepository.approveTest(
+          level: info.level.toString().split('.').last,
+          cycle: info.cycle!,
+          set: info.sets!,
+          chapter: info.chapter!,
+        );
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Center(child: Text(isConfirm ? '유저 앱 반영 완료 🤠' : '저장 완료')),
+          showCloseIcon: true,
+          closeIconColor: Colors.white,
+        ),
+      );
+
       setState(() {
         _isLoading = false;
       });
@@ -262,11 +279,16 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
         return;
       }
       if (widget.category == 'TEST') {
-        _previousProblemList =
-            await testDataRepository.getCurrentSetsTest(sets: info.sets!);
+        _previousProblemList = await testDataRepository.getCurrentSetsTest(
+          level: info.level.toString().split('.').last,
+          cycle: info.cycle!,
+          set: info.sets!,
+        );
       } else if (widget.category == 'MIDTERM') {
-        _previousProblemList =
-            await testDataRepository.getCurrentCycleTest(cycle: info.cycle!);
+        _previousProblemList = await testDataRepository.getCurrentCycleTest(
+          level: info.level.toString().split('.').last,
+          cycle: info.cycle!,
+        );
       } else {
         return;
       }

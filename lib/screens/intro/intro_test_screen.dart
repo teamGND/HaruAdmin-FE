@@ -21,7 +21,6 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   // 페이지 번호
   static const int _pageSize = 8;
   static const double _rowHeight = 50;
-  /* TODO 현재페이지 쿠키에 저장 */
   int _currentPage = 0;
   LEVEL dropdownValue = LEVEL.LEVEL1;
 
@@ -87,10 +86,21 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
       if (category == CATEGORY.MIDTERM) {
         category = CATEGORY.WORD;
         cycle += 1;
-        sets += 1;
+        sets = 1;
+        chapter = 1;
       } else if (category == CATEGORY.TEST) {
         category = CATEGORY.WORD;
+        cycle += 1;
         sets += 1;
+        chapter = 1;
+      } else if (category == CATEGORY.GRAMMAR) {
+        category = CATEGORY.TEST;
+        chapter += 1;
+      } else if (category == CATEGORY.WORD) {
+        if (chapter == 2) {
+          category = CATEGORY.GRAMMAR;
+        }
+        chapter += 1;
       }
     }
     ref.watch(introProvider.notifier).update(

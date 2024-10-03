@@ -241,6 +241,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
             ),
             TextButton(
               onPressed: () async {
+                Navigator.pop(context);
+
                 try {
                   // 확정하면 데이터 저장
                   await wordRepository

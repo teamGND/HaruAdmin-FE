@@ -243,7 +243,7 @@ class _WordState extends State<WordScreen> {
                                             ),
                                           ),
                                           SizedBox(
-                                            // 단어 개수
+                                            // 단어 상태
                                             height: TABLE_ROW_HEIGHT,
                                             child: Center(
                                               child: Text(

@@ -374,6 +374,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             ),
             TextButton(
               onPressed: () async {
+                Navigator.pop(context);
+
                 await finalSave(true);
               },
               child: const Text('확인'),

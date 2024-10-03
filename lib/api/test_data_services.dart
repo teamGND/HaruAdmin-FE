@@ -77,10 +77,14 @@ class TestDataRepository {
     return null;
   }
 
-  getCurrentSetsTest({required int sets}) async {
+  getCurrentSetsTest({
+    required String level,
+    required int cycle,
+    required int set,
+  }) async {
     try {
       final response = await dio.get(
-        '/test/sets/$sets',
+        '/test/sets/$level/$cycle/$set',
       );
 
       if (response.statusCode == 200) {
@@ -95,10 +99,13 @@ class TestDataRepository {
     }
   }
 
-  getCurrentCycleTest({required int cycle}) async {
+  getCurrentCycleTest({
+    required String level,
+    required int cycle,
+  }) async {
     try {
       final response = await dio.get(
-        '/test/cycle/$cycle',
+        '/test/cycle/$level/$cycle',
       );
 
       if (response.statusCode == 200) {
@@ -108,6 +115,21 @@ class TestDataRepository {
         }
         return problemList;
       }
+    } catch (e) {
+      print("error : $e");
+    }
+  }
+
+  approveTest({
+    required String level,
+    required int cycle,
+    required int set,
+    required int chapter,
+  }) async {
+    try {
+      await dio.post(
+        '/test/approve/:level/:cycle/:set/:chapter',
+      );
     } catch (e) {
       print("error : $e");
     }

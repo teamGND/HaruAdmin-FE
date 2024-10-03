@@ -206,7 +206,7 @@ class AddGrammarData {
 
 class Sentence {
   int? id;
-  int order;
+  int? order;
   String? sentenceType;
   String? characterType;
   String? expression;

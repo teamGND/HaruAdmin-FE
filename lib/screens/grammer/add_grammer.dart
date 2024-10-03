@@ -13,7 +13,6 @@ import '../../api/translate_service.dart';
 import '../../model/translate_model.dart';
 import '../../provider/intro_provider.dart';
 import '../../utils/enum_type.dart';
-import '../../utils/escape_json_string.dart';
 import '../../widgets/buttons.dart';
 import 'widget/grammar_description_widget.dart';
 
@@ -289,7 +288,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           korean: data.expression!,
           english: data.expressionEng,
         );
-        print(response);
         if (response != null) {
           if (isRep) {
             setState(() {
@@ -393,48 +391,49 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           id: _representSentences[0].id,
           order: 0,
           sentenceType: "REPRESENT",
-          expression: escapeJsonString(koreanControllers[0].text),
-          expressionEng: escapeJsonString(englishControllers[0].text),
-          expressionChn: escapeJsonString(chineseControllers[0].text),
-          expressionVie: escapeJsonString(vietnamControllers[0].text),
-          expressionRus: escapeJsonString(russianControllers[0].text),
+          expression: koreanControllers[0].text,
+          expressionEng: englishControllers[0].text,
+          expressionChn: chineseControllers[0].text,
+          expressionVie: vietnamControllers[0].text,
+          expressionRus: russianControllers[0].text,
           voiceUrl: _representSentences[0].voiceUrl,
           characterType: 'BLACK',
         )
       ];
       sentences.addAll(saveRepSentences());
       sentences.addAll(saveExSentences());
+
+      final data = AddGrammarData(
+          level: info.level.toString().split('.')[1],
+          cycle: info.cycle,
+          sets: info.sets,
+          chapter: info.chapter,
+          title: titleController.text,
+          description: ref.read(grammarDataProvider).description,
+          descriptionEng: ref.read(grammarDataProvider).descriptionEng,
+          descriptionChn: ref.read(grammarDataProvider).descriptionChn,
+          descriptionVie: ref.read(grammarDataProvider).descriptionVie,
+          descriptionRus: ref.read(grammarDataProvider).descriptionRus,
+          sentenceList: sentences,
+          metaGrammars: _metaGrammar.map((e) => e.id).toList(),
+          status: isConfirm ? 'APPROVE' : 'WAIT');
+
       await grammerRepository
           .updateGrammarData(
-        id: info.dataId!,
-        data: AddGrammarData(
-            level: info.level.toString().split('.').last,
-            cycle: info.cycle,
-            sets: info.sets,
-            chapter: info.chapter,
-            title: titleController.text,
-            description:
-                escapeJsonString(ref.read(grammarDataProvider).description),
-            descriptionEng:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionEng),
-            descriptionChn:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionChn),
-            descriptionVie:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionVie),
-            descriptionRus:
-                escapeJsonString(ref.read(grammarDataProvider).descriptionRus),
-            sentenceList: sentences,
-            metaGrammars: _metaGrammar.map((e) => e.id).toList(),
-            status: isConfirm ? 'APPROVE' : 'WAIT'),
+        id: int.parse(widget.grammarId!),
+        data: data,
       )
-          .then((value) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Center(child: Text(isConfirm ? '유저 앱 반영 완료 🤠' : '저장 완료')),
-            showCloseIcon: true,
-            closeIconColor: Colors.white,
-          ),
-        );
+          .then((value) async {
+        await fetchGrammarData().then((value) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Center(child: Text(isConfirm ? '유저 앱 반영 완료 🤠' : '저장 완료')),
+              showCloseIcon: true,
+              closeIconColor: Colors.white,
+            ),
+          );
+        });
       });
     } catch (e) {
       print(e);

@@ -38,7 +38,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   ];
 
   int _selectedLanguage = 0;
-  final List<String> _inputText = ['', '', '', '', ''];
   final List<String> _hintText = [
     '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.\n{}로 화자를 표시하세요.',
     '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.\nUse {} to indicate the speaker.',
@@ -155,14 +154,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   @override
   void initState() {
     super.initState();
-
-    for (int i = 0; i < widget.dialogueControllers.length; i++) {
-      widget.dialogueControllers[i].addListener(() {
-        setState(() {
-          _inputText[i] = widget.dialogueControllers[i].text;
-        });
-      });
-    }
 
     widget.dialogueControllers[0].text =
         ref.read(grammarDataProvider).dialogue ?? '';
@@ -421,8 +412,8 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                       height: 400,
                       child: RichText(
                         text: TextSpan(
-                          children:
-                              parseDialogueLine(_inputText[_selectedLanguage]),
+                          children: parseDialogueLine(widget
+                              .dialogueControllers[_selectedLanguage].text),
                           style: const TextStyle(
                               color: Colors.black, fontSize: 10),
                         ),

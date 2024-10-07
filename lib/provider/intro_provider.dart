@@ -59,6 +59,7 @@ class IntroInfoNotifier extends Notifier<IntroInfo> {
     int? chapter,
     String? title,
     List<String>? wordDatas,
+    CHAPTER_STATUS? status,
   }) {
     state = state.copyWith(
       dataId: dataId,

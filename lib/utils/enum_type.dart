@@ -30,3 +30,20 @@ CATEGORY categoryFromString(String category) {
       return CATEGORY.WORD;
   }
 }
+
+enum CHAPTER_STATUS { APPROVE, DELETE, SHOWUSER, WAIT }
+
+CHAPTER_STATUS chapterStatusFromString(String status) {
+  switch (status) {
+    case 'APPROVE':
+      return CHAPTER_STATUS.APPROVE;
+    case 'DELETE':
+      return CHAPTER_STATUS.DELETE;
+    case 'SHOWUSER':
+      return CHAPTER_STATUS.SHOWUSER;
+    case 'WAIT':
+      return CHAPTER_STATUS.WAIT;
+    default:
+      return CHAPTER_STATUS.WAIT;
+  }
+}

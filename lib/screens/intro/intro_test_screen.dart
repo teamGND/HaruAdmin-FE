@@ -90,27 +90,26 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
         chapter = 1;
       } else if (category == CATEGORY.TEST) {
         category = CATEGORY.WORD;
-        cycle += 1;
+        cycle = 1;
         sets += 1;
         chapter = 1;
       } else if (category == CATEGORY.GRAMMAR) {
         category = CATEGORY.TEST;
-        chapter += 1;
       } else if (category == CATEGORY.WORD) {
         if (chapter == 2) {
           category = CATEGORY.GRAMMAR;
         }
-        chapter += 1;
       }
     }
     ref.watch(introProvider.notifier).update(
-        chapter: chapter,
-        cycle: cycle,
-        sets: sets,
-        category: category,
-        level: level,
-        title: title,
-        wordDatas: wordList);
+          chapter: chapter,
+          cycle: cycle,
+          sets: sets,
+          category: category,
+          level: level,
+          title: title,
+          wordDatas: wordList,
+        );
 
     context.go('/intro/add');
   }
@@ -249,7 +248,10 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   Future<void> fetchData() async {
     try {
       await IntroDataRepository()
-          .getIntroDataList(page: _currentPage, size: _pageSize)
+          .getIntroDataList(
+        page: _currentPage,
+        size: _pageSize,
+      )
           .then((value) {
         introData = value;
       });

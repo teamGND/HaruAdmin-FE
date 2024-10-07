@@ -137,6 +137,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
               titleKor: (info.category == CATEGORY.WORD)
                   ? convertWordListToString(title: info.title, words: wordList)
                   : info.title,
+              status: 'WAIT',
             ));
 
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

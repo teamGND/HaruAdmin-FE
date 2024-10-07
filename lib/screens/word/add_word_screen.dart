@@ -82,7 +82,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     });
   }
 
-  void save() async {
+  void save({bool isConfrim = false}) async {
     try {
       if (info.dataId != null) {
         for (int i = 0; i < _datas.length; i++) {
@@ -195,91 +195,6 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
       print(e);
       throw Exception(e);
     }
-  }
-
-  void confirm() async {
-    // (description 제외) 모든 데이터 null 값 체크
-    bool isAllNull = _datas.every((element) {
-      if (element.title.isEmpty ||
-          element.title == '' ||
-          element.english == '' ||
-          element.chinese == '' ||
-          element.vietnam == '' ||
-          element.russian == '' ||
-          // element.imgUrl == null ||
-          element.voiceUrl == null) {
-        return false;
-      }
-      return true;
-    });
-
-    if (isAllNull == false) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Center(child: Text('모든 데이터를 입력해주세요. \'저장하기\'를 먼저 해주세요.')),
-          showCloseIcon: true,
-          closeIconColor: Colors.white,
-        ),
-      );
-      return;
-    }
-
-    // CONFRIM 확정하겠냐는 dialog
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('데이터를 유저 앱에 반영합니다.'),
-          content: const Text(
-              '체크리스트\n1. 단어의 맞춤법을 확인했나요?\n2. 영어, 중국어, 베트남어, 러시아어 - 번역을 검토했나요?\n3. 이미지가 정확한지 확인했나요?\n4. 음성이 정확한지 확인했나요?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-
-                try {
-                  // 확정하면 데이터 저장
-                  await wordRepository
-                      .saveWordData(
-                    id: info.dataId!,
-                    data: PatchWordChapterData(
-                        level: info.level.toString().split('.').last,
-                        title: info.title,
-                        chapter: info.chapter,
-                        sets: info.sets,
-                        cycle: info.cycle,
-                        word: _datas,
-                        status: 'APPROVE'),
-                  )
-                      .then((value) {
-                    if (value != null) {
-                      Navigator.pop(context);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Center(child: Text('유저 앱 반영 완료 🤠')),
-                          showCloseIcon: true,
-                          closeIconColor: Colors.white,
-                        ),
-                      );
-                    }
-                  });
-                } catch (e) {
-                  throw Exception(e);
-                }
-              },
-              child: const Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void getImageUrl(int index) async {
@@ -788,7 +703,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                     const Expanded(child: SizedBox()),
                     MyCustomButton(
                       text: 'CONFIRM',
-                      onTap: () => confirm(),
+                      onTap: () => save(isConfrim: true),
                       color: const Color(0xFFFF7D53),
                     ),
                     const SizedBox(width: 10),

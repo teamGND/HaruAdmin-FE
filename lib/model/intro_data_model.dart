@@ -369,6 +369,7 @@ class UpdateIntroData {
   int sets;
   int chapter;
   String? titleKor;
+  String? status;
 
   UpdateIntroData({
     required this.level,
@@ -377,6 +378,7 @@ class UpdateIntroData {
     required this.sets,
     required this.chapter,
     this.titleKor,
+    this.status,
   });
 
   Map<String, dynamic> toJson() {
@@ -387,6 +389,7 @@ class UpdateIntroData {
       'cycle': cycle,
       'sets': sets,
       'titleKor': titleKor,
+      'status': status,
     };
   }
 
@@ -398,6 +401,7 @@ class UpdateIntroData {
       cycle: json['cycle'],
       sets: json['sets'],
       titleKor: json['titleKor'],
+      status: json['status'],
     );
   }
 
@@ -408,6 +412,7 @@ class UpdateIntroData {
     int? cycle,
     int? sets,
     String? title,
+    String? status,
   }) {
     return UpdateIntroData(
       level: level ?? this.level,
@@ -416,6 +421,7 @@ class UpdateIntroData {
       cycle: cycle ?? this.cycle,
       sets: sets ?? this.sets,
       titleKor: title ?? titleKor,
+      status: status ?? this.status,
     );
   }
 }

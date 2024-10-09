@@ -83,6 +83,7 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
           descriptionChn: _descriptionController[2].text,
           descriptionVie: _descriptionController[3].text,
           descriptionRus: _descriptionController[4].text,
+          grammarImageUrl: imageUrl,
         );
   }
 
@@ -346,16 +347,16 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        (imageUrl != null && imageUrl != '')
+                            ? Image.network(
+                                imageUrl!,
+                                fit: BoxFit.cover,
+                              )
+                            : const SizedBox(height: 10)
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  (imageUrl != null && imageUrl != '')
-                      ? Image.network(
-                          imageUrl!,
-                          fit: BoxFit.cover,
-                        )
-                      : const SizedBox(height: 10)
                 ],
               ),
             ),

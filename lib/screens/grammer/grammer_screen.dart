@@ -212,7 +212,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
                         _currentPage != grammarData.totalPages
                             ? GestureDetector(
                                 onTap: () {
-                                  goToPage(_currentPage + 1);
+                                  goToPage(_currentPage);
                                 },
                                 child: const SizedBox(
                                     width: 50, child: Text('다음 >')),
@@ -320,7 +320,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
                 onPressed: () {
                   addChapter(
                     index: i,
-                    grammarId: grammarData.content.last.id,
+                    grammarId: grammarData.content[i].id,
                   );
                 },
                 child: Center(

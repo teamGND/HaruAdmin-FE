@@ -330,7 +330,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         expressionVie: vietnamControllers[i].text,
         expressionRus: russianControllers[i].text,
         voiceUrl: _representSentences[i].voiceUrl,
-        characterType: 'BLACK',
+        characterType: 'BLUE',
       ));
     }
     return sentences;
@@ -429,8 +429,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         await fetchGrammarData().then((value) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Center(child: Text(isConfirm ? '유저 앱 반영 완료 🤠' : '저장 완료')),
+              content: Center(child: Text(isConfirm ? '데이터 컨펌 완료' : '저장 완료')),
               showCloseIcon: true,
               closeIconColor: Colors.white,
             ),

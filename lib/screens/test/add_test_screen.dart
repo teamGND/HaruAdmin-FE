@@ -151,7 +151,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
     });
   }
 
-  save({required bool isConfirm}) async {
+  save({required bool isFinal}) async {
     try {
       setState(() {
         _isLoading = true;
@@ -216,7 +216,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
       }
 
       await testDataRepository.postTestData(testDataList: problems);
-      if (isConfirm) {
+      if (isFinal) {
         await testDataRepository.approveTest(
           level: info.level.toString().split('.').last,
           cycle: info.cycle!,
@@ -227,7 +227,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Center(child: Text(isConfirm ? '유저 앱 반영 완료 🤠' : '저장 완료')),
+          content: Center(child: Text(isFinal ? '유저 앱 반영 완료 🤠' : '저장 완료')),
           showCloseIcon: true,
           closeIconColor: Colors.white,
         ),
@@ -495,7 +495,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                 flex: 1,
                 child: MyCustomButton(
                   text: 'Save',
-                  onTap: () => save(isConfirm: false),
+                  onTap: () => save(isFinal: false),
                   color: const Color(0xFF3F99F7),
                 ),
               ),
@@ -504,7 +504,7 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                   flex: 1,
                   child: MyCustomButton(
                     text: 'Confirm',
-                    onTap: () => save(isConfirm: true),
+                    onTap: () => save(isFinal: true),
                     color: const Color(0xFFFF7D53),
                   )),
             ],

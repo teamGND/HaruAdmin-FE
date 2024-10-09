@@ -102,8 +102,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
       final player = AudioPlayer();
       await player.setUrl(audioUrl);
       await player.setVolume(0.5);
-      await player.pause();
-      await player.stop();
       player.play();
     } catch (e) {
       print(e);

@@ -82,7 +82,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
     });
   }
 
-  void save({bool isConfrim = false}) async {
+  void save({bool isConfirm = false}) async {
     try {
       if (info.dataId != null) {
         for (int i = 0; i < _datas.length; i++) {
@@ -126,14 +126,14 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
             sets: info.sets,
             cycle: info.cycle,
             word: _datas,
-            status: 'WAIT',
+            status: isConfirm ? 'APPROVE' : 'WAIT',
           ),
         )
             .then((value) {
           if (value != null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Center(child: Text('저장 완료')),
+              SnackBar(
+                content: Center(child: Text(isConfirm ? '데이터 컨펌 완료' : '저장 완료')),
                 showCloseIcon: true,
                 closeIconColor: Colors.white,
               ),
@@ -703,7 +703,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                     const Expanded(child: SizedBox()),
                     MyCustomButton(
                       text: 'CONFIRM',
-                      onTap: () => save(isConfrim: true),
+                      onTap: () => save(isConfirm: true),
                       color: const Color(0xFFFF7D53),
                     ),
                     const SizedBox(width: 10),

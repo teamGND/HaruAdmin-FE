@@ -19,7 +19,7 @@ class IntroTestScreen extends ConsumerStatefulWidget {
 class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   late IntroDataList introData;
   // 페이지 번호
-  static const int _pageSize = 8;
+  static const int _pageSize = 10;
   static const double _rowHeight = 50;
   int _currentPage = 0;
   LEVEL dropdownValue = LEVEL.LEVEL1;
@@ -323,214 +323,219 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else {
-                    return Column(
-                      children: [
-                        introData.content.isEmpty
-                            ? const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(20.0),
-                                  child: Text(
-                                    '데이터가 없습니다.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : Table(
-                                border: TableBorder.all(
-                                  color: const Color(0xFFB9B9B9),
-                                  width: 1,
-                                ),
-                                columnWidths: const {
-                                  0: FlexColumnWidth(1),
-                                  1: FlexColumnWidth(2),
-                                  2: FlexColumnWidth(1),
-                                  3: FlexColumnWidth(1),
-                                  4: FlexColumnWidth(1),
-                                  5: FlexColumnWidth(10), // title
-                                  6: FlexColumnWidth(2),
-                                  7: FlexColumnWidth(2),
-                                },
-                                children: [
-                                  TableRow(
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFF0F0F0),
-                                    ),
-                                    children: List.generate(
-                                      tabletitle.length,
-                                      (index) => SizedBox(
-                                          height: 40,
-                                          child: Center(
-                                              child: Text(tabletitle[index]))),
-                                    ),
-                                  ),
-                                  ...List.generate(introData.content.length,
-                                      (index) {
-                                    IntroListComponentData data =
-                                        introData.content[index];
-                                    return TableRow(
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          introData.content.isEmpty
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20.0),
+                                    child: Text(
+                                      '데이터가 없습니다.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
                                       ),
-                                      children: [
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Checkbox(
-                                              value: _selected[index],
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _selected[index] = value!;
-                                                });
-                                              },
+                                    ),
+                                  ),
+                                )
+                              : Table(
+                                  border: TableBorder.all(
+                                    color: const Color(0xFFB9B9B9),
+                                    width: 1,
+                                  ),
+                                  columnWidths: const {
+                                    0: FlexColumnWidth(1),
+                                    1: FlexColumnWidth(2),
+                                    2: FlexColumnWidth(1),
+                                    3: FlexColumnWidth(1),
+                                    4: FlexColumnWidth(1),
+                                    5: FlexColumnWidth(10), // title
+                                    6: FlexColumnWidth(2),
+                                    7: FlexColumnWidth(2),
+                                  },
+                                  children: [
+                                    TableRow(
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF0F0F0),
+                                      ),
+                                      children: List.generate(
+                                        tabletitle.length,
+                                        (index) => SizedBox(
+                                            height: 40,
+                                            child: Center(
+                                                child:
+                                                    Text(tabletitle[index]))),
+                                      ),
+                                    ),
+                                    ...List.generate(introData.content.length,
+                                        (index) {
+                                      IntroListComponentData data =
+                                          introData.content[index];
+                                      return TableRow(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                        ),
+                                        children: [
+                                          SizedBox(
+                                            height: _rowHeight,
+                                            child: Center(
+                                              child: Checkbox(
+                                                value: _selected[index],
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _selected[index] = value!;
+                                                  });
+                                                },
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.category),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.cycle.toString()),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.sets.toString()),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child:
-                                                Text(data.chapter.toString()),
-                                          ),
-                                        ),
-                                        SizedBox(
+                                          SizedBox(
                                             height: _rowHeight,
-                                            child: TextButton(
-                                                onPressed: () {
-                                                  updateWordGrammarChapter(
-                                                      data);
-                                                },
-                                                child: Text(
-                                                  data.titleKor ?? '',
-                                                ))),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.status ?? '?'),
+                                            child: Center(
+                                              child: Text(data.category),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: (data.category == 'TEST' ||
-                                                    data.category == 'MIDTERM')
-                                                ? TextButton(
-                                                    onPressed: () {
-                                                      addTest(data);
-                                                    },
-                                                    child: const Text(
-                                                      '테스트',
-                                                      style: TextStyle(
-                                                        color: Colors.orange,
-                                                      ),
-                                                    ))
-                                                : TextButton(
-                                                    onPressed: () {
-                                                      addQuiz(data);
-                                                    },
-                                                    child: const Text(
-                                                      '퀴즈',
-                                                      style: TextStyle(
-                                                        color: Colors.blue,
-                                                      ),
-                                                    )),
+                                          SizedBox(
+                                            height: _rowHeight,
+                                            child: Center(
+                                              child:
+                                                  Text(data.cycle.toString()),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    );
-                                  }),
-                                ],
-                              ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                deleteSelected();
-                              },
-                              child: const Text(
-                                '선택 삭제',
-                                style: TextStyle(
-                                  color: Colors.red,
+                                          SizedBox(
+                                            height: _rowHeight,
+                                            child: Center(
+                                              child: Text(data.sets.toString()),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: _rowHeight,
+                                            child: Center(
+                                              child:
+                                                  Text(data.chapter.toString()),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              height: _rowHeight,
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    updateWordGrammarChapter(
+                                                        data);
+                                                  },
+                                                  child: Text(
+                                                    data.titleKor ?? '',
+                                                  ))),
+                                          SizedBox(
+                                            height: _rowHeight,
+                                            child: Center(
+                                              child: Text(data.status ?? '?'),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: _rowHeight,
+                                            child: Center(
+                                              child: (data.category == 'TEST' ||
+                                                      data.category ==
+                                                          'MIDTERM')
+                                                  ? TextButton(
+                                                      onPressed: () {
+                                                        addTest(data);
+                                                      },
+                                                      child: const Text(
+                                                        '테스트',
+                                                        style: TextStyle(
+                                                          color: Colors.orange,
+                                                        ),
+                                                      ))
+                                                  : TextButton(
+                                                      onPressed: () {
+                                                        addQuiz(data);
+                                                      },
+                                                      child: const Text(
+                                                        '퀴즈',
+                                                        style: TextStyle(
+                                                          color: Colors.blue,
+                                                        ),
+                                                      )),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }),
+                                  ],
                                 ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.2,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  _currentPage != 0
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            goToPage(_currentPage - 1);
-                                          },
-                                          child: const SizedBox(
-                                              width: 50, child: Text('< 이전')))
-                                      : const SizedBox(width: 50),
-                                  Container(
-                                    padding: const EdgeInsets.all(5),
-                                    width: 50,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 1,
-                                        )),
-                                    child: Text(
-                                      (_currentPage + 1).toString(),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  _currentPage != introData.totalPages
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            goToPage(_currentPage + 1);
-                                          },
-                                          child: const SizedBox(
-                                              width: 50, child: Text('다음 >')),
-                                        )
-                                      : const SizedBox(width: 50),
-                                  GestureDetector(
-                                    onTap: () {
-                                      goToPage(introData.totalPages - 1);
-                                    },
-                                    child: const Text('맨뒤로 >>'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            MyCustomButton(
-                                text: '회차추가',
-                                onTap: () => addChapter(),
-                                color: Colors.blue)
-                          ],
-                        ),
-                      ],
+                          const SizedBox(height: 20),
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   children: [
+                          //     TextButton(
+                          //       onPressed: () {
+                          //         deleteSelected();
+                          //       },
+                          //       child: const Text(
+                          //         '선택 삭제',
+                          //         style: TextStyle(
+                          //           color: Colors.red,
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     SizedBox(
+                          //       width: MediaQuery.of(context).size.width * 0.2,
+                          //       child: Row(
+                          //         mainAxisAlignment:
+                          //             MainAxisAlignment.spaceEvenly,
+                          //         children: [
+                          //           _currentPage != 0
+                          //               ? GestureDetector(
+                          //                   onTap: () {
+                          //                     goToPage(_currentPage - 1);
+                          //                   },
+                          //                   child: const SizedBox(
+                          //                       width: 50, child: Text('< 이전')))
+                          //               : const SizedBox(width: 50),
+                          //           Container(
+                          //             padding: const EdgeInsets.all(5),
+                          //             width: 50,
+                          //             height: 30,
+                          //             decoration: BoxDecoration(
+                          //                 borderRadius: BorderRadius.circular(5),
+                          //                 border: Border.all(
+                          //                   color: Colors.black,
+                          //                   width: 1,
+                          //                 )),
+                          //             child: Text(
+                          //               (_currentPage + 1).toString(),
+                          //               textAlign: TextAlign.center,
+                          //             ),
+                          //           ),
+                          //           _currentPage != introData.totalPages
+                          //               ? GestureDetector(
+                          //                   onTap: () {
+                          //                     goToPage(_currentPage + 1);
+                          //                   },
+                          //                   child: const SizedBox(
+                          //                       width: 50, child: Text('다음 >')),
+                          //                 )
+                          //               : const SizedBox(width: 50),
+                          //           GestureDetector(
+                          //             onTap: () {
+                          //               goToPage(introData.totalPages - 1);
+                          //             },
+                          //             child: const Text('맨뒤로 >>'),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //     MyCustomButton(
+                          //         text: '회차추가',
+                          //         onTap: () => addChapter(),
+                          //         color: Colors.blue)
+                          //   ],
+                          // ),
+                        ],
+                      ),
                     );
                   }
                 },

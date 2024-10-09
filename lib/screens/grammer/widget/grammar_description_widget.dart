@@ -63,6 +63,10 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
           ref.read(grammarDataProvider.notifier).updateDescriptionImageUrl(
                 value,
               );
+
+          setState(() {
+            imageUrl = value;
+          });
         });
       } else {
         // User canceled the picker
@@ -116,7 +120,14 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
   void initState() {
     super.initState();
 
+    // textcontroller 안에 텍스트  ref.read(grammarDataProvider.notifier).description
     for (int i = 0; i < _descriptionController.length; i++) {
+      _descriptionController[i].text =
+          ref.read(grammarDataProvider.notifier).getDescriptionList[i];
+      setState(() {
+        _inputText[i] = _descriptionController[i].text;
+      });
+      // add listener
       _descriptionController[i].addListener(() {
         setState(() {
           _inputText[i] = _descriptionController[i].text;
@@ -335,15 +346,16 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                             ),
                           ),
                         ),
-                        (imageUrl != null && imageUrl != '')
-                            ? Image.network(
-                                imageUrl!,
-                                fit: BoxFit.cover,
-                              )
-                            : const SizedBox(height: 10)
                       ],
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  (imageUrl != null && imageUrl != '')
+                      ? Image.network(
+                          imageUrl!,
+                          fit: BoxFit.cover,
+                        )
+                      : const SizedBox(height: 10)
                 ],
               ),
             ),

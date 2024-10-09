@@ -87,6 +87,14 @@ class GrammarDataNotifier extends Notifier<GrammarData> {
 
   get getMetaGrammars => state.metaGrammars;
 
+  get getDescriptionList => [
+        state.description,
+        state.descriptionEng,
+        state.descriptionChn,
+        state.descriptionVie,
+        state.descriptionRus,
+      ];
+
   updateDescriptionImageUrl(String? imageUrl) {
     state = state.copyWith(grammarImageUrl: imageUrl);
   }

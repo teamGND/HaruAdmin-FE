@@ -477,13 +477,24 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         });
 
         // 제시문
-        await ref.read(grammarDataProvider.notifier).updateDialogue(
+        ref.read(grammarDataProvider.notifier).updateDialogue(
             dialogueId: _representSentences[0].id,
             dialogue: _representSentences[0].expression,
             dialogueEng: _representSentences[0].expressionEng,
             dialogueChn: _representSentences[0].expressionChn,
             dialogueVie: _representSentences[0].expressionVie,
             dialogueRus: _representSentences[0].expressionRus);
+
+        ref.read(grammarDataProvider.notifier).updateDescription(
+            description: _data.description,
+            descriptionEng: _data.descriptionEng,
+            descriptionChn: _data.descriptionChn,
+            descriptionVie: _data.descriptionVie,
+            descriptionRus: _data.descriptionRus);
+
+        ref
+            .read(grammarDataProvider.notifier)
+            .updateDescriptionImageUrl(_data.imageUrl);
         /* 컨트롤러에 추가 */
         // 타이틀
         titleController = TextEditingController(text: info.title);

@@ -14,11 +14,12 @@ class WordScreen extends StatefulWidget {
 }
 
 class _WordState extends State<WordScreen> {
-  final int _pageSize = 8;
-  int _currentPage = 0;
   late WordDataList wordData;
+
+  final int _pageSize = 8;
+  final double TABLE_ROW_HEIGHT = 50;
   LEVEL dropdownValue = LEVEL.LEVEL1;
-  double TABLE_ROW_HEIGHT = 50;
+  int _currentPage = 0;
 
   final tabletitle = ['No.', '사이클', '세트', '회차', '타이틀', '학습 내용', '단어수', '상태'];
 
@@ -27,17 +28,17 @@ class _WordState extends State<WordScreen> {
   @override
   void initState() {
     super.initState();
-    _wordListDataFuture = fetchData();
+    _wordListDataFuture = fetchData(page: _currentPage);
   }
 
   void updateChapter({index}) {
     context.go('/word/add/${wordData.content[index].id}');
   }
 
-  Future<void> fetchData() async {
+  Future<void> fetchData({required int page}) async {
     try {
       await WordDataRepository()
-          .getWordDataList(page: _currentPage, size: _pageSize)
+          .getWordDataList(page: page, size: _pageSize)
           .then((value) {
         wordData = value;
       });
@@ -46,15 +47,16 @@ class _WordState extends State<WordScreen> {
     }
   }
 
-  void goToPage(int page) {
+  void goToPage({required int page}) async {
     if (page < 0 || page >= wordData.totalPages) {
       return;
     } else {
       setState(() {
         _currentPage = page;
       });
+
+      await fetchData(page: page);
     }
-    fetchData();
   }
 
   @override
@@ -257,7 +259,7 @@ class _WordState extends State<WordScreen> {
                                 ),
                           const SizedBox(height: 20),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const SizedBox(
                                 width: 10,
@@ -271,7 +273,7 @@ class _WordState extends State<WordScreen> {
                                     _currentPage != 0
                                         ? GestureDetector(
                                             onTap: () {
-                                              goToPage(_currentPage - 1);
+                                              goToPage(page: _currentPage - 1);
                                             },
                                             child: const SizedBox(
                                                 width: 50, child: Text('< 이전')))
@@ -292,21 +294,25 @@ class _WordState extends State<WordScreen> {
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    _currentPage != wordData.totalPages
+                                    (_currentPage + 1) != wordData.totalPages
                                         ? GestureDetector(
                                             onTap: () {
-                                              goToPage(_currentPage + 1);
+                                              goToPage(page: _currentPage + 1);
                                             },
                                             child: const SizedBox(
                                                 width: 50, child: Text('다음 >')),
                                           )
                                         : const SizedBox(width: 50),
-                                    GestureDetector(
-                                      onTap: () {
-                                        goToPage(wordData.totalPages - 1);
-                                      },
-                                      child: const Text('맨뒤로 >>'),
-                                    ),
+                                    (_currentPage + 1 != wordData.totalPages)
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              goToPage(
+                                                  page:
+                                                      wordData.totalPages - 1);
+                                            },
+                                            child: const Text('맨뒤로 >>'),
+                                          )
+                                        : const SizedBox(width: 50),
                                   ],
                                 ),
                               ),

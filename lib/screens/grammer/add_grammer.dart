@@ -411,6 +411,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           sets: info.sets,
           chapter: info.chapter,
           title: titleController.text,
+          imageUrl: ref.read(grammarDataProvider).grammarImageUrl,
           description: ref.read(grammarDataProvider).description,
           descriptionEng: ref.read(grammarDataProvider).descriptionEng,
           descriptionChn: ref.read(grammarDataProvider).descriptionChn,

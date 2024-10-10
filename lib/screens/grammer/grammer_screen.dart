@@ -17,9 +17,9 @@ class GrammerScreen extends ConsumerStatefulWidget {
 
 class _GrammerDataState extends ConsumerState<GrammerScreen> {
   final int _pageSize = 8;
-  int _currentPage = 0;
   late GrammarDataList grammarData;
   LEVEL dropdownValue = LEVEL.LEVEL1;
+  int _currentPage = 0;
 
   final tableTitle = [
     'No.',
@@ -42,10 +42,26 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
 
   late Future<void> _grammarListDataFuture;
 
-  Future<void> fetchData() async {
+  Future<void> init() async {
     try {
       await GrammerDataRepository()
-          .getGrammerDataList(page: _currentPage, size: _pageSize)
+          .getGrammerDataList(page: 0, size: _pageSize)
+          .then((value) async {
+        setState(() {
+          _currentPage = value.totalPages;
+        });
+        print(value.totalPages);
+        await fetchData(page: value.totalPages - 1);
+      });
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<void> fetchData({required int page}) async {
+    try {
+      await GrammerDataRepository()
+          .getGrammerDataList(page: page, size: _pageSize)
           .then((value) {
         setState(() {
           grammarData = value;
@@ -56,15 +72,16 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
     }
   }
 
-  void goToPage(int page) {
+  Future<void> goToPage(int page) async {
     if (page < 0 || page >= grammarData.totalPages) {
       return;
     } else {
       setState(() {
         _currentPage = page;
       });
+
+      await fetchData(page: page);
     }
-    fetchData();
   }
 
   void addChapter({
@@ -93,7 +110,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
   @override
   void initState() {
     super.initState();
-    _grammarListDataFuture = fetchData();
+    _grammarListDataFuture = init();
   }
 
   @override

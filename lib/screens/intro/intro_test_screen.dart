@@ -29,7 +29,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   @override
   void initState() {
     super.initState();
-    _introDataFuture = fetchData();
+    _introDataFuture = fetchData(page: _currentPage);
   }
 
   final tabletitle = [
@@ -45,15 +45,17 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
 
   final List<bool> _selected = List.generate(_pageSize, (index) => false);
 
-  void goToPage(int page) {
+  void goToPage(int page) async {
     if (page < 0 || page >= introData.totalPages) {
       return;
     } else {
       setState(() {
         _currentPage = page;
+        _selected.fillRange(0, _pageSize, false);
       });
+
+      await fetchData(page: page);
     }
-    fetchData();
   }
 
   void addChapter() {
@@ -236,7 +238,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                       ),
                     );
                   });
-                  await fetchData();
+                  await fetchData(page: _currentPage);
                 },
                 child: const Text('확인'),
               ),
@@ -245,19 +247,22 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
         });
   }
 
-  Future<void> fetchData() async {
+  Future<void> fetchData({required int page}) async {
     try {
       await IntroDataRepository()
           .getIntroDataList(
-        page: _currentPage,
+        page: page,
         size: _pageSize,
       )
           .then((value) {
-        introData = value;
+        setState(() {
+          introData = value;
+        });
       });
     } catch (e) {
       throw Exception(e);
     }
+    return;
   }
 
   @override
@@ -467,73 +472,79 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                   ],
                                 ),
                           const SizedBox(height: 20),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //   children: [
-                          //     TextButton(
-                          //       onPressed: () {
-                          //         deleteSelected();
-                          //       },
-                          //       child: const Text(
-                          //         '선택 삭제',
-                          //         style: TextStyle(
-                          //           color: Colors.red,
-                          //         ),
-                          //       ),
-                          //     ),
-                          //     SizedBox(
-                          //       width: MediaQuery.of(context).size.width * 0.2,
-                          //       child: Row(
-                          //         mainAxisAlignment:
-                          //             MainAxisAlignment.spaceEvenly,
-                          //         children: [
-                          //           _currentPage != 0
-                          //               ? GestureDetector(
-                          //                   onTap: () {
-                          //                     goToPage(_currentPage - 1);
-                          //                   },
-                          //                   child: const SizedBox(
-                          //                       width: 50, child: Text('< 이전')))
-                          //               : const SizedBox(width: 50),
-                          //           Container(
-                          //             padding: const EdgeInsets.all(5),
-                          //             width: 50,
-                          //             height: 30,
-                          //             decoration: BoxDecoration(
-                          //                 borderRadius: BorderRadius.circular(5),
-                          //                 border: Border.all(
-                          //                   color: Colors.black,
-                          //                   width: 1,
-                          //                 )),
-                          //             child: Text(
-                          //               (_currentPage + 1).toString(),
-                          //               textAlign: TextAlign.center,
-                          //             ),
-                          //           ),
-                          //           _currentPage != introData.totalPages
-                          //               ? GestureDetector(
-                          //                   onTap: () {
-                          //                     goToPage(_currentPage + 1);
-                          //                   },
-                          //                   child: const SizedBox(
-                          //                       width: 50, child: Text('다음 >')),
-                          //                 )
-                          //               : const SizedBox(width: 50),
-                          //           GestureDetector(
-                          //             onTap: () {
-                          //               goToPage(introData.totalPages - 1);
-                          //             },
-                          //             child: const Text('맨뒤로 >>'),
-                          //           ),
-                          //         ],
-                          //       ),
-                          //     ),
-                          //     MyCustomButton(
-                          //         text: '회차추가',
-                          //         onTap: () => addChapter(),
-                          //         color: Colors.blue)
-                          //   ],
-                          // ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  deleteSelected();
+                                },
+                                child: const Text(
+                                  '선택 삭제',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.2,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    _currentPage != 0
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              goToPage(_currentPage - 1);
+                                            },
+                                            child: const SizedBox(
+                                                width: 50, child: Text('< 이전')))
+                                        : const SizedBox(width: 50),
+                                    Container(
+                                      padding: const EdgeInsets.all(5),
+                                      width: 50,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                            color: Colors.black,
+                                            width: 1,
+                                          )),
+                                      child: Text(
+                                        (_currentPage + 1).toString(),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    (_currentPage + 1) != introData.totalPages
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              goToPage(_currentPage + 1);
+                                            },
+                                            child: const SizedBox(
+                                                width: 50, child: Text('다음 >')),
+                                          )
+                                        : const SizedBox(width: 50),
+                                    (_currentPage + 1 != introData.totalPages)
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              goToPage(
+                                                  introData.totalPages - 1);
+                                            },
+                                            child: const Text('맨뒤로 >>'),
+                                          )
+                                        : const SizedBox(width: 50),
+                                  ],
+                                ),
+                              ),
+                              (_currentPage + 1 == introData.totalPages)
+                                  ? MyCustomButton(
+                                      text: '회차추가',
+                                      onTap: () => addChapter(),
+                                      color: Colors.blue)
+                                  : const SizedBox(width: 100),
+                            ],
+                          ),
                         ],
                       ),
                     );

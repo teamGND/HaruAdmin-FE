@@ -28,6 +28,9 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
   };
   List<String> wordList = [];
   late TextEditingController _titleController;
+  late TextEditingController _cycleController;
+  late TextEditingController _setsController;
+  late TextEditingController _chapterController;
   late List<TextEditingController> _controllers;
   late IntroInfo info;
 
@@ -66,9 +69,10 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
       if (info.category == null ||
           info.level == null ||
           info.cycle == null ||
-          info.chapter == null ||
           info.sets == null ||
-          info.title == null) {
+          info.chapter == null ||
+          info.title == null ||
+          info.title == '') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Center(child: Text('모든 항목을 입력해주세요')),
@@ -175,6 +179,21 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
       return controller;
     }).toList();
     _titleController = TextEditingController(text: info.title);
+    _titleController.addListener(() {
+      info = info.copyWith(title: _titleController.text);
+    });
+    _cycleController = TextEditingController(text: info.cycle.toString());
+    _cycleController.addListener(() {
+      info = info.copyWith(cycle: int.parse(_cycleController.text));
+    });
+    _setsController = TextEditingController(text: info.sets.toString());
+    _setsController.addListener(() {
+      info = info.copyWith(sets: int.parse(_setsController.text));
+    });
+    _chapterController = TextEditingController(text: info.chapter.toString());
+    _chapterController.addListener(() {
+      info = info.copyWith(chapter: int.parse(_chapterController.text));
+    });
   }
 
   @override
@@ -289,13 +308,10 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: TextField(
-                        keyboardType: TextInputType.number,
-                        decoration:
-                            const InputDecoration(border: InputBorder.none),
-                        controller: TextEditingController(
-                          text: info.cycle != null ? info.cycle.toString() : '',
-                        ),
-                      ),
+                          keyboardType: TextInputType.number,
+                          decoration:
+                              const InputDecoration(border: InputBorder.none),
+                          controller: _cycleController),
                     )),
 
                     // 4. 세트 //
@@ -303,13 +319,10 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: TextField(
-                        keyboardType: TextInputType.number,
-                        decoration:
-                            const InputDecoration(border: InputBorder.none),
-                        controller: TextEditingController(
-                          text: info.sets != null ? info.sets.toString() : '',
-                        ),
-                      ),
+                          keyboardType: TextInputType.number,
+                          decoration:
+                              const InputDecoration(border: InputBorder.none),
+                          controller: _setsController),
                     )),
 
                     // 5. 챕터 //
@@ -320,11 +333,7 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                         keyboardType: TextInputType.number,
                         decoration:
                             const InputDecoration(border: InputBorder.none),
-                        controller: TextEditingController(
-                          text: info.chapter != null
-                              ? info.chapter.toString()
-                              : '',
-                        ),
+                        controller: _chapterController,
                       ),
                     )),
 

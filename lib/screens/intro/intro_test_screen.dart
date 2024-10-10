@@ -91,14 +91,19 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
         sets = 1;
         chapter = 1;
       } else if (category == CATEGORY.TEST) {
-        category = CATEGORY.WORD;
-        cycle = 1;
-        sets += 1;
-        chapter = 1;
+        if (sets == 6) {
+          category = CATEGORY.MIDTERM;
+          sets = 7;
+          chapter = 1;
+        } else {
+          category = CATEGORY.WORD;
+          sets += 1;
+          chapter = 1;
+        }
       } else if (category == CATEGORY.GRAMMAR) {
         category = CATEGORY.TEST;
       } else if (category == CATEGORY.WORD) {
-        if (chapter == 2) {
+        if (chapter == 3) {
           category = CATEGORY.GRAMMAR;
         }
       }

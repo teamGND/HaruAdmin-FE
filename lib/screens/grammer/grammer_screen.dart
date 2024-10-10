@@ -46,13 +46,12 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
     try {
       await GrammerDataRepository()
           .getGrammerDataList(page: 0, size: _pageSize)
-          .then((value) async {
+          .then((value) {
         setState(() {
           _currentPage = value.totalPages;
         });
-        print(value.totalPages);
-        await fetchData(page: value.totalPages - 1);
       });
+      await fetchData(page: _currentPage);
     } catch (e) {
       throw Exception(e);
     }

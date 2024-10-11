@@ -61,6 +61,10 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    if ('/admin/intro' == err.requestOptions.uri.path) {
+      // resolve error and
+    }
+
     print(
       'ERROR[${err.response}] => PATH: ${err.requestOptions.uri.path}\n',
     );

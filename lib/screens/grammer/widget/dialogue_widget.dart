@@ -29,13 +29,13 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   final GrammerDataRepository grammerDataRepository = GrammerDataRepository();
 
   final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
-  final List<String> characterTypes = [
-    'BLACK',
-    'RED',
-    'BLUE',
-    'YELLOW',
-    'PINK'
-  ];
+  final Map<String, String> characterTypes = {
+    '차카': 'BLACK',
+    '송송': 'RED',
+    '옹': 'BLUE',
+    '룰루': 'YELLOW',
+    '핑': 'PINK'
+  };
 
   int _selectedLanguage = 0;
   final List<String> _hintText = [
@@ -251,8 +251,9 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                 (index) => GestureDetector(
                                   onTap: () {
                                     widget
-                                        .dialogueControllers[_selectedLanguage]
-                                        .text += '{${characterTypes[index]}}';
+                                            .dialogueControllers[_selectedLanguage]
+                                            .text +=
+                                        '{${characterTypes.keys.elementAt(index)}}';
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -269,7 +270,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Image.asset(
-                                        'assets/images/character_${characterTypes[index]}.png',
+                                        'assets/images/character_${characterTypes.values.elementAt(index)}.png',
                                         width: 30,
                                         height: 30,
                                       ),

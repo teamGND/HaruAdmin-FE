@@ -29,7 +29,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   @override
   void initState() {
     super.initState();
-    _introDataFuture = fetchData(page: _currentPage);
+    _introDataFuture = init();
   }
 
   final tabletitle = [
@@ -44,6 +44,24 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   ];
 
   final List<bool> _selected = List.generate(_pageSize, (index) => false);
+
+  Future<void> init() async {
+    try {
+      await IntroDataRepository()
+          .getIntroDataList(
+        page: 0,
+        size: _pageSize,
+      )
+          .then((value) {
+        setState(() {
+          _currentPage = value.totalPages - 1;
+        });
+      });
+      await fetchData(page: _currentPage);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 
   void goToPage(int page) async {
     if (page < 0 || page >= introData.totalPages) {
@@ -492,11 +510,18 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                 ),
                               ),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.2,
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
+                                    (_currentPage != 0)
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              goToPage(0);
+                                            },
+                                            child: const Text('<< 맨앞으로 '),
+                                          )
+                                        : const SizedBox(width: 50),
+                                    const SizedBox(width: 10),
                                     _currentPage != 0
                                         ? GestureDetector(
                                             onTap: () {
@@ -521,6 +546,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
+                                    const SizedBox(width: 10),
                                     (_currentPage + 1) != introData.totalPages
                                         ? GestureDetector(
                                             onTap: () {

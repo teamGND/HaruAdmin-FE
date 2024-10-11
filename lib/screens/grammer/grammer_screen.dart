@@ -42,21 +42,6 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
 
   late Future<void> _grammarListDataFuture;
 
-  Future<void> init() async {
-    try {
-      await GrammerDataRepository()
-          .getGrammerDataList(page: 0, size: _pageSize)
-          .then((value) {
-        setState(() {
-          _currentPage = value.totalPages;
-        });
-      });
-      await fetchData(page: _currentPage);
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
   Future<void> fetchData({required int page}) async {
     try {
       await GrammerDataRepository()
@@ -72,7 +57,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
   }
 
   Future<void> goToPage(int page) async {
-    if (page < 0 || page >= grammarData.totalPages) {
+    if (page < 0 || page > grammarData.totalPages) {
       return;
     } else {
       setState(() {
@@ -109,7 +94,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
   @override
   void initState() {
     super.initState();
-    _grammarListDataFuture = init();
+    _grammarListDataFuture = fetchData(page: _currentPage);
   }
 
   @override
@@ -225,7 +210,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
                             textAlign: TextAlign.center,
                           ),
                         ),
-                        _currentPage != grammarData.totalPages
+                        (_currentPage - 1 != grammarData.totalPages)
                             ? GestureDetector(
                                 onTap: () {
                                   goToPage(_currentPage);
@@ -234,12 +219,14 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
                                     width: 50, child: Text('다음 >')),
                               )
                             : const SizedBox(width: 50),
-                        GestureDetector(
-                          onTap: () {
-                            goToPage(grammarData.totalPages - 1);
-                          },
-                          child: const Text('맨뒤로 >>'),
-                        ),
+                        (_currentPage - 1 != grammarData.totalPages)
+                            ? GestureDetector(
+                                onTap: () {
+                                  goToPage(grammarData.totalPages - 1);
+                                },
+                                child: const Text('맨뒤로 >>'),
+                              )
+                            : const SizedBox(width: 50),
                       ],
                     ),
                   ],

@@ -244,24 +244,34 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
               ),
               TextButton(
                 onPressed: () async {
-                  Navigator.of(context).pop();
-                  List<int> ids = introData.content
-                      .asMap()
-                      .entries
-                      .where((element) => _selected[element.key])
-                      .map((e) => e.value.id)
-                      .toList();
-                  await IntroDataRepository()
-                      .deleteIntroData(ids)
-                      .then((value) {
-                    // 데이터 메시지 팝업
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(value.toString()),
-                      ),
-                    );
-                  });
-                  await fetchData(page: _currentPage);
+                  try {
+                    Navigator.of(context).pop();
+                    List<int> ids = introData.content
+                        .asMap()
+                        .entries
+                        .where((element) => _selected[element.key])
+                        .map((e) => e.value.id)
+                        .toList();
+
+                    print(ids);
+                    await IntroDataRepository()
+                        .deleteIntroData(ids)
+                        .then((value) {
+                      // 데이터 메시지 팝업
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Center(child: Text(value.toString())),
+                        ),
+                      );
+                    });
+                    setState(() {
+                      _selected.fillRange(0, _pageSize, false);
+                    });
+
+                    await fetchData(page: _currentPage);
+                  } catch (e) {
+                    print(e);
+                  }
                 },
                 child: const Text('확인'),
               ),

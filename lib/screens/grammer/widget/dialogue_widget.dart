@@ -7,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 
 import '../../../api/translate_service.dart';
 import '../../../model/translate_model.dart';
+import '../../../utils/enum_type.dart';
 import '../../../utils/parse_dialogue_line.dart';
 import '../../../provider/grammar_provider.dart';
 
@@ -15,10 +16,8 @@ class DialogueWidget extends ConsumerStatefulWidget {
   const DialogueWidget({
     super.key,
     required this.dialogueControllers,
-    required this.chapter,
   });
   final List<TextEditingController> dialogueControllers;
-  final String? chapter;
 
   @override
   ConsumerState<DialogueWidget> createState() => DialogueWidgetState();
@@ -29,13 +28,13 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   final GrammerDataRepository grammerDataRepository = GrammerDataRepository();
 
   final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
-  final List<String> characterTypes = [
-    'BLACK',
-    'RED',
-    'BLUE',
-    'YELLOW',
-    'PINK'
-  ];
+  final Map<String, String> characterTypes = {
+    '차카': 'BLACK',
+    '송송': 'RED',
+    '옹': 'BLUE',
+    '룰루': 'YELLOW',
+    '핑': 'PINK'
+  };
 
   int _selectedLanguage = 0;
   final List<String> _hintText = [
@@ -48,8 +47,15 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
 
   // 제시문 오디오 파일 업로드
   void getAudioUrl() async {
-    String? chapter = widget.chapter;
-    String audioName = 'dialogue_chapter$chapter';
+    // level, cycle, sets, chapter 가져오기
+
+    LEVEL? level = ref.read(introProvider).level;
+    int? cycle = ref.read(introProvider).cycle;
+    int? sets = ref.read(introProvider).sets;
+    int? chapter = ref.read(introProvider).chapter;
+
+    String audioName =
+        'grammar_description_${level.toString().split('.').last}_${cycle}_${sets}_$chapter';
 
     if (chapter == null || chapter == '') {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -251,8 +257,9 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                 (index) => GestureDetector(
                                   onTap: () {
                                     widget
-                                        .dialogueControllers[_selectedLanguage]
-                                        .text += '{${characterTypes[index]}}';
+                                            .dialogueControllers[_selectedLanguage]
+                                            .text +=
+                                        '{${characterTypes.keys.elementAt(index)}}';
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -269,7 +276,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Image.asset(
-                                        'assets/images/character_${characterTypes[index]}.png',
+                                        'assets/images/character_${characterTypes.values.elementAt(index)}.png',
                                         width: 30,
                                         height: 30,
                                       ),

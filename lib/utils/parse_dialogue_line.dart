@@ -6,6 +6,14 @@ List<InlineSpan> parseDialogueLine(String line) {
       RegExp(r'<(.*?)>|\[(.*?)\]|\*(.*?)\*|\{(.*?)\}|([^<>\[\]\*\{\}]+)');
   Iterable<RegExpMatch> matches = exp.allMatches(line);
 
+  final Map<String, String> characterTypes = {
+    '차카': 'BLACK',
+    '송송': 'RED',
+    '옹': 'BLUE',
+    '룰루': 'YELLOW',
+    '핑': 'PINK'
+  };
+
   for (var match in matches) {
     if (match.group(0)!.startsWith('<') && match.group(0)!.endsWith('>')) {
       spans.add(
@@ -46,7 +54,7 @@ List<InlineSpan> parseDialogueLine(String line) {
       // Matching for the color codes inside {}
       String colorName = match.group(4)!;
       String imageName =
-          'assets/images/character_$colorName.png'; // adjust the path as necessary
+          'assets/images/character_${characterTypes[colorName]}.png'; // adjust the path as necessary
       spans.add(
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,

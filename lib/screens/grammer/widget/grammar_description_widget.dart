@@ -12,7 +12,10 @@ import '../../../provider/grammar_provider.dart';
 class DescriptionWidget extends ConsumerStatefulWidget {
   const DescriptionWidget({
     super.key,
+    required this.descriptionControllers,
   });
+
+  final List<TextEditingController> descriptionControllers;
 
   @override
   ConsumerState<DescriptionWidget> createState() => DescriptionWidgetState();
@@ -24,13 +27,7 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
 
   final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
   int _selectedLanguage = 0;
-  final List<TextEditingController> _descriptionController = [
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-    TextEditingController(),
-  ];
+
   final List<String> _inputText = ['', '', '', '', ''];
   final List<String> _hintText = [
     '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.',
@@ -78,11 +75,11 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
 
   save() {
     ref.read(grammarDataProvider.notifier).updateDescription(
-          description: _descriptionController[0].text,
-          descriptionEng: _descriptionController[1].text,
-          descriptionChn: _descriptionController[2].text,
-          descriptionVie: _descriptionController[3].text,
-          descriptionRus: _descriptionController[4].text,
+          description: widget.descriptionControllers[0].text,
+          descriptionEng: widget.descriptionControllers[1].text,
+          descriptionChn: widget.descriptionControllers[2].text,
+          descriptionVie: widget.descriptionControllers[3].text,
+          descriptionRus: widget.descriptionControllers[4].text,
           grammarImageUrl: imageUrl,
         );
   }
@@ -90,7 +87,7 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
   //translate
   translate() async {
     try {
-      bool isKoreanFilled = _descriptionController[0].text.isNotEmpty;
+      bool isKoreanFilled = widget.descriptionControllers[0].text.isNotEmpty;
 
       if (isKoreanFilled == false) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,14 +101,14 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
       }
 
       TranslatedResponse? response = await translateRepository.translate(
-        korean: _descriptionController[0].text,
-        english: _descriptionController[1].text,
+        korean: widget.descriptionControllers[0].text,
+        english: widget.descriptionControllers[1].text,
       );
 
-      _descriptionController[1].text = response?.english ?? '';
-      _descriptionController[2].text = response?.chinese ?? '';
-      _descriptionController[3].text = response?.vietnam ?? '';
-      _descriptionController[4].text = response?.russian ?? '';
+      widget.descriptionControllers[1].text = response?.english ?? '';
+      widget.descriptionControllers[2].text = response?.chinese ?? '';
+      widget.descriptionControllers[3].text = response?.vietnam ?? '';
+      widget.descriptionControllers[4].text = response?.russian ?? '';
     } catch (e) {
       print("error : $e");
     }
@@ -121,28 +118,21 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
   void initState() {
     super.initState();
 
-    // textcontroller 안에 텍스트  ref.read(grammarDataProvider.notifier).description
-    for (int i = 0; i < _descriptionController.length; i++) {
-      _descriptionController[i].text =
-          ref.read(grammarDataProvider.notifier).getDescriptionList[i];
-      setState(() {
-        _inputText[i] = _descriptionController[i].text;
-      });
-      // add listener
-      _descriptionController[i].addListener(() {
-        setState(() {
-          _inputText[i] = _descriptionController[i].text;
-        });
-      });
-    }
-    setState(() {
-      imageUrl = ref.read(grammarDataProvider.notifier).getImageUrl;
-    });
+    widget.descriptionControllers[0].text =
+        ref.read(grammarDataProvider).description ?? '';
+    widget.descriptionControllers[1].text =
+        ref.read(grammarDataProvider).descriptionEng ?? '';
+    widget.descriptionControllers[2].text =
+        ref.read(grammarDataProvider).descriptionChn ?? '';
+    widget.descriptionControllers[3].text =
+        ref.read(grammarDataProvider).descriptionVie ?? '';
+    widget.descriptionControllers[4].text =
+        ref.read(grammarDataProvider).descriptionRus ?? '';
   }
 
   @override
   void dispose() {
-    for (var controller in _descriptionController) {
+    for (var controller in widget.descriptionControllers) {
       controller.dispose();
     }
     super.dispose();
@@ -217,7 +207,8 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                               const EdgeInsets.symmetric(horizontal: 5),
                           hintText: _hintText[_selectedLanguage],
                         ),
-                        controller: _descriptionController[_selectedLanguage],
+                        controller:
+                            widget.descriptionControllers[_selectedLanguage],
                       ),
                     ),
                   ),

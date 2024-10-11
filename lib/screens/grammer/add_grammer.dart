@@ -32,13 +32,17 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   // 타이틀 입력
   TextEditingController titleController = TextEditingController();
 
-  // 대표 문장
+  // dscription
+  List<TextEditingController> descriptionControllers = [];
+
+  // dialogue와 대표 문장
   List<TextEditingController> koreanControllers = [];
   List<TextEditingController> englishControllers = [];
   List<TextEditingController> chineseControllers = [];
   List<TextEditingController> vietnamControllers = [];
   List<TextEditingController> russianControllers = [];
 
+  // 예시 문장
   List<TextEditingController> exampleTitleControllers = [];
   List<TextEditingController> exampleEnglishControllers = [];
   List<TextEditingController> exampleChineseControllers = [];
@@ -398,7 +402,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
           expressionChn: chineseControllers[0].text,
           expressionVie: vietnamControllers[0].text,
           expressionRus: russianControllers[0].text,
-          voiceUrl: _representSentences[0].voiceUrl,
+          voiceUrl: ref.read(grammarDataProvider).grammarAudioUrl,
           characterType: 'BLACK',
         )
       ];
@@ -457,6 +461,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               chapter: value.chapter,
               title: value.title,
             );
+            ref.watch(introProvider.notifier).update(
+                  category: CATEGORY.GRAMMAR,
+                  level: levelFromString(value.level),
+                  cycle: value.cycle,
+                  sets: value.sets,
+                  chapter: value.chapter,
+                  title: value.title,
+                );
+
             _data = value;
             _representSentences = value.representSentences;
             _exampleSentences = value.exampleSentences;
@@ -499,6 +512,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         /* 컨트롤러에 추가 */
         // 타이틀
         titleController = TextEditingController(text: info.title);
+
+        // 설명
+        descriptionControllers = [
+          TextEditingController(text: _data.description),
+          TextEditingController(text: _data.descriptionEng),
+          TextEditingController(text: _data.descriptionChn),
+          TextEditingController(text: _data.descriptionVie),
+          TextEditingController(text: _data.descriptionRus),
+        ];
 
         // 대표 문장
         koreanControllers = List.generate(
@@ -583,6 +605,9 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
       element.dispose();
     }
     for (var element in russianControllers) {
+      element.dispose();
+    }
+    for (var element in descriptionControllers) {
       element.dispose();
     }
     for (var element in exampleTitleControllers) {
@@ -694,7 +719,6 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                     SizedBox(
                       height: 500,
                       child: DialogueWidget(
-                        chapter: info.chapter.toString(),
                         dialogueControllers: [
                           koreanControllers.isNotEmpty
                               ? koreanControllers[0]
@@ -847,9 +871,11 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(
+                    SizedBox(
                       height: 500,
-                      child: DescriptionWidget(),
+                      child: DescriptionWidget(
+                        descriptionControllers: descriptionControllers,
+                      ),
                     ),
                     const SizedBox(height: 15),
                     const SizedBox(height: 15),

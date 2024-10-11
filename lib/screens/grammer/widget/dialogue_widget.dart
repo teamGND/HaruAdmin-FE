@@ -7,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 
 import '../../../api/translate_service.dart';
 import '../../../model/translate_model.dart';
+import '../../../utils/enum_type.dart';
 import '../../../utils/parse_dialogue_line.dart';
 import '../../../provider/grammar_provider.dart';
 
@@ -15,10 +16,8 @@ class DialogueWidget extends ConsumerStatefulWidget {
   const DialogueWidget({
     super.key,
     required this.dialogueControllers,
-    required this.chapter,
   });
   final List<TextEditingController> dialogueControllers;
-  final String? chapter;
 
   @override
   ConsumerState<DialogueWidget> createState() => DialogueWidgetState();
@@ -48,8 +47,15 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
 
   // 제시문 오디오 파일 업로드
   void getAudioUrl() async {
-    String? chapter = widget.chapter;
-    String audioName = 'dialogue_chapter$chapter';
+    // level, cycle, sets, chapter 가져오기
+
+    LEVEL? level = ref.read(introProvider).level;
+    int? cycle = ref.read(introProvider).cycle;
+    int? sets = ref.read(introProvider).sets;
+    int? chapter = ref.read(introProvider).chapter;
+
+    String audioName =
+        'grammar_description_${level.toString().split('.').last}_${cycle}_${sets}_$chapter';
 
     if (chapter == null || chapter == '') {
       ScaffoldMessenger.of(context).showSnackBar(

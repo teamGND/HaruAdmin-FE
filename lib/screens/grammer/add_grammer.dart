@@ -267,8 +267,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
 
     // 한국어와 영어가 모두 입력되었는지 확인
     bool isKoreanFilled = datas.every((element) {
-      print(element.expression);
-      if (element.expression == '' || element.expressionEng == '') {
+      // if (element.expression == '' || element.expressionEng == null) {
+      if (element.expression == '') {
         return false;
       }
       return true;
@@ -277,7 +277,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     if (isKoreanFilled == false) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Center(child: Text('한국어와 영어를 모두 입력하고 저장한 후 번역해주세요')),
+          content: Center(child: Text('한국어 모두 입력하고 저장한 후 번역해주세요')),
+          // content: Center(child: Text('한국어와 영어를 모두 입력하고 저장한 후 번역해주세요')),
           showCloseIcon: true,
           closeIconColor: Colors.white,
         ),
@@ -295,7 +296,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
         if (response != null) {
           if (isRep) {
             setState(() {
-              if (data.expressionEng != null) {
+              if (data.expressionEng != null || data.expressionEng != '') {
                 englishControllers[i + 1].text = response.english ?? '';
               }
               chineseControllers[i + 1].text = response.chinese ?? '';
@@ -304,7 +305,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
             });
           } else {
             setState(() {
-              if (data.expressionEng != null) {
+              if (data.expressionEng != null || data.expressionEng != '') {
                 exampleEnglishControllers[i].text = response.english ?? '';
               }
               exampleChineseControllers[i].text = response.chinese ?? '';

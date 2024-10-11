@@ -333,7 +333,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 value.codeUnitAt(i) > 57 ||
                 value.length != 13 ||
                 value[3] != '-' ||
-                value[8] != '-') {
+                value[7] != '-') {
               return '010-0000-0000 형식으로 입력해주세요';
             }
           }

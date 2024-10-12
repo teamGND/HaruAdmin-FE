@@ -313,7 +313,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
               // 5. 타이틀
               height: 35,
               child: Center(
-                child: Text(grammarData.content[i].title!),
+                child: Text(grammarData.content[i].title ?? ''),
               ),
             ),
             SizedBox(

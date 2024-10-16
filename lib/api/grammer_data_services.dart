@@ -16,7 +16,7 @@ class GrammerDataRepository {
   }) async {
     try {
       final response = await dio.get(
-        '/grammar-list?pageNumber=$page&pageSize=$size',
+        '/grammar-list?page=$page&size=$size',
       );
       return GrammarDataList.fromJson(response.data);
     } catch (e) {

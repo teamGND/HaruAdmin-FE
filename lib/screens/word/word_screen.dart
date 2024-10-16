@@ -16,20 +16,14 @@ class WordScreen extends StatefulWidget {
 class _WordState extends State<WordScreen> {
   late WordDataList wordData;
 
-  final int _pageSize = 8;
+  final int _pageSize = 10;
   final double TABLE_ROW_HEIGHT = 50;
   LEVEL dropdownValue = LEVEL.LEVEL1;
   int _currentPage = 0;
 
-  final tabletitle = ['No.', '사이클', '세트', '회차', '타이틀', '학습 내용', '단어수', '상태'];
+  final tabletitle = ['사이클', '세트', '회차', '타이틀', '학습 내용', '단어수', '상태'];
 
   late Future<void> _wordListDataFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _wordListDataFuture = fetchData(page: _currentPage);
-  }
 
   void updateChapter({index}) {
     context.go('/word/add/${wordData.content[index].id}');
@@ -40,7 +34,9 @@ class _WordState extends State<WordScreen> {
       await WordDataRepository()
           .getWordDataList(page: page, size: _pageSize)
           .then((value) {
-        wordData = value;
+        setState(() {
+          wordData = value;
+        });
       });
     } catch (e) {
       throw Exception(e);
@@ -57,6 +53,12 @@ class _WordState extends State<WordScreen> {
 
       await fetchData(page: page);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _wordListDataFuture = fetchData(page: _currentPage);
   }
 
   @override
@@ -146,11 +148,10 @@ class _WordState extends State<WordScreen> {
                                     0: FlexColumnWidth(1),
                                     1: FlexColumnWidth(1),
                                     2: FlexColumnWidth(1),
-                                    3: FlexColumnWidth(1),
-                                    4: FlexColumnWidth(3), // 타이틀
-                                    5: FlexColumnWidth(7), // 단어 리스트
+                                    3: FlexColumnWidth(3), // 타이틀
+                                    4: FlexColumnWidth(7), // 단어 리스트
+                                    5: FlexColumnWidth(1),
                                     6: FlexColumnWidth(1),
-                                    7: FlexColumnWidth(1),
                                   },
                                   children: [
                                     TableRow(
@@ -175,15 +176,6 @@ class _WordState extends State<WordScreen> {
                                           color: Colors.white,
                                         ),
                                         children: [
-                                          SizedBox(
-                                            // No.
-                                            height: TABLE_ROW_HEIGHT,
-                                            child: Center(
-                                              child: Text(
-                                                (index + 1).toString(),
-                                              ),
-                                            ),
-                                          ),
                                           SizedBox(
                                             // 사이클
                                             height: TABLE_ROW_HEIGHT,

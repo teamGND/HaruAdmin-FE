@@ -16,8 +16,11 @@ class GrammerScreen extends ConsumerStatefulWidget {
 }
 
 class _GrammerDataState extends ConsumerState<GrammerScreen> {
-  final int _pageSize = 8;
   late GrammarDataList grammarData;
+
+  final int _pageSize = 10;
+  final double TABLE_ROW_HEIGHT = 45;
+
   LEVEL dropdownValue = LEVEL.LEVEL1;
   int _currentPage = 0;
 
@@ -181,7 +184,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
                       },
                       children: _buildTableRows(),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -213,7 +216,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
                         (_currentPage - 1 != grammarData.totalPages)
                             ? GestureDetector(
                                 onTap: () {
-                                  goToPage(_currentPage);
+                                  goToPage(_currentPage + 1);
                                 },
                                 child: const SizedBox(
                                     width: 50, child: Text('다음 >')),
@@ -253,7 +256,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
               ),
               color: Colors.grey[200],
             ),
-            height: 40,
+            height: 30,
             child: Center(
               child: Text(
                 tableTitle[index],
@@ -281,7 +284,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
           children: [
             SizedBox(
               // 1. No.
-              height: 35,
+              height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(
                   (i + 1).toString(),
@@ -290,35 +293,35 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
             ),
             SizedBox(
               // 2. 사이클
-              height: 35,
+              height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(grammarData.content[i].cycle.toString()),
               ),
             ),
             SizedBox(
               // 3. 세트
-              height: 35,
+              height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(grammarData.content[i].sets.toString()),
               ),
             ),
             SizedBox(
               // 4. 회차
-              height: 35,
+              height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(grammarData.content[i].chapter.toString()),
               ),
             ),
             SizedBox(
               // 5. 타이틀
-              height: 35,
+              height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(grammarData.content[i].title ?? ''),
               ),
             ),
             SizedBox(
               // 6. 제시문 제목
-              height: 35,
+              height: TABLE_ROW_HEIGHT,
               child: TextButton(
                 onPressed: () {
                   addChapter(

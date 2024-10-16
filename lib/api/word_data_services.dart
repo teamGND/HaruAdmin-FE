@@ -13,8 +13,7 @@ class WordDataRepository {
   Future<WordDataList> getWordDataList(
       {required int page, required int size}) async {
     try {
-      final response =
-          await dio.get('/word-list?pageNumber=$page&pageSize=$size');
+      final response = await dio.get('/word-list?page=$page&size=$size');
       final WordDataList wordDataList = WordDataList.fromJson(response.data);
 
       return wordDataList;

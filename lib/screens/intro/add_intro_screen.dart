@@ -49,19 +49,20 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
   }
 
   addWord() {
-    if (wordList.length > 10) {
+    if (wordList.length >= 15) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Center(child: Text('단어는 최대 10개까지 입력 가능합니다.')),
+          content: Center(child: Text('단어는 최대 15개까지 입력 가능합니다.')),
           showCloseIcon: true,
           closeIconColor: Colors.white,
         ),
       );
       return;
+    } else {
+      setState(() {
+        wordList.add('');
+      });
     }
-    setState(() {
-      wordList.add('');
-    });
   }
 
   saveIntroData() async {

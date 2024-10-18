@@ -37,6 +37,8 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   };
 
   int _selectedLanguage = 0;
+  bool _isTranslating = false;
+
   final List<String> _hintText = [
     '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.\n{}로 화자를 표시하세요.',
     '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.\nUse {} to indicate the speaker.',
@@ -127,6 +129,9 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
 
   // 번역
   translate() async {
+    setState(() {
+      _isTranslating = true;
+    });
     try {
       bool isKoreanFilled = widget.dialogueControllers[0].text.isNotEmpty;
 
@@ -153,6 +158,9 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
     } catch (e) {
       print("error : $e");
     }
+    setState(() {
+      _isTranslating = false;
+    });
   }
 
   @override
@@ -320,7 +328,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                     ),
                     const SizedBox(width: 10),
                     GestureDetector(
-                      onTap: translate,
+                      onTap: () => translate(),
                       child: Container(
                         height: 50,
                         width: 100,
@@ -332,15 +340,17 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Center(
-                          child: Text(
-                            '번역',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        child: Center(
+                          child: _isTranslating
+                              ? const CircularProgressIndicator()
+                              : const Text(
+                                  '번역',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ),

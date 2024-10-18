@@ -68,6 +68,9 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     'RUS',
   ];
 
+  bool _isRepTranslating = false;
+  bool _isExTranslating = false;
+
   void getAudioUrl({
     required bool isRep,
     required int index,
@@ -246,6 +249,13 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
   }
 
   translate({required isRep, isDialogue = false}) async {
+    setState(() {
+      if (isRep) {
+        _isRepTranslating = true;
+      } else {
+        _isExTranslating = true;
+      }
+    });
     // 번역할 데이터 datas에 넣기
     List<Sentence> datas = isRep ? saveRepSentences() : saveExSentences();
     if (isDialogue) {
@@ -319,6 +329,14 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
       print(e);
       throw Exception(e);
     }
+
+    setState(() {
+      if (isRep) {
+        _isRepTranslating = false;
+      } else {
+        _isExTranslating = false;
+      }
+    });
   }
 
   List<Sentence> saveRepSentences() {
@@ -690,7 +708,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 20),
                         Text(
-                          '\t#1 제목은 맨 위 < > 사이에\n\t#2 볼드체 목표 문법 [ ] 사이에',
+                          '\t#1 제목은 맨 위 < > 사이에\n\t#2 볼드체 목표 문법 [ ] 사이에\n\t#3 각주는 * * 사이에',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -699,7 +717,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 30),
                         Text(
-                          '#3 각주는 * * 사이에\n#4 화자는 { } 사이에',
+                          '#4 화자는 { } 사이에\n#5 줄바꿈은 백슬래시 \\ 넣기',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -767,7 +785,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         const SizedBox(width: 10),
                         const Icon(Icons.download_done_outlined),
                         const Text(
-                          ' 대표 문장',
+                          ' 대표 문장 (2개)',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -795,14 +813,33 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           color: Colors.orange,
                         ),
                         const Spacer(),
-                        MyCustomButton(
-                          text: '번역',
-                          onTap: () {
-                            translate(isRep: true);
-                          },
-                          color: const Color(0XFF484848),
+                        GestureDetector(
+                          onTap: () => translate(isRep: true),
+                          child: Container(
+                            height: 50,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF484848),
+                              border: Border.all(
+                                color: const Color(0xFF484848),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: _isRepTranslating
+                                  ? const CircularProgressIndicator()
+                                  : const Text(
+                                      '번역',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 20),
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -854,7 +891,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 30),
                         Text(
-                          '#4 번호 매기기는 @@사이에 숫자넣기\n#5 메타문법은 ^^ ^^ 사이에',
+                          '#4 번호 매기기는 @@사이에 숫자넣기\n#5 메타문법은 ^^ ^^ 사이에\n#6 줄바꿈은 백슬래시 \\ 넣기',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -992,16 +1029,36 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         const SizedBox(width: 20),
                         MyCustomButton(
                           text: '삭제',
-                          onTap: () => deleteSelectedRepresentiveSentence(),
+                          onTap: () => deleteSelectedExampleSentence(),
                           color: Colors.orange,
                         ),
                         const Spacer(),
-                        MyCustomButton(
-                          text: '번역',
-                          onTap: () {
-                            translate(isRep: false);
-                          },
-                          color: const Color(0XFF484848),
+                        GestureDetector(
+                          onTap: () => translate(isRep: false),
+                          child: Container(
+                            height: 50,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF484848),
+                              border: Border.all(
+                                color: const Color(0xFF484848),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: _isExTranslating
+                                  ? const CircularProgressIndicator()
+                                  : const Text(
+                                      '번역',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 20),
                       ],

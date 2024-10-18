@@ -35,7 +35,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   IntroInfo info = IntroInfo();
   List<PatchWordChapterDataComponent> _datas = [];
   final List<bool> _isChecked = List<bool>.filled(15, false);
-  bool _isWaiting = false;
+  bool _isImgUploading = false;
+  bool _isTranslating = false;
 
   List<Map<String, double>> tabletitle = [
     {'': 50},
@@ -217,7 +218,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
       if (result != null) {
         PlatformFile file = result.files.first;
         setState(() {
-          _isWaiting = true;
+          _isImgUploading = true;
         });
         await wordRepository
             .uploadFile(
@@ -234,7 +235,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
               return data;
             }).toList();
 
-            _isWaiting = false;
+            _isImgUploading = false;
           });
         });
       } else {
@@ -516,7 +517,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          (_isWaiting == false &&
+                                          (_isImgUploading == false &&
                                                   _datas[index].imageUrl !=
                                                       null)
                                               ? Image.network(

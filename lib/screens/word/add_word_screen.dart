@@ -34,7 +34,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   // 회차 데이터 가져오기
   IntroInfo info = IntroInfo();
   List<PatchWordChapterDataComponent> _datas = [];
-  final List<bool> _isChecked = List<bool>.filled(10, false);
+  final List<bool> _isChecked = List<bool>.filled(15, false);
   bool _isWaiting = false;
 
   List<Map<String, double>> tabletitle = [
@@ -78,7 +78,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
       for (int i = 0; i < _datas.length; i++) {
         _datas[i].order = i + 1;
       }
-      _isChecked.fillRange(0, 10, false);
+      _isChecked.fillRange(0, 15, false);
     });
   }
 

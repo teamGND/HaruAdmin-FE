@@ -27,8 +27,8 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
 
   final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
   int _selectedLanguage = 0;
+  bool _isTranslating = false;
 
-  final List<String> _inputText = ['', '', '', '', ''];
   final List<String> _hintText = [
     '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.',
     '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.',
@@ -86,6 +86,9 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
 
   //translate
   translate() async {
+    setState(() {
+      _isTranslating = true;
+    });
     try {
       bool isKoreanFilled = widget.descriptionControllers[0].text.isNotEmpty;
 
@@ -112,6 +115,9 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
     } catch (e) {
       print("error : $e");
     }
+    setState(() {
+      _isTranslating = false;
+    });
   }
 
   @override
@@ -244,7 +250,7 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                     ),
                     const SizedBox(width: 10),
                     GestureDetector(
-                      onTap: translate,
+                      onTap: () => translate(),
                       child: Container(
                         height: 50,
                         width: 100,
@@ -256,15 +262,17 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Center(
-                          child: Text(
-                            '번역',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        child: Center(
+                          child: _isTranslating
+                              ? const CircularProgressIndicator()
+                              : const Text(
+                                  '번역',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
@@ -331,8 +339,10 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                           width: 300,
                           child: RichText(
                             text: TextSpan(
-                              children: parseDescriptionLine(
-                                  _inputText[_selectedLanguage]),
+                              // parse
+                              children: parseDescriptionLine(widget
+                                  .descriptionControllers[_selectedLanguage]
+                                  .text),
                               style: const TextStyle(
                                   color: Colors.black, fontSize: 10),
                             ),

@@ -9,7 +9,6 @@ import 'package:haru_admin/screens/intro/add_intro_screen.dart';
 import 'package:haru_admin/screens/intro/intro_test_screen.dart';
 import 'package:haru_admin/screens/meta/meta_screen.dart';
 import 'package:haru_admin/screens/mypage.dart';
-import 'package:haru_admin/screens/test/add_quiz_screen.dart';
 import 'package:haru_admin/screens/test/add_test_screen.dart';
 import 'package:haru_admin/screens/word/add_word_screen.dart';
 import 'package:haru_admin/screens/word/word_screen.dart';
@@ -49,14 +48,6 @@ final GoRouter router = GoRouter(
           name: '테스트 데이터 추가',
           path: '/test/add/:category/:introId',
           builder: (context, state) => AddTestScreen(
-            state.pathParameters['category'],
-            state.pathParameters['introId'],
-          ),
-        ),
-        GoRoute(
-          name: '퀴즈 데이터 추가',
-          path: '/quiz/add/:category/:introId',
-          builder: (context, state) => AddQuizScreen(
             state.pathParameters['category'],
             state.pathParameters['introId'],
           ),

@@ -149,6 +149,10 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
   void translate() async {
     // 한국어, 영어 모두 입력안했을 때 '한국어와 영어를 모두 입력해주세요' snack bar
+    setState(() {
+      _isTranslating = true;
+    });
+
     bool isKoreanFilled = _datas.every((element) {
       if (element.title.isEmpty ||
           element.title == '' ||
@@ -192,10 +196,17 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
         vietnamControllers[i].text = _datas[i].vietnam ?? '';
         russianControllers[i].text = _datas[i].russian ?? '';
       }
+      setState(() {
+        _isTranslating = false;
+      });
     } catch (e) {
       print(e);
       throw Exception(e);
     }
+
+    setState(() {
+      _isTranslating = false;
+    });
   }
 
   void getImageUrl(int index) async {
@@ -708,11 +719,13 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                       color: const Color(0xFFFF7D53),
                     ),
                     const SizedBox(width: 10),
-                    MyCustomButton(
-                      text: '번역하기',
-                      onTap: () => translate(),
-                      color: const Color(0xFF484848),
-                    ),
+                    _isTranslating
+                        ? const CircularProgressIndicator()
+                        : MyCustomButton(
+                            text: '번역하기',
+                            onTap: () => translate(),
+                            color: const Color(0xFF484848),
+                          ),
                     const SizedBox(width: 10),
                     MyCustomButton(
                       text: '저장하기',

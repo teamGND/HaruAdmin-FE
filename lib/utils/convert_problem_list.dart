@@ -15,6 +15,10 @@ int? stringNumberToInteger(String? number, bool hasChoice4,
       if (isOX) return null;
       if (hasChoice4) return 3;
       return null;
+    case 'O':
+      return 1;
+    case 'X':
+      return 0;
     default:
       return null;
   }
@@ -96,8 +100,8 @@ ProblemDataModel? convertListToProblemContents({
       {
         return frameModel.copyWith(
           problemType: frameModel.problemType,
-          audio: contents[0],
-          answerString: contents[1],
+          answerString: contents[0],
+          audio: contents[1],
         );
       }
     case 208:
@@ -105,7 +109,7 @@ ProblemDataModel? convertListToProblemContents({
         return frameModel.copyWith(
           problemType: frameModel.problemType,
           questionString: contents[0],
-          exampleChanged: contents[1],
+          answerString: contents[1],
           answerNumber: stringNumberToInteger(contents[2], false, isOX: true),
         );
       }
@@ -179,16 +183,16 @@ List<String?> convertProblemContentsToList(ProblemDataModel state) {
     case 207:
       {
         return [
+          state.answerString,
           state.audio,
-          state.questionString,
         ];
       }
     case 208:
       {
         return [
           state.questionString,
-          state.exampleChanged,
-          state.answerNumber == null ? '' : state.answerNumber.toString(),
+          state.answerString,
+          state.answerNumber == 0 ? 'X' : 'O',
         ];
       }
     default:

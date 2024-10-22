@@ -240,8 +240,8 @@ class _WordState extends State<WordScreen> {
                                             // 단어 상태
                                             height: TABLE_ROW_HEIGHT,
                                             child: Center(
-                                              child: Text(
-                                                  data.quizStatus.toString()),
+                                              child:
+                                                  Text(data.status.toString()),
                                             ),
                                           ),
                                         ],
@@ -253,61 +253,47 @@ class _WordState extends State<WordScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.2,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _currentPage != 0
-                                        ? GestureDetector(
-                                            onTap: () {
-                                              goToPage(page: _currentPage - 1);
-                                            },
-                                            child: const SizedBox(
-                                                width: 50, child: Text('< 이전')))
-                                        : const SizedBox(width: 50),
-                                    Container(
-                                      padding: const EdgeInsets.all(5),
-                                      width: 50,
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                          border: Border.all(
-                                            color: Colors.black,
-                                            width: 1,
-                                          )),
-                                      child: Text(
-                                        (_currentPage + 1).toString(),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    (_currentPage + 1) != wordData.totalPages
-                                        ? GestureDetector(
-                                            onTap: () {
-                                              goToPage(page: _currentPage + 1);
-                                            },
-                                            child: const SizedBox(
-                                                width: 50, child: Text('다음 >')),
-                                          )
-                                        : const SizedBox(width: 50),
-                                    (_currentPage + 1 != wordData.totalPages)
-                                        ? GestureDetector(
-                                            onTap: () {
-                                              goToPage(
-                                                  page:
-                                                      wordData.totalPages - 1);
-                                            },
-                                            child: const Text('맨뒤로 >>'),
-                                          )
-                                        : const SizedBox(width: 50),
-                                  ],
+                              _currentPage != 0
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        goToPage(page: _currentPage - 1);
+                                      },
+                                      child: const SizedBox(
+                                          width: 50, child: Text('< 이전')))
+                                  : const SizedBox(width: 50),
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                width: 50,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: 1,
+                                    )),
+                                child: Text(
+                                  (_currentPage + 1).toString(),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
+                              (_currentPage + 1) != wordData.totalPages
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        goToPage(page: _currentPage + 1);
+                                      },
+                                      child: const SizedBox(
+                                          width: 60,
+                                          child: Center(child: Text('다음 >'))),
+                                    )
+                                  : const SizedBox(width: 50),
+                              (_currentPage + 1 != wordData.totalPages)
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        goToPage(page: wordData.totalPages - 1);
+                                      },
+                                      child: const Text('맨뒤로 >>'),
+                                    )
+                                  : const SizedBox(width: 50),
                             ],
                           ),
                         ],

@@ -29,7 +29,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   @override
   void initState() {
     super.initState();
-    _introDataFuture = init();
+    _introDataFuture = fetchData(page: _currentPage);
   }
 
   final tabletitle = [
@@ -45,23 +45,23 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
 
   final List<bool> _selected = List.generate(_pageSize, (index) => false);
 
-  Future<void> init() async {
-    try {
-      await IntroDataRepository()
-          .getIntroDataList(
-        page: 0,
-        size: _pageSize,
-      )
-          .then((value) {
-        setState(() {
-          _currentPage = value.totalPages - 1;
-        });
-      });
-      await fetchData(page: _currentPage);
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
+  // Future<void> init() async {
+  //   try {
+  //     await IntroDataRepository()
+  //         .getIntroDataList(
+  //       page: 0,
+  //       size: _pageSize,
+  //     )
+  //         .then((value) {
+  //       setState(() {
+  //         _currentPage = value.totalPages - 1;
+  //       });
+  //     });
+  //     await fetchData(page: _currentPage);
+  //   } catch (e) {
+  //     throw Exception(e);
+  //   }
+  // }
 
   void goToPage(int page) async {
     if (page < 0 || page >= introData.totalPages) {
@@ -167,7 +167,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     context.go('/intro/add');
   }
 
-  void addQuiz(IntroListComponentData data) {
+  void addTest(IntroListComponentData data) {
     String? title = data.titleKor;
     List<String> wordList = [];
     try {
@@ -181,26 +181,6 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           cycle: data.cycle,
           sets: data.sets,
           category: categoryFromString(data.category),
-          level: dropdownValue,
-          title: title,
-          wordDatas: wordList);
-
-      context.go('/quiz/add/${data.category}/${data.id}');
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  void addTest(IntroListComponentData data) {
-    String? title = data.titleKor;
-    List<String> wordList = [];
-    try {
-      ref.watch(introProvider.notifier).update(
-          dataId: data.id,
-          chapter: data.chapter,
-          cycle: data.cycle,
-          sets: data.sets,
-          category: CATEGORY.TEST,
           level: dropdownValue,
           title: title,
           wordDatas: wordList);
@@ -487,16 +467,23 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                                           color: Colors.orange,
                                                         ),
                                                       ))
-                                                  : TextButton(
-                                                      onPressed: () {
-                                                        addQuiz(data);
-                                                      },
-                                                      child: const Text(
-                                                        '퀴즈',
-                                                        style: TextStyle(
-                                                          color: Colors.blue,
-                                                        ),
-                                                      )),
+                                                  : (data.status == 'WAIT')
+                                                      ? const Text('-',
+                                                          style: TextStyle(
+                                                            color: Colors.grey,
+                                                            fontSize: 12,
+                                                          ))
+                                                      : TextButton(
+                                                          onPressed: () {
+                                                            addTest(data);
+                                                          },
+                                                          child: const Text(
+                                                            '퀴즈',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.blue,
+                                                            ),
+                                                          )),
                                             ),
                                           ),
                                         ],

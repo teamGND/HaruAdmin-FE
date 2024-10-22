@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:haru_admin/provider/intro_provider.dart';
+import 'package:haru_admin/provider/test_provider.dart';
 
-import '../provider/intro_provider.dart';
-
-class UpperTable extends StatelessWidget {
+class UpperTable extends ConsumerWidget {
   const UpperTable({
     super.key,
-    required this.info,
-    required this.exampleList,
   });
-  final IntroInfo info;
-  final List<String?>? exampleList;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       height: 150,
       width: 600,
@@ -46,7 +43,7 @@ class UpperTable extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: SizedBox(
                       child: Text(
-                        info.level.toString().split('.').last,
+                        ref.watch(testProvider.notifier).level,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -79,7 +76,7 @@ class UpperTable extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: SizedBox(
                       child: Text(
-                        info.cycle.toString(),
+                        ref.watch(testProvider.notifier).cycle,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -112,7 +109,7 @@ class UpperTable extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: SizedBox(
                       child: Text(
-                        info.sets.toString(),
+                        ref.watch(testProvider.notifier).sets,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -147,7 +144,7 @@ class UpperTable extends StatelessWidget {
                 height: 30,
                 child: Center(
                   child: Text(
-                    info.chapter.toString(),
+                    ref.watch(testProvider.notifier).chapter,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -178,7 +175,7 @@ class UpperTable extends StatelessWidget {
                 height: 30,
                 child: Center(
                   child: Text(
-                    info.category.toString().split('.')[1],
+                    ref.watch(testProvider.notifier).category,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -210,7 +207,7 @@ class UpperTable extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: SizedBox(
                     child: Text(
-                      info.title ?? '',
+                      ref.watch(testProvider.notifier).title,
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -247,9 +244,7 @@ class UpperTable extends StatelessWidget {
                       width: 50,
                       height: 42,
                       child: Text(
-                        (exampleList == [] || exampleList == null)
-                            ? ''
-                            : exampleList!.join(', '),
+                        ref.watch(testProvider).exampleData.join(', '),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

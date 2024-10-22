@@ -1,9 +1,14 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
 import 'package:haru_admin/model/test_data_model.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
+
+final testDataRepositoryProvider = Provider<TestDataRepository>((ref) {
+  return TestDataRepository();
+});
 
 class TestDataRepository {
   final dio = DioClient().provideDio();

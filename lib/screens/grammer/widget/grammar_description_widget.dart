@@ -53,11 +53,11 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
             .uploadFile(
           fileBytes: file.bytes!,
           fileName:
-              'grammar_description_${info.level.toString().split('.').last}_${info.cycle.toString()}_${info.sets.toString()}_${info.chapter.toString()}',
+              'grammar_${info.level.toString().split('.').last}_${info.cycle.toString()}_${info.sets.toString()}_${info.chapter.toString()}',
           fileType: file.extension!,
         )
             .then((value) {
-          ref.read(grammarDataProvider.notifier).updateDescriptionImageUrl(
+          ref.watch(grammarDataProvider.notifier).updateDescriptionImageUrl(
                 value,
               );
 

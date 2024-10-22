@@ -55,7 +55,7 @@ class WordDataListComponent {
   int cycle;
   int sets;
   String level;
-  String? quizStatus;
+  String? status;
   String? state;
   String? title;
   int wordCount;
@@ -68,7 +68,7 @@ class WordDataListComponent {
     required this.sets,
     required this.id,
     required this.level,
-    required this.quizStatus,
+    required this.status,
     required this.state,
     required this.title,
     required this.wordCount,
@@ -83,7 +83,7 @@ class WordDataListComponent {
       sets: jsondata['sets'],
       id: jsondata['id'],
       level: jsondata['level'],
-      quizStatus: jsondata['quizStatus'],
+      status: jsondata['status'],
       state: jsondata['state'],
       title: jsondata['title'],
       wordCount: jsondata['wordCount'],
@@ -99,7 +99,7 @@ class WordDataListComponent {
       'sets': sets,
       'id': id,
       'level': level,
-      'quizStatus': quizStatus,
+      'status': status,
       'state': state,
       'title': title,
       'wordCount': wordCount,

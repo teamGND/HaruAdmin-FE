@@ -57,7 +57,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
     int? chapter = ref.read(introProvider).chapter;
 
     String audioName =
-        'grammar_description_${level.toString().split('.').last}_${cycle}_${sets}_$chapter';
+        'dialogue_${level.toString().split('.').last}_${cycle}_${sets}_$chapter';
 
     if (chapter == null || chapter == '') {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,7 +84,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
           fileType: file.extension!,
         )
             .then((value) {
-          ref.read(grammarDataProvider.notifier).updateDialogueAudioUrl(value);
+          ref.watch(grammarDataProvider.notifier).updateDialogueAudioUrl(value);
         });
       } else {
         // User canceled the picker

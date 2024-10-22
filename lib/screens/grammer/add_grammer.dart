@@ -76,8 +76,8 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
     required int index,
   }) async {
     String? title = isRep
-        ? koreanControllers[index].text
-        : exampleTitleControllers[index].text;
+        ? 'rep_${info.level.toString().split('.').last}_${info.cycle}_${info.sets}_${info.chapter}_${(index - 1).toString()}'
+        : 'ex_${info.level.toString().split('.').last}_${info.cycle}_${info.sets}_${info.chapter}_$index';
 
     if (title == '' || title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

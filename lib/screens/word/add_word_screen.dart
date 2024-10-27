@@ -170,6 +170,9 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
           closeIconColor: Colors.white,
         ),
       );
+      setState(() {
+        _isTranslating = false;
+      });
       return;
     }
 
@@ -234,7 +237,8 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
         await wordRepository
             .uploadFile(
           fileBytes: file.bytes!,
-          fileName: _datas[index].title,
+          fileName:
+              '${info.level.toString().split('.').last}-${info.cycle.toString()}-${info.sets.toString()}-${info.chapter.toString()}_${_datas[index].title}',
           fileType: file.extension!,
         )
             .then((value) {
@@ -537,7 +541,12 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                                                   height: 60,
                                                   fit: BoxFit.cover,
                                                 )
-                                              : const SizedBox(),
+                                              : Image.network(
+                                                  'https://haru-hangeul.s3.ap-northeast-2.amazonaws.com/${info.level.toString().split('.').last}-${info.cycle.toString()}-${info.sets.toString()}-${info.chapter.toString()}_${Uri.encodeComponent(_datas[index].title)}.jpg',
+                                                  width: 60,
+                                                  height: 60,
+                                                  fit: BoxFit.cover,
+                                                ),
                                           TextButton(
                                             onPressed: () {
                                               // 이미지 불러오기

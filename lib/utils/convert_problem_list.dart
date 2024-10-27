@@ -2,7 +2,9 @@ import '../model/test_data_model.dart';
 
 int? stringNumberToInteger(String? number, bool hasChoice4,
     {bool isOX = false}) {
-  switch (number) {
+  if (number == null) return null;
+
+  switch (number.trim()) {
     case '0':
       return 0;
     case '1':
@@ -16,8 +18,10 @@ int? stringNumberToInteger(String? number, bool hasChoice4,
       if (hasChoice4) return 3;
       return null;
     case 'O':
+    case 'o':
       return 1;
     case 'X':
+    case 'x':
       return 0;
     default:
       return null;

@@ -85,36 +85,52 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
 
   void save({bool isConfirm = false}) async {
     try {
-      if (info.dataId != null) {
-        for (int i = 0; i < _datas.length; i++) {
-          _datas[i].order = i + 1;
-        }
-        for (int i = 0; i < _datas.length; i++) {
-          _datas[i].english = englishControllers[i].text;
-          _datas[i].chinese = chineseControllers[i].text;
-          _datas[i].vietnam = vietnamControllers[i].text;
-          _datas[i].russian = russianControllers[i].text;
-          _datas[i].description = descriptionControllers[i].text;
-        }
-
-        if (_datas.isNotEmpty) {
-          bool isWordFilled = _datas.every((element) {
-            if (element.title.isEmpty || element.title == '') {
-              return false;
-            }
-            return true;
-          });
-
-          if (!isWordFilled) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Center(child: Text('단어를 입력해주세요')),
-                showCloseIcon: true,
-                closeIconColor: Colors.white,
-              ),
+      if (info.dataId == null) {
+        await wordRepository
+            .getWordData(id: int.parse(widget.wordId!))
+            .then((value) {
+          setState(() {
+            info = IntroInfo(
+              dataId: value.id,
+              level: levelFromString(value.level),
+              category: CATEGORY.WORD,
+              cycle: value.cycle,
+              sets: value.sets,
+              chapter: value.chapter,
+              title: value.title,
             );
-            return;
+          });
+        });
+      }
+
+      for (int i = 0; i < _datas.length; i++) {
+        _datas[i].order = i + 1;
+      }
+      for (int i = 0; i < _datas.length; i++) {
+        _datas[i].english = englishControllers[i].text;
+        _datas[i].chinese = chineseControllers[i].text;
+        _datas[i].vietnam = vietnamControllers[i].text;
+        _datas[i].russian = russianControllers[i].text;
+        _datas[i].description = descriptionControllers[i].text;
+      }
+
+      if (_datas.isNotEmpty) {
+        bool isWordFilled = _datas.every((element) {
+          if (element.title.isEmpty || element.title == '') {
+            return false;
           }
+          return true;
+        });
+
+        if (!isWordFilled) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Center(child: Text('단어를 입력해주세요')),
+              showCloseIcon: true,
+              closeIconColor: Colors.white,
+            ),
+          );
+          return;
         }
 
         await wordRepository

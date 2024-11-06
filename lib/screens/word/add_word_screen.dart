@@ -37,6 +37,7 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   final List<bool> _isChecked = List<bool>.filled(15, false);
   bool _isImgUploading = false;
   bool _isTranslating = false;
+  bool _isSaving = false;
 
   List<Map<String, double>> tabletitle = [
     {'': 50},
@@ -84,6 +85,9 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
   }
 
   void save({bool isConfirm = false}) async {
+    setState(() {
+      _isSaving = true;
+    });
     try {
       if (info.dataId == null) {
         await wordRepository
@@ -160,6 +164,10 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
       }
     } catch (e) {
       throw Exception(e);
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
     }
   }
 
@@ -738,11 +746,13 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                       color: const Color(0xFFFFCC4A),
                     ),
                     const Expanded(child: SizedBox()),
-                    MyCustomButton(
-                      text: 'CONFIRM',
-                      onTap: () => save(isConfirm: true),
-                      color: const Color(0xFFFF7D53),
-                    ),
+                    _isSaving
+                        ? const CircularProgressIndicator()
+                        : MyCustomButton(
+                            text: 'CONFIRM',
+                            onTap: () => save(isConfirm: true),
+                            color: const Color(0xFFFF7D53),
+                          ),
                     const SizedBox(width: 10),
                     _isTranslating
                         ? const CircularProgressIndicator()
@@ -752,11 +762,13 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                             color: const Color(0xFF484848),
                           ),
                     const SizedBox(width: 10),
-                    MyCustomButton(
-                      text: '저장하기',
-                      onTap: () => save(),
-                      color: const Color(0xFF3F99F7),
-                    )
+                    _isSaving
+                        ? const CircularProgressIndicator()
+                        : MyCustomButton(
+                            text: '저장하기',
+                            onTap: () => save(),
+                            color: const Color(0xFF3F99F7),
+                          )
                   ],
                 ),
               ),

@@ -7,6 +7,7 @@ import '../../../api/grammer_data_services.dart';
 import '../../../api/translate_service.dart';
 import '../../../model/translate_model.dart';
 import '../../../provider/grammar_provider.dart';
+import '../../../utils/grammar_parse_line_function.dart';
 
 // 제시문
 class DescriptionWidget extends ConsumerStatefulWidget {
@@ -29,13 +30,6 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
   int _selectedLanguage = 0;
   bool _isTranslating = false;
 
-  final List<String> _hintText = [
-    '<제목>\n[대괄호]를 입력해서 강조하세요.\n*별표*로 주석을 첨가하세요.',
-    '<Title>\nUse [brackets] to emphasize.\nAdd *asterisks* for comments.',
-    '<标题>\n使用[方括号]强调。\n添加*星号*进行评论。',
-    '<Tiêu đề>\nSử dụng [dấu ngoặc vuông] để nhấn mạnh.\nThêm *dấu sao* để bình luận.',
-    '<Заголовок>\nИспользуйте [квадратные скобки] для выделения.\nДобавьте *звездочки* для комментариев.',
-  ];
   String? imageUrl = '';
 
   Future<void> getImageUrl() async {
@@ -206,12 +200,11 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
                         style: const TextStyle(
                           fontSize: 11,
                         ),
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           fillColor: Colors.white,
                           border: InputBorder.none,
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 5),
-                          hintText: _hintText[_selectedLanguage],
+                          contentPadding: EdgeInsets.symmetric(horizontal: 5),
+                          hintText: '제시문을 입력해주세요.',
                         ),
                         controller:
                             widget.descriptionControllers[_selectedLanguage],
@@ -366,167 +359,4 @@ class DescriptionWidgetState extends ConsumerState<DescriptionWidget> {
       ],
     );
   }
-}
-
-List<InlineSpan> parseDescriptionLine(String line) {
-  List<InlineSpan> spans = [];
-  RegExp exp = RegExp(
-      r'<(.*?)>|\[(.*?)\]|\{(.*?)\}|\@(.*?)\@|\^\^(.*?)\^\^|([^\<\>\[\]\{\}\@\^\^]+)');
-  Iterable<RegExpMatch> matches = exp.allMatches(line);
-
-  bool hasNumberPrefix = false;
-
-  for (var match in matches) {
-    if (match.group(0)!.startsWith('<') && match.group(0)!.endsWith('>')) {
-      spans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Container(
-            alignment: Alignment.center,
-            width: double.infinity, // Expand the container to full width
-            child: Text(
-              match.group(1)!,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ),
-      );
-    } else if (match.group(0)!.startsWith('[') &&
-        match.group(0)!.endsWith(']')) {
-      spans.add(
-        TextSpan(
-          text: match.group(2),
-          style: const TextStyle(
-            color: Color(0xFF00A1F8),
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      );
-    } else if (match.group(0)!.startsWith('{') &&
-        match.group(0)!.endsWith('}')) {
-      String innerText = match.group(3)!;
-      List<InlineSpan> innerSpans = [];
-      RegExp innerExp = RegExp(r'\[(.*?)\]|([^\[\]]+)');
-      Iterable<RegExpMatch> innerMatches = innerExp.allMatches(innerText);
-
-      for (var innerMatch in innerMatches) {
-        if (innerMatch.group(0)!.startsWith('[') &&
-            innerMatch.group(0)!.endsWith(']')) {
-          innerSpans.add(
-            TextSpan(
-              text: innerMatch.group(1),
-              style: const TextStyle(
-                color: Color(0xFF00A1F8),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          );
-        } else {
-          innerSpans.add(
-            TextSpan(
-              text: innerMatch.group(0),
-              style: const TextStyle(
-                color: Color(0xFF959595),
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          );
-        }
-      }
-
-      spans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(right: 4),
-                width: 26,
-                height: 14,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0XFFB1B1B1),
-                ),
-                child: const Center(
-                  child: Text(
-                    'ex',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              RichText(text: TextSpan(children: innerSpans)),
-            ],
-          ),
-        ),
-      );
-    } else if (match.group(0)!.startsWith('@') &&
-        match.group(0)!.endsWith('@')) {
-      hasNumberPrefix = true;
-      String number = match.group(4)!;
-      spans.add(
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: Container(
-            margin: const EdgeInsets.only(right: 4),
-            width: 20,
-            height: 20,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF00A1F8),
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    } else if (match.group(0)!.startsWith('^^') &&
-        match.group(0)!.endsWith('^^')) {
-      spans.add(
-        TextSpan(
-          text: match.group(5),
-          style: const TextStyle(
-            backgroundColor: Color(0xFF5BD1FF),
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
-      );
-    } else {
-      spans.add(
-        TextSpan(
-          text: match.group(0),
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: hasNumberPrefix ? FontWeight.w600 : FontWeight.w400,
-            color: Colors.black,
-          ),
-        ),
-      );
-      if (match.group(0)!.contains('\n')) {
-        hasNumberPrefix = false; // Reset font weight after a new line
-      }
-    }
-  }
-  return spans;
 }

@@ -8,7 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../../api/translate_service.dart';
 import '../../../model/translate_model.dart';
 import '../../../utils/enum_type.dart';
-import '../../../utils/parse_dialogue_line.dart';
+import '../../../utils/grammar_parse_line_function.dart';
 import '../../../provider/grammar_provider.dart';
 
 // 제시문
@@ -28,13 +28,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
   final GrammerDataRepository grammerDataRepository = GrammerDataRepository();
 
   final List<String> _languageTitles = ["한국어", "ENG", "CHN", "VIE", "RUS"];
-  final Map<String, String> characterTypes = {
-    '차카': 'BLACK',
-    '송송': 'RED',
-    '옹': 'BLUE',
-    '룰루': 'YELLOW',
-    '핑': 'PINK'
-  };
+  final List<String> characterTypes = ['차카', '송송', '옹', '룰루', '핑'];
 
   int _selectedLanguage = 0;
   bool _isTranslating = false;
@@ -265,9 +259,8 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                 (index) => GestureDetector(
                                   onTap: () {
                                     widget
-                                            .dialogueControllers[_selectedLanguage]
-                                            .text +=
-                                        '{${characterTypes.keys.elementAt(index)}}';
+                                        .dialogueControllers[_selectedLanguage]
+                                        .text += '{${characterTypes[index]}}';
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -284,7 +277,7 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Image.asset(
-                                        'assets/images/character_${characterTypes.values.elementAt(index)}.png',
+                                        'assets/images/character_${characterTypes[index]}.png',
                                         width: 30,
                                         height: 30,
                                       ),

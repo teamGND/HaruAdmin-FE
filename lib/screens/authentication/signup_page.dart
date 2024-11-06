@@ -329,16 +329,19 @@ class _SignUpPageState extends State<SignUpPage> {
           return '연락처를 입력해주세요';
         } else {
           for (int i = 0; i < value!.length; i++) {
-            if (value.codeUnitAt(i) < 48 ||
-                value.codeUnitAt(i) > 57 ||
-                value.length != 13 ||
-                value[3] != '-' ||
-                value[7] != '-') {
-              return '010-0000-0000 형식으로 입력해주세요';
+            // 010-0000-0000 형태로 입력 확인
+            if (i == 3 || i == 8) {
+              if (value[i] != '-') {
+                return '연락처 형식에 맞게 입력해주세요';
+              }
+            } else {
+              if (int.parse(value[i]) < 0 || int.parse(value[i]) > 9) {
+                return '연락처 형식에 맞게 입력해주세요';
+              }
             }
           }
+          return null;
         }
-        return null;
       },
     );
   }

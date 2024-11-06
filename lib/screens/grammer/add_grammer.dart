@@ -708,7 +708,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 20),
                         Text(
-                          '\t#1 제목은 맨 위 < > 사이에\n\t#2 볼드체 목표 문법 [ ] 사이에\n\t#3 각주는 * * 사이에',
+                          '\t#1 제목은 맨 위 < > 사이에\n\t#2 제목 줄바꿈: 백슬래시 \\ 넣기\n\t#3 볼드체(목표 문법): []사이에',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -717,7 +717,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 30),
                         Text(
-                          '#4 화자는 { } 사이에\n#5 줄바꿈은 백슬래시 \\ 넣기',
+                          '#4 각주: * * 사이에\n#5 화자: {옹}, {룰루}, {핑}, {차카}, {송송} 중 선택',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -882,7 +882,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 20),
                         Text(
-                          '\t #1 제목은 맨 위 < > 사이에\n\t #2 볼드체 목표 문법 [ ] 사이에\n\t #3 예시 문장은 { } 사이에',
+                          '\t#1 제목은 맨 위 < > 사이에\n\t#2 제목 줄바꿈: 백슬래시 \\ 넣기\n\t#3 번호 매기기는 @ @사이에 숫자 넣기',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -891,7 +891,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 30),
                         Text(
-                          '#4 번호 매기기는 @@사이에 숫자넣기\n#5 메타문법은 ^^ ^^ 사이에\n#6 줄바꿈은 백슬래시 \\ 넣기',
+                          '#4 볼드체(목표 문법): [ ] 사이에\n#5 메타문법은 ^^ ^^ 사이에\n#6 예시 문장: { } 사이에',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,
@@ -900,7 +900,7 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                         ),
                         SizedBox(width: 30),
                         Text(
-                          '** | 를 절대 쓰지 마세요 **',
+                          '#7 번역이 안되었으면 하는 부분은: ‘ ‘ 사이에\n** | 를 절대 쓰지 마세요 **',
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             fontSize: 12,

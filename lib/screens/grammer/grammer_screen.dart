@@ -19,7 +19,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
   late GrammarDataList grammarData;
 
   final int _pageSize = 10;
-  final double TABLE_ROW_HEIGHT = 45;
+  final double TABLE_ROW_HEIGHT = 40;
 
   LEVEL dropdownValue = LEVEL.LEVEL1;
   int _currentPage = 0;

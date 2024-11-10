@@ -417,7 +417,6 @@ class DialogueWidgetState extends ConsumerState<DialogueWidget> {
                     const SizedBox(height: 10),
                     SizedBox(
                       width: 300,
-                      height: 400,
                       child: RichText(
                         text: TextSpan(
                           children: parseDialogueLine(widget

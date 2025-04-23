@@ -9,7 +9,7 @@ class DioClient {
 
   Dio provideDio() {
     final Dio dio = Dio(BaseOptions(
-      baseUrl: "https://www.haruhangeul.com/admin",
+      baseUrl: "http://api.haruhangeul.com/admin",
       contentType: 'application/json',
     ));
 
@@ -19,7 +19,7 @@ class DioClient {
 
   Dio provideDioForFile() {
     final Dio dio = Dio(BaseOptions(
-      baseUrl: "https://www.haruhangeul.com/admin",
+      baseUrl: "http://api.haruhangeul.com/admin",
       contentType: 'multipart/form-data',
     ));
 

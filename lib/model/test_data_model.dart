@@ -69,13 +69,13 @@ class TestDataEntity {
 
 class ProblemDataModel {
   int? id;
-  String? level;
+  String? level; // ALPHABET
   int? cycle;
   int? sets;
-  String? category;
+  String? category; // WORD GRAMMAR TEST MIDTERM ALPHABET
   int? chapter;
   int sequence;
-  int problemType;
+  int problemType; // 1 2 3 4 5 : ALPHABET
   String? choice1;
   String? choice2;
   String? choice3;

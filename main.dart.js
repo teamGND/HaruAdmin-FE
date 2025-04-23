@@ -99890,10 +99890,10 @@ case 1:return A.p(q,r)
 case 2:return A.o(o,r)}})
 return A.q($async$eH,r)}}
 A.abQ.prototype={
-iI(){var s=A.aRk(A.Bt("https://www.haruhangeul.com/admin","application/json")),r=s.N2$
+iI(){var s=A.aRk(A.Bt("http://api.haruhangeul.com/admin","application/json")),r=s.N2$
 r.D(r,new A.lf())
 return s},
-yI(){var s=A.aRk(A.Bt("https://www.haruhangeul.com/admin","multipart/form-data")),r=s.N2$
+yI(){var s=A.aRk(A.Bt("http://api.haruhangeul.com/admin","multipart/form-data")),r=s.N2$
 r.D(r,new A.lf())
 return s}}
 A.lf.prototype={
@@ -103338,7 +103338,7 @@ H(a){var s=this.z
 s===$&&A.b()
 return A.p_(new A.avR(this),s,t.H)}}
 A.avR.prototype={
-$2(a9,b0){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7=null,a8="https://www.haruhangeul.com/admin"
+$2(a9,b0){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7=null,a8="http://api.haruhangeul.com/admin"
 if(b0.a===B.hW){s=this.a
 r=s.as
 q=s.a.d
@@ -103452,7 +103452,7 @@ A.avF.prototype={
 $1(a){return new A.q0(new A.avy(this.a),null)},
 $S:257}
 A.avy.prototype={
-$2(a2,a3){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b=null,a="https://www.haruhangeul.com/admin",a0=t.w,a1=A.b6(a2,b,a0).w
+$2(a2,a3){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b=null,a="http://api.haruhangeul.com/admin",a0=t.w,a1=A.b6(a2,b,a0).w
 a0=A.b6(a2,b,a0).w
 s=J.cN(0,t.l)
 for(r=t.Gf,q=t.i6,p=t.zm,o=this.a,n=o.x,m=o.y,l=0;!1;l=j){k=n[l]

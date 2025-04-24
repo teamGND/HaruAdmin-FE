@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/widgets/button.dart';
+import 'package:haru_admin/widgets/gaps.dart';
 
 class PopupModal extends StatelessWidget {
   const PopupModal({
@@ -30,17 +31,19 @@ class PopupModal extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 20,
-                bottom: 30,
-              ),
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                  bottom: 30,
+                ),
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
               ),
             ),
             Text(

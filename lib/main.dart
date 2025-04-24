@@ -22,6 +22,19 @@ void main() {
               fontWeight: FontWeight.w700,
             ),
           ),
+          // alert dialog theme
+          dialogTheme: const DialogTheme(
+            backgroundColor: Color(0xFFFFFFFF),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            surfaceTintColor: Color(0xFF484848),
+            alignment: Alignment.center,
+            titleTextStyle: TextStyle(
+                fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black),
+            contentTextStyle: TextStyle(
+                fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
+          ),
         ),
       ),
     ),

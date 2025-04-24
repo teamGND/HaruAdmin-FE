@@ -1,39 +1,62 @@
 import 'package:flutter/material.dart';
 
-class Button extends StatelessWidget {
-  const Button({
+enum ButtonSize {
+  small,
+  medium,
+  large,
+  extraLarge,
+}
+
+class ClickableButton extends StatelessWidget {
+  const ClickableButton({
     super.key,
     required this.onPressed,
     required this.color,
     required this.text,
+    this.size = ButtonSize.medium,
   });
 
   final VoidCallback onPressed;
   final Color color;
   final String text;
+  final ButtonSize size;
+
+  // button size
+  double get buttonSize {
+    switch (size) {
+      case ButtonSize.small:
+        return 50;
+      case ButtonSize.medium:
+        return 100;
+      case ButtonSize.large:
+        return 200;
+      case ButtonSize.extraLarge:
+        return 380;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 130,
-          vertical: 25,
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: buttonSize,
+        height: 50,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-        textAlign: TextAlign.center,
       ),
     );
   }

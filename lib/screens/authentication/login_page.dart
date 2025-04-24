@@ -145,10 +145,11 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                     Gaps.v40,
-                    Button(
+                    ClickableButton(
                       onPressed: login,
                       color: Colors.black,
                       text: '로그인',
+                      size: ButtonSize.extraLarge,
                     ),
                     Gaps.v10,
                     TextButton(

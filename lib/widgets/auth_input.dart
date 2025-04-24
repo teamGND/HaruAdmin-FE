@@ -37,9 +37,11 @@ class AuthInput extends StatelessWidget {
           ),
           Gaps.h20,
           Expanded(
-            child: TextField(
+            child: TextFormField(
               controller: adminIdController,
               obscureText: label.contains('비밀번호') ? true : false,
+              autocorrect: false,
+              validator: validator,
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: const TextStyle(
@@ -49,6 +51,14 @@ class AuthInput extends StatelessWidget {
                   borderSide: BorderSide(
                     color: Color(0xFFBDBDBD),
                   ),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: ColorPallete.red,
+                  ),
+                ),
+                errorStyle: const TextStyle(
+                  color: ColorPallete.red,
                 ),
               ),
             ),

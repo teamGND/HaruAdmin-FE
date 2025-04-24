@@ -5,11 +5,10 @@ import 'package:haru_admin/themes/colors.dart';
 import 'package:haru_admin/widgets/auth_input.dart';
 import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/colors.dart';
-import 'package:haru_admin/widgets/divider.dart';
 import 'package:haru_admin/widgets/dot.dart';
 import 'package:haru_admin/widgets/gaps.dart';
+import 'package:haru_admin/widgets/popup_modal.dart';
 import 'package:haru_admin/widgets/rowitems.dart';
-import 'package:go_router/go_router.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -30,6 +29,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String rankController = 'MASTER';
   TextEditingController phoneNumberController = TextEditingController();
+
+  bool saveAndValidateForm(GlobalKey<FormState> formKey) {
+    if (!formKey.currentState!.validate()) {
+      return false;
+    }
+    formKey.currentState!.save();
+    return true;
+  }
 
   signup() async {
     if (!saveAndValidateForm(_formKey) || !isIdavailable) {
@@ -61,6 +68,42 @@ class _SignUpPageState extends State<SignUpPage> {
         });
   }
 
+  checkId(value) async {
+    await authRepository
+        .adminIdCheck(adminIdController.text)
+        .then((response) => {
+              print(response),
+              if (response.statusCode == 200)
+                {
+                  setState(() {
+                    isIdavailable = true;
+                  }),
+                }
+            })
+        .catchError((e) {
+      setState(() {
+        isIdavailable = false;
+      });
+      showDialog<Widget>(
+          context: context,
+          builder: (BuildContext context) {
+            return PopupModal(
+                title: '아이디 중복',
+                content: '아이디가 중복되었습니다.',
+                actions: [
+                  ClickableButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    color: Colors.black,
+                    text: '확인',
+                    size: ButtonSize.medium,
+                  )
+                ]);
+          });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -81,58 +124,6 @@ class _SignUpPageState extends State<SignUpPage> {
     phoneNumberController.dispose();
 
     super.dispose();
-  }
-
-  bool saveAndValidateForm(GlobalKey<FormState> formKey) {
-    if (!formKey.currentState!.validate()) {
-      return false;
-    }
-    formKey.currentState!.save();
-    return true;
-  }
-
-  checkId(value) async {
-    await authRepository
-        .adminIdCheck(adminIdController.text)
-        .then((response) => {
-              print(response),
-              if (response.statusCode == 200)
-                {
-                  setState(() {
-                    isIdavailable = true;
-                  }),
-                }
-            })
-        .catchError((e) {
-      setState(() {
-        isIdavailable = false;
-      });
-      showDialog<Widget>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('아이디 중복'),
-              content: const Text('아이디가 중복되었습니다.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('확인'),
-                ),
-              ],
-            );
-          });
-    });
-  }
-
-  String passwordCheck(String? value) {
-    if (value != passwordController.text) {
-      return '비밀번호가 일치하지 않습니다.';
-    } else if (value!.isEmpty) {
-      return '비밀번호를 입력해주세요';
-    }
-    return '';
   }
 
   @override
@@ -237,7 +228,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                 checkId(adminIdController.text);
                               },
                               child: isIdavailable
-                                  ? const Icon(Icons.check)
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 24,
+                                    )
                                   : const Text('중복 확인',
                                       style: TextStyle(
                                           color: Colors.black,
@@ -251,17 +246,27 @@ class _SignUpPageState extends State<SignUpPage> {
                           adminIdController: passwordController,
                           label: '비밀번호',
                           hint: '비밀번호를 입력하세요',
-                          validator: passwordCheck,
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return '비밀번호를 입력해주세요';
+                            }
+                            if (value!.length >= 17 && value.length <= 9) {
+                              return '비밀번호는 10~16자로 지정해주세요.';
+                            }
+                            return null;
+                          },
                         ),
                         AuthInput(
                           adminIdController: confirmPasswordController,
                           label: '비밀번호 확인',
                           hint: '비밀번호를 다시 입력하세요',
                           validator: (value) {
-                            if (value?.isEmpty ?? true) {
+                            if (value != passwordController.text) {
+                              return '비밀번호가 일치하지 않습니다.';
+                            } else if (value!.isEmpty) {
                               return '비밀번호를 입력해주세요';
                             }
-                            return passwordCheck(value);
+                            return null;
                           },
                         ),
                         Padding(
@@ -354,10 +359,11 @@ class _SignUpPageState extends State<SignUpPage> {
                           },
                         ),
                         Gaps.v40,
-                        Button(
+                        ClickableButton(
                           onPressed: signup,
                           color: Colors.black,
                           text: '회원가입',
+                          size: ButtonSize.extraLarge,
                         ),
                       ],
                     ),

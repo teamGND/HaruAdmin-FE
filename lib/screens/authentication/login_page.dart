@@ -9,7 +9,6 @@ import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/colors.dart';
 import 'package:haru_admin/widgets/dot.dart';
 import 'package:haru_admin/widgets/gaps.dart';
-import 'package:haru_admin/widgets/rowitems.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -168,40 +167,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget userId() {
-    return RowItems(
-      infoname: '아이디',
-      obscureText: false,
-      controller: adminIdController,
-      onSaved: (value) {
-        adminIdController.text = value!;
-      },
-      validator: (value) {
-        if (value?.isEmpty ?? true) {
-          return '아이디를 입력해주세요';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget password() {
-    return RowItems(
-      infoname: '비밀번호',
-      obscureText: true,
-      onSaved: (value) {
-        passwordController.text = value!;
-      },
-      controller: passwordController,
-      validator: (value) {
-        if (value?.isEmpty ?? true) {
-          return '비밀번호를 입력해주세요';
-        }
-        return null;
-      },
     );
   }
 }

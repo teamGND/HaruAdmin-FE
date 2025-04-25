@@ -8,7 +8,6 @@ import 'package:haru_admin/widgets/colors.dart';
 import 'package:haru_admin/widgets/dot.dart';
 import 'package:haru_admin/widgets/gaps.dart';
 import 'package:haru_admin/widgets/popup_modal.dart';
-import 'package:haru_admin/widgets/rowitems.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -21,7 +20,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   late final AuthRepository authRepository;
   bool isIdavailable = false;
-  RankLabel? selectedRank;
   TextEditingController adminIdController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();

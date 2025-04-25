@@ -69,11 +69,6 @@ class _WordState extends State<WordScreen> {
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(children: [
-              Text(
-                '단어 학습 데이터',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

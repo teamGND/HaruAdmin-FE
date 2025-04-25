@@ -40,6 +40,7 @@ class ClickableButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
+        margin: const EdgeInsets.all(5),
         width: buttonSize,
         height: 50,
         decoration: BoxDecoration(

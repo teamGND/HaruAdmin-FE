@@ -39,41 +39,7 @@ final GoRouter router = GoRouter(
       },
       routes: [
         ...sidebarRoutes.map((sidebar) => sidebar.route).toList(),
-        GoRoute(
-          name: '인트로 데이터 추가',
-          path: '/intro/add',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: AddIntroScreen(),
-          ),
-        ),
-        GoRoute(
-          name: '테스트 데이터 추가',
-          path: '/test/add/:category/:introId',
-          pageBuilder: (context, state) => NoTransitionPage(
-            child: AddTestScreen(
-              state.pathParameters['category'],
-              state.pathParameters['introId'],
-            ),
-          ),
-        ),
-        GoRoute(
-          name: '문법 데이터 추가',
-          path: '/grammar/add/:grammarId',
-          pageBuilder: (context, state) => NoTransitionPage(
-            child: AddGrammerScreen(
-              state.pathParameters['grammarId'],
-            ),
-          ),
-        ),
-        GoRoute(
-          name: '단어 데이터 추가',
-          path: '/word/add/:wordId',
-          pageBuilder: (context, state) => NoTransitionPage(
-            child: AddWordScreen(
-              state.pathParameters['wordId'],
-            ),
-          ),
-        ),
+        ...sidebarChildRoutes.map((sidebar) => sidebar.route).toList(),
       ],
     ),
   ],
@@ -98,7 +64,7 @@ List<SidebarModel> sidebarRoutes = [
     icon: const Dot(color: ColorPallete.introColor),
     label: 'Intro',
     route: GoRoute(
-      name: '인트로 & 퀴즈/테스트',
+      name: '전체 회차 조회/생성',
       path: '/intro',
       pageBuilder: (context, state) =>
           const NoTransitionPage(child: IntroTestScreen()),
@@ -150,7 +116,10 @@ List<SidebarModel> sidebarRoutes = [
     isStudyMenu: true,
   ),
   SidebarModel(
-    icon: const Icon(Icons.groups),
+    icon: Image.asset(
+      'assets/icons/team.png',
+      width: 17,
+    ),
     label: 'Team',
     route: GoRoute(
         name: '관리자 계정 관리',
@@ -159,12 +128,73 @@ List<SidebarModel> sidebarRoutes = [
             const NoTransitionPage(child: Admin())),
   ),
   SidebarModel(
-    icon: const Icon(Icons.person),
+    icon: Image.asset(
+      'assets/icons/me.png',
+      width: 17,
+    ),
     label: 'Me',
     route: GoRoute(
-      name: '마이페이지',
+      name: '나의 관리자 정보',
       path: '/mypage',
       pageBuilder: (context, state) => const NoTransitionPage(child: Mypage()),
     ),
+  ),
+];
+
+List<SidebarModel> sidebarChildRoutes = [
+  SidebarModel(
+    icon: const Dot(color: ColorPallete.introColor),
+    label: 'Intro >    Add & Edit',
+    route: GoRoute(
+      name: '인트로 데이터 추가',
+      path: '/intro/add',
+      pageBuilder: (context, state) => const NoTransitionPage(
+        child: AddIntroScreen(),
+      ),
+    ),
+    isStudyMenu: true,
+  ),
+  SidebarModel(
+    icon: const Dot(color: ColorPallete.wordColor),
+    label: 'Word >    Add & Edit',
+    route: GoRoute(
+      name: '단어 데이터 추가',
+      path: '/word/add/:wordId',
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: AddWordScreen(
+          state.pathParameters['wordId'],
+        ),
+      ),
+    ),
+    isStudyMenu: true,
+  ),
+  SidebarModel(
+    icon: const Dot(color: ColorPallete.grammarColor),
+    label: 'Grammar >    Add & Edit',
+    route: GoRoute(
+      name: '문법 데이터 추가',
+      path: '/grammar/add/:grammarId',
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: AddGrammerScreen(
+          state.pathParameters['grammarId'],
+        ),
+      ),
+    ),
+    isStudyMenu: true,
+  ),
+  SidebarModel(
+    icon: const Dot(color: ColorPallete.testColor),
+    label: 'Quiz & Test >    Add & Edit',
+    route: GoRoute(
+      name: '테스트 데이터 추가',
+      path: '/test/add/:category/:introId',
+      pageBuilder: (context, state) => NoTransitionPage(
+        child: AddTestScreen(
+          state.pathParameters['category'],
+          state.pathParameters['introId'],
+        ),
+      ),
+    ),
+    isStudyMenu: true,
   ),
 ];

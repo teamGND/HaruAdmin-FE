@@ -108,14 +108,6 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(children: [
-          const Text(
-            '문법 학습 데이터',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

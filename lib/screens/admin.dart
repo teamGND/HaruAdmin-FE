@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:haru_admin/api/auth_services.dart';
 import 'package:haru_admin/api/network/dio_client.dart';
+import 'package:haru_admin/themes/colors.dart';
+import 'package:haru_admin/widgets/button.dart';
+import 'package:haru_admin/widgets/popup_modal.dart';
+import 'package:haru_admin/widgets/status_chip.dart';
 
 class Admin extends StatefulWidget {
   const Admin({super.key});
@@ -32,23 +36,36 @@ class _AdminState extends State<Admin> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(height: 50),
-          const Text('관리자 계정 관리',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          DataTable(
-            columns: _buildColumns(),
-            rows: _buildRows(),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 20),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 20),
+    return Container(
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: MediaQuery.of(context).size.width -
+                    80, // Account for margin
+              ),
+              child: DataTable(
+                columns: _buildColumns(),
+                rows: _buildRows(),
+                // Optional: Adjust column spacing for better appearance
+                columnSpacing: 20,
+                dataTextStyle: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -66,15 +83,15 @@ class _AdminState extends State<Admin> {
                       child: Text(
                         '$i',
                         style: const TextStyle(
-                          color: Colors.blue,
+                          color: Colors.black,
                         ),
                       ),
                     ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -84,7 +101,11 @@ class _AdminState extends State<Admin> {
       return DataColumn(
         label: Text(
           columnName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF585858),
+          ),
         ),
       );
     }).toList();
@@ -100,22 +121,25 @@ class _AdminState extends State<Admin> {
           DataCell(Text(adminData.phoneNumber ?? "none")),
           DataCell(Text(adminData.ranks ?? "none")),
           DataCell(
-            InkWell(
-              onTap: () {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return buildAlertDialog(context);
-                    });
-                // Add your custom logic here
-              },
-              child: Text(
-                adminData.status == 'WAIT' ? "대기" : "승인",
-                style: TextStyle(
-                  color: adminData.status == 'WAIT' ? Colors.red : Colors.blue,
-                ), // Set the text color to blue
-              ),
+            StatusChip(
+              status: DataStatus.fromString(adminData.status),
             ),
+            // InkWell(
+            //   onTap: () {
+            //     showDialog(
+            //         context: context,
+            //         builder: (BuildContext context) {
+            //           return buildAlertDialog(context);
+            //         });
+            //     // Add your custom logic here
+            //   },
+            //   child: Text(
+            //     adminData.status == 'WAIT' ? "대기" : "승인",
+            //     style: TextStyle(
+            //       color: adminData.status == 'WAIT' ? Colors.red : Colors.blue,
+            //     ), // Set the text color to blue
+            //   ),
+            // ),
           ),
         ],
       );
@@ -123,29 +147,29 @@ class _AdminState extends State<Admin> {
   }
 }
 
-AlertDialog buildAlertDialog(context) {
-  return AlertDialog(
-    title: const Text('계정 상태 변경'),
-    content: const Text('계정 정보'),
+PopupModal buildAlertDialog(context) {
+  return PopupModal(
+    title: '계정 상태 변경',
+    content: '계정 정보',
     actions: [
-      TextButton(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        child: const Text('취소'),
-      ),
-      TextButton(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        child: const Text('승인'),
-      ),
-      TextButton(
-        onPressed: () {
-          Navigator.pop(context);
-        },
-        child: const Text('삭제'),
-      ),
+      ClickableButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          color: Colors.black,
+          text: '취소'),
+      ClickableButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          color: ColorPallete.red,
+          text: '삭제'),
+      ClickableButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          color: ColorPallete.green,
+          text: '승인'),
     ],
   );
 }

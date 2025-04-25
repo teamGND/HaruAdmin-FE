@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:haru_admin/router.dart';
 import 'package:haru_admin/utils/secure_storage.dart';
 import 'package:haru_admin/widgets/gaps.dart';
+import 'package:haru_admin/widgets/upper_area.dart';
 
 class SideBar extends StatefulWidget {
   const SideBar({
@@ -20,6 +21,7 @@ class SideBar extends StatefulWidget {
 
 class _SideBarState extends State<SideBar> {
   bool isFolded = false;
+  // SidebarModel selectedSidebar = sidebarRoutes.last;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +91,10 @@ class _SideBarState extends State<SideBar> {
                   );
                 }).toList(),
                 SideBarTile(
-                  icon: const Icon(Icons.logout),
+                  icon: Image.asset(
+                    'assets/icons/logout.png',
+                    width: 17,
+                  ),
                   label: 'Logout',
                   routePath: '/login',
                   isFolded: isFolded,
@@ -97,7 +102,13 @@ class _SideBarState extends State<SideBar> {
               ],
             ),
           ),
-          Expanded(child: widget.child),
+          Expanded(
+              child: Column(
+            children: [
+              UpperArea(state: widget.state),
+              Expanded(child: widget.child),
+            ],
+          )),
         ],
       ),
     );

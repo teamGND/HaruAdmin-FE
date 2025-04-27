@@ -23,7 +23,6 @@ class UpperArea extends StatelessWidget {
         left: 20,
         right: 20,
         top: 20,
-        bottom: 8,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,6 +73,7 @@ class TitleSearchBar extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(
         maxWidth: 200,
+        maxHeight: 30,
       ),
       child: TextField(
         decoration: InputDecoration(

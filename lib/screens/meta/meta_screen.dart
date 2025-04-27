@@ -2,10 +2,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:haru_admin/api/meta_grammar_services.dart';
 import 'package:haru_admin/model/meta_data_model.dart';
+import 'package:haru_admin/themes/colors.dart';
+import 'package:haru_admin/widgets/button.dart';
 
 import '../../api/translate_service.dart';
 import '../../model/translate_model.dart';
-import '../../widgets/buttons.dart';
 
 class MetaGrammarScreen extends StatefulWidget {
   const MetaGrammarScreen({super.key});
@@ -512,25 +513,25 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        MyCustomButton(
+        ClickableButton(
           text: '삭제',
-          onTap: delete,
-          color: Colors.red,
+          onPressed: delete,
+          color: ColorPallete.red,
         ),
         const SizedBox(width: 10),
-        MyCustomButton(
+        ClickableButton(
           text: '번역',
-          onTap: translate,
-          color: const Color(0XFF484848),
+          onPressed: translate,
+          color: ColorPallete.gray,
         ),
         const SizedBox(width: 10),
-        MyCustomButton(
-          text: '저장하기',
-          onTap: () {
+        ClickableButton(
+          text: '저장',
+          onPressed: () {
             saveMetaGrammarData(
                 metaId: _metaGrammarTitles[_selectedMetaDataIdx!].id);
           },
-          color: const Color(0xFF3F99F7),
+          color: ColorPallete.blue,
         ),
       ],
     );

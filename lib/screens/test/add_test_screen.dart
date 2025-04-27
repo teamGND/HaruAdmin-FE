@@ -4,7 +4,7 @@ import 'package:haru_admin/api/test_data_services.dart';
 import 'package:haru_admin/model/test_data_model.dart';
 import 'package:haru_admin/provider/intro_provider.dart';
 import 'package:haru_admin/utils/enum_type.dart';
-import 'package:haru_admin/widgets/buttons.dart';
+import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/problem_table.dart';
 import '../../provider/test_provider.dart';
 import '../../utils/convert_problem_list.dart';
@@ -476,9 +476,9 @@ class _AddTestScreenState extends ConsumerState<AddTestScreen> {
                       const Spacer(),
                       Padding(
                         padding: const EdgeInsets.only(right: 10.0),
-                        child: MyCustomButton(
+                        child: ClickableButton(
                           text: '추가',
-                          onTap: () {
+                          onPressed: () {
                             if (dropdownValue == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -554,9 +554,9 @@ class AddTestButtons extends ConsumerWidget {
         isCategoryWord
             ? Flexible(
                 flex: 1,
-                child: MyCustomButton(
+                child: ClickableButton(
                   text: '자동 생성',
-                  onTap: () {
+                  onPressed: () {
                     List<String> words = ref.read(testProvider).exampleData;
 
                     List<int> wordsTypes = List.generate(words.length, (index) {
@@ -634,18 +634,17 @@ class AddTestButtons extends ConsumerWidget {
                                   ),
                                 ),
                                 actions: [
-                                  MyCustomButton(
+                                  ClickableButton(
                                     text: '취소',
-                                    onTap: () {
+                                    onPressed: () {
                                       Navigator.of(context).pop();
                                     },
                                     color: Colors.blue,
-                                    colorBorder: true,
                                   ),
-                                  MyCustomButton(
+                                  ClickableButton(
                                     text: '확인',
                                     color: Colors.blue,
-                                    onTap: () async {
+                                    onPressed: () async {
                                       ref
                                           .watch(testProvider.notifier)
                                           .createWordProblem(
@@ -668,9 +667,9 @@ class AddTestButtons extends ConsumerWidget {
         const SizedBox(width: 10),
         Flexible(
           flex: 1,
-          child: MyCustomButton(
+          child: ClickableButton(
             text: 'Save',
-            onTap: () async {
+            onPressed: () async {
               await ref.watch(testProvider.notifier).save(isFinal: false);
 
               ScaffoldMessenger.of(context).showSnackBar(
@@ -687,9 +686,9 @@ class AddTestButtons extends ConsumerWidget {
         const SizedBox(width: 10),
         Flexible(
             flex: 1,
-            child: MyCustomButton(
+            child: ClickableButton(
               text: 'Confirm',
-              onTap: () async {
+              onPressed: () async {
                 await ref.watch(testProvider.notifier).save(isFinal: true);
 
                 ScaffoldMessenger.of(context).showSnackBar(

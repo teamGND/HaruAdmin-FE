@@ -6,13 +6,13 @@ enum DataStatus {
   APPROVE,
   SHOW_USER;
 
-  static DataStatus fromString(String status) {
+  static DataStatus fromString(String? status) {
     switch (status) {
       case 'WAIT':
         return WAIT;
       case 'APPROVE':
         return APPROVE;
-      case 'SHOW_USER':
+      case 'SHOWUSER':
         return SHOW_USER;
       default:
         throw Exception('Unknown status: $status');
@@ -78,6 +78,7 @@ class StatusChip extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: getTextColor(),
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );

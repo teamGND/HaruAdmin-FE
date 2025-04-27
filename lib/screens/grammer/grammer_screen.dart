@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/grammer_data_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/utils/enum_type.dart';
-import 'package:haru_admin/widgets/buttons.dart';
+import 'package:haru_admin/widgets/gaps.dart';
+import 'package:haru_admin/widgets/level_dropdown.dart';
+import 'package:haru_admin/widgets/pagination_controller.dart';
+import 'package:haru_admin/widgets/status_chip.dart';
 
 import '../../provider/intro_provider.dart';
 
@@ -19,13 +22,12 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
   late GrammarDataList grammarData;
 
   final int _pageSize = 10;
-  final double TABLE_ROW_HEIGHT = 40;
+  final double TABLE_ROW_HEIGHT = 50;
 
   LEVEL dropdownValue = LEVEL.LEVEL1;
   int _currentPage = 0;
 
   final tableTitle = [
-    'No.',
     '사이클',
     '세트',
     '회차',
@@ -54,6 +56,7 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
           grammarData = value;
         });
       });
+      ref.read(currentPageProvider.notifier).state = page;
     } catch (e) {
       throw Exception(e);
     }
@@ -105,51 +108,15 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
     return Center(
         child: SizedBox(
       width: MediaQuery.of(context).size.width * 0.8,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
+      child: SingleChildScrollView(
         child: Column(children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
-                '레벨',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              const SizedBox(
-                width: 20.0,
-              ),
-              DropdownMenu<String>(
-                inputDecorationTheme: InputDecorationTheme(
-                  fillColor: Colors.white,
-                  focusColor: Colors.blue,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(
-                      color: Colors.black,
-                      width: 1,
-                    ),
-                  ),
-                ),
-                width: 300,
-                initialSelection: dropdownValue.toString(),
-                onSelected: (value) {
-                  setState(() {
-                    dropdownValue = value as LEVEL;
-                  });
-                },
-                dropdownMenuEntries: LEVEL.values.map((value) {
-                  return DropdownMenuEntry<String>(
-                    value: value.toString(),
-                    label: value.toString().split('.')[1],
-                  );
-                }).toList(),
-              ),
+              LevelDropdown(),
             ],
           ),
-          const SizedBox(height: 20),
+          Gaps.v10,
           FutureBuilder(
             future: _grammarListDataFuture,
             builder: (context, snapshot) {
@@ -158,72 +125,59 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
               } else {
                 return Column(
                   children: [
-                    Table(
-                      border: TableBorder.all(
-                        color: const Color(0xFFB9B9B9),
-                        width: 1,
-                      ),
-                      columnWidths: const {
-                        0: FlexColumnWidth(1),
-                        1: FlexColumnWidth(1), // 사이클
-                        2: FlexColumnWidth(1), // 세트
-                        3: FlexColumnWidth(1), // 회차
-                        4: FlexColumnWidth(3), // 타이틀
-                        5: FlexColumnWidth(7), // 제시문 제목
-                        6: FlexColumnWidth(1), //  예시 개수
-                        7: FlexColumnWidth(
-                            1), // 상태(status) - APPROVE, DELETE, WAIT
-                      },
-                      children: _buildTableRows(),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _currentPage != 0
-                            ? GestureDetector(
-                                onTap: () {
-                                  goToPage(_currentPage - 1);
+                    grammarData.content.isEmpty
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: Text(
+                                '데이터가 없습니다.\n<인트로> 페이지에서 회차와 한국어 단어를 먼저 추가해주세요.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          )
+                        : ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: MediaQuery.of(context).size.width - 80,
+                              minHeight:
+                                  MediaQuery.of(context).size.height - 215,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                left: 20,
+                                right: 20,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white,
+                              ),
+                              child: Table(
+                                border: const TableBorder(
+                                  horizontalInside: BorderSide(
+                                    color: Color(0xFFAFAFAF),
+                                    width: 1,
+                                  ),
+                                ),
+                                columnWidths: const {
+                                  0: FlexColumnWidth(1), // 사이클
+                                  1: FlexColumnWidth(1), // 세트
+                                  2: FlexColumnWidth(1), // 회차
+                                  3: FlexColumnWidth(3), // 타이틀
+                                  4: FlexColumnWidth(7), // 제시문 제목
+                                  5: FlexColumnWidth(1), //  예시 개수
+                                  6: FlexColumnWidth(
+                                      1), // 상태(status) - APPROVE, DELETE, WAIT
                                 },
-                                child: const SizedBox(
-                                    width: 50, child: Text('< 이전')))
-                            : const SizedBox(width: 50),
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 5),
-                          padding: const EdgeInsets.all(5),
-                          width: 50,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: Colors.black,
-                                width: 1,
-                              )),
-                          child: Text(
-                            (_currentPage + 1).toString(),
-                            textAlign: TextAlign.center,
+                                children: _buildTableRows(),
+                              ),
+                            ),
                           ),
-                        ),
-                        (_currentPage - 1 != grammarData.totalPages)
-                            ? GestureDetector(
-                                onTap: () {
-                                  goToPage(_currentPage + 1);
-                                },
-                                child: const SizedBox(
-                                    width: 50, child: Text('다음 >')),
-                              )
-                            : const SizedBox(width: 50),
-                        (_currentPage - 1 != grammarData.totalPages)
-                            ? GestureDetector(
-                                onTap: () {
-                                  goToPage(grammarData.totalPages - 1);
-                                },
-                                child: const Text('맨뒤로 >>'),
-                              )
-                            : const SizedBox(width: 50),
-                      ],
-                    ),
+                    const SizedBox(height: 10),
+                    PaginationController(
+                        totalPages: grammarData.totalPages, goToPage: goToPage),
                   ],
                 );
               }
@@ -241,14 +195,15 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
       TableRow(
         children: List.generate(tableTitle.length, (index) {
           return Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey,
-                width: 0.5,
-              ),
-              color: Colors.grey[200],
-            ),
-            height: 30,
+            decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(
+                    color: Color(0xFF585858),
+                    width: 1,
+                  ),
+                )),
+            height: 50,
             child: Center(
               child: Text(
                 tableTitle[index],
@@ -275,44 +230,42 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
           ),
           children: [
             SizedBox(
-              // 1. No.
-              height: TABLE_ROW_HEIGHT,
-              child: Center(
-                child: Text(
-                  (i + 1).toString(),
-                ),
-              ),
-            ),
-            SizedBox(
-              // 2. 사이클
+              // 1. 사이클
               height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(grammarData.content[i].cycle.toString()),
               ),
             ),
             SizedBox(
-              // 3. 세트
+              // 2. 세트
               height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(grammarData.content[i].sets.toString()),
               ),
             ),
             SizedBox(
-              // 4. 회차
+              // 3. 회차
               height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(grammarData.content[i].chapter.toString()),
               ),
             ),
             SizedBox(
-              // 5. 타이틀
+              // 4. 타이틀
               height: TABLE_ROW_HEIGHT,
               child: Center(
-                child: Text(grammarData.content[i].title ?? ''),
+                child: Text(
+                  grammarData.content[i].title ?? '',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
               ),
             ),
             SizedBox(
-              // 6. 제시문 제목
+              // 5. 제시문 제목
               height: TABLE_ROW_HEIGHT,
               child: TextButton(
                 onPressed: () {
@@ -339,19 +292,20 @@ class _GrammerDataState extends ConsumerState<GrammerScreen> {
               ),
             ),
             SizedBox(
-              // 단어 개수
-              height: 35,
+              // 6. 예시 개수
+              height: TABLE_ROW_HEIGHT,
               child: Center(
                 child: Text(
                     grammarData.content[i].exampleSentenceNumber.toString()),
               ),
             ),
             SizedBox(
-              // 단어 개수
-              height: 35,
+              // 7. 상태(status) - APPROVE, DELETE, WAIT
+              height: TABLE_ROW_HEIGHT,
               child: Center(
-                child: Text(grammarData.content[i].status.toString()),
-              ),
+                  child: StatusChip(
+                      status: DataStatus.fromString(
+                          grammarData.content[i].status.toString()))),
             ),
           ],
         ),

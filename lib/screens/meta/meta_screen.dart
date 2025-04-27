@@ -4,6 +4,7 @@ import 'package:haru_admin/api/meta_grammar_services.dart';
 import 'package:haru_admin/model/meta_data_model.dart';
 import 'package:haru_admin/themes/colors.dart';
 import 'package:haru_admin/widgets/button.dart';
+import 'package:haru_admin/widgets/gaps.dart';
 
 import '../../api/translate_service.dart';
 import '../../model/translate_model.dart';
@@ -266,40 +267,32 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
         width: MediaQuery.of(context).size.width * 0.8,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Text(
-                '메타문법 데이터',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w700,
-                ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FutureBuilder(
+                    future: _metaListDataFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading data');
+                      } else {
+                        // Process the data and build the UI
+                        return buildMetaGrammarTable();
+                      }
+                    },
+                  ),
+                  Gaps.h20,
+                  if (_selectedMetaDataIdx != null)
+                    buildMetaGrammarDetailView(),
+                ],
               ),
-              const Text(
-                '10개 이상 추가될 경우, 연진 또는 개발자에게 문의하세요',
-                style: TextStyle(
-                  fontSize: 5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 20),
-              FutureBuilder(
-                future: _metaListDataFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return const Text('Error loading data');
-                  } else {
-                    // Process the data and build the UI
-                    return buildMetaGrammarTable();
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              if (_selectedMetaDataIdx != null) buildMetaGrammarDetailView(),
-            ],
+            ),
           ),
         ),
       ),
@@ -307,120 +300,212 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
   }
 
   Widget buildMetaGrammarTable() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.5,
-      height: 200,
-      child: Table(
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        border: TableBorder.all(
-          color: const Color(0xFFB9B9B9),
-          width: 1,
-        ),
-        columnWidths: const {
-          0: FlexColumnWidth(1),
-          1: FlexColumnWidth(4), // 사이클
-          2: FlexColumnWidth(1), // 세트
-          3: FlexColumnWidth(4), // 회차
-        },
-        children: [
-          metaGrammarListTitle(),
-          for (var i = 0; i < 5; i++)
-            TableRow(
-              children: [
-                buildTableCell(i * 2 + 1),
-                buildMetaTitleCell(i * 2),
-                buildTableCell(i * 2 + 2),
-                buildMetaTitleCell(i * 2 + 1),
-              ],
-            )
-        ],
+    //  const Text(
+    //             '최대 10개 추가 가능',
+    //             style: TextStyle(
+    //               fontSize: 10,
+    //               fontWeight: FontWeight.w500,
+    //               color: Color(0xFF585858),
+    //             ),
+    //           ),
+    return Container(
+      width: 210,
+      height: MediaQuery.of(context).size.height * 0.7,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 20,
       ),
-    );
-  }
-
-  Widget buildTableCell(int number) {
-    return TableCell(
-      child: SizedBox(
-        height: 30,
-        child: Center(
-          child: Text(number.toString()),
-        ),
-      ),
-    );
-  }
-
-  Widget buildMetaTitleCell(int index) {
-    if (_metaGrammarTitles.length < index) return const Text('');
-
-    return TableCell(
-        child: Container(
-      height: 30,
-      alignment: Alignment.center,
       decoration: BoxDecoration(
-        border: Border.all(
-          color: _selectedMetaDataIdx == index
-              ? Colors.lightBlue
-              : Colors.transparent,
-          width: 2,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
+          20,
         ),
       ),
-      child: _metaGrammarTitles.length == (index + 1)
-          ? TextButton(
-              onPressed: () {
-                addMetaGrammarData();
-              },
-              child: const Text(
-                '추가하기',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.blue,
-                ),
-              ),
-            )
-          : TextButton(
-              onPressed: () {
-                getSelectedMetaData(index);
-              },
-              child: Text(
-                _metaGrammarTitles.length > index
-                    ? _metaGrammarTitles[index].title ?? ''
-                    : '',
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ),
-    ));
+      child: SingleChildScrollView(
+        child: Column(
+            children: List.generate(10, (idx) {
+          return _metaGrammarTitles.length - 1 > idx
+              ? GestureDetector(
+                  onTap: () {
+                    getSelectedMetaData(idx);
+                  },
+                  child: Container(
+                    width: 170,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: _selectedMetaDataIdx == idx
+                          ? const Color(0xFFD9D9D9)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Gaps.h10,
+                          SizedBox(
+                            width: 25,
+                            child: Text(
+                              '${(idx + 1).toString()}.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: _selectedMetaDataIdx == idx
+                                    ? Colors.black
+                                    : const Color(0xFF9C9C9C),
+                              ),
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                          Gaps.h20,
+                          SizedBox(
+                            width: 110,
+                            child: Text(
+                              _metaGrammarTitles[idx].title ?? '',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: _selectedMetaDataIdx == idx
+                                    ? Colors.black
+                                    : const Color(0xFF9C9C9C),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : _metaGrammarTitles.length - 1 == (idx)
+                  ? GestureDetector(
+                      onTap: () {
+                        addMetaGrammarData();
+                      },
+                      child: SizedBox(
+                        width: 170,
+                        height: 50,
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Gaps.h10,
+                              SizedBox(
+                                width: 25,
+                                child: Text(
+                                  '${(idx + 1).toString()}.',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: ColorPallete.blue,
+                                  ),
+                                  textAlign: TextAlign.end,
+                                ),
+                              ),
+                              Gaps.h20,
+                              const SizedBox(
+                                width: 110,
+                                child: Text(
+                                  '추가하기',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: ColorPallete.blue,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : SizedBox(
+                      width: 170,
+                      height: 50,
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Gaps.h10,
+                            SizedBox(
+                              width: 25,
+                              child: Text(
+                                '${(idx + 1).toString()}.',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF9C9C9C),
+                                ),
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+        })),
+      ),
+    );
   }
 
   Widget buildMetaGrammarDetailView() {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Text('<메타문법 용어 수정/추가>',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          Row(
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.6,
+            padding: const EdgeInsets.all(30),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '문법 용어 수정/추가하기',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Gaps.v20,
+                Row(
+                  children: [
+                    Text(
+                      '${_selectedMetaDataIdx == null ? '' : (_selectedMetaDataIdx! + 1)}.',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Gaps.h10,
+                    buildTitleTextField(),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                buildDescriptionTable(),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.6,
+          height: 100,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text('번호'),
-              const SizedBox(width: 20),
-              Text(
-                  '${_selectedMetaDataIdx == null ? '' : (_selectedMetaDataIdx! + 1)}'),
+              ClickableButton(
+                  onPressed: delete, color: ColorPallete.red, text: '삭제'),
+              ClickableButton(
+                  onPressed: translate, color: ColorPallete.gray, text: '번역'),
+              ClickableButton(
+                  onPressed: saveMetaGrammarData,
+                  color: ColorPallete.green,
+                  text: '저장'),
             ],
           ),
-          Row(
-            children: [
-              const Text('제목'),
-              const SizedBox(width: 20),
-              buildTitleTextField(),
-            ],
-          ),
-          const SizedBox(height: 20),
-          buildDescriptionTable(),
-          const SizedBox(height: 10),
-          buildActionButtons(),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -433,8 +518,13 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
         child: TextFormField(
           controller: titleController,
           decoration: const InputDecoration(
+            hintText: '제목을 입력해주세요',
+            hintStyle: TextStyle(
+              fontSize: 15,
+              color: Color(0xFF9C9C9C),
+            ),
             border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+              borderSide: BorderSide(color: Color(0xFFCDCDCD)),
             ),
           ),
           style: const TextStyle(fontSize: 15),
@@ -444,40 +534,42 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
   }
 
   Widget buildDescriptionTable() {
-    return Expanded(
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minHeight: 200,
+        maxHeight: 350,
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              child: Table(
-                border: TableBorder.all(
-                  color: const Color(0xFFB9B9B9),
-                  width: 1,
-                ),
-                columnWidths: const {
-                  0: FlexColumnWidth(1),
-                  1: FlexColumnWidth(8),
-                },
-                children: List.generate(
-                  titles.length,
-                  (index) => MetagrammarDescriptionTableRow(
-                    title: titles[index],
-                    index: index,
-                    textController: index == 0
-                        ? koreanControllers
-                        : index == 1
-                            ? englishControllers
-                            : index == 2
-                                ? chineseControllers
-                                : index == 3
-                                    ? vietnamControllers
-                                    : russianControllers,
-                  ),
+            buildImageSection(),
+            Table(
+              border: TableBorder.all(
+                color: const Color(0xFFB9B9B9),
+                width: 1,
+              ),
+              columnWidths: const {
+                0: FlexColumnWidth(1),
+                1: FlexColumnWidth(8),
+              },
+              children: List.generate(
+                titles.length,
+                (index) => MetagrammarDescriptionTableRow(
+                  title: titles[index],
+                  index: index,
+                  textController: index == 0
+                      ? koreanControllers
+                      : index == 1
+                          ? englishControllers
+                          : index == 2
+                              ? chineseControllers
+                              : index == 3
+                                  ? vietnamControllers
+                                  : russianControllers,
                 ),
               ),
             ),
-            buildImageSection(),
           ],
         ),
       ),
@@ -509,131 +601,38 @@ class _MetaGrammarScreenState extends State<MetaGrammarScreen> {
     );
   }
 
-  Widget buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        ClickableButton(
-          text: '삭제',
-          onPressed: delete,
-          color: ColorPallete.red,
-        ),
-        const SizedBox(width: 10),
-        ClickableButton(
-          text: '번역',
-          onPressed: translate,
-          color: ColorPallete.gray,
-        ),
-        const SizedBox(width: 10),
-        ClickableButton(
-          text: '저장',
-          onPressed: () {
-            saveMetaGrammarData(
-                metaId: _metaGrammarTitles[_selectedMetaDataIdx!].id);
-          },
-          color: ColorPallete.blue,
-        ),
-      ],
-    );
-  }
-
-  TableRow metaGrammarListTitle() {
-    return const TableRow(
-      decoration: BoxDecoration(
-        color: Color(0xFFF0F0F0),
-      ),
-      children: [
-        TableCell(
-          child: SizedBox(
-            height: 30,
-            child: Center(
-                child: Text(
-              '순서',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            )),
-          ),
-        ),
-        TableCell(
-          child: SizedBox(
-            height: 30,
-            child: Center(
-                child: Text(
-              '제목',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            )),
-          ),
-        ),
-        TableCell(
-          child: SizedBox(
-            height: 30,
-            child: Center(
-                child: Text(
-              '순서',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            )),
-          ),
-        ),
-        TableCell(
-          child: SizedBox(
-            height: 30,
-            child: Center(
-                child: Text(
-              '제목',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            )),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-TableRow MetagrammarDescriptionTableRow({
-  required String title,
-  required int index,
-  required TextEditingController textController,
-}) {
-  return TableRow(children: [
-    Container(
-      height: 30,
+  TableRow MetagrammarDescriptionTableRow({
+    required String title,
+    required int index,
+    required TextEditingController textController,
+  }) {
+    return TableRow(
       decoration: const BoxDecoration(
-        color: Color(0xFFF0F0F0),
+        color: Colors.white,
       ),
-      child: Center(
-        child: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-    ),
-    Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: 30, // Minimum height
-          maxHeight: 200, // You can adjust the max height as needed
-        ),
-        child: TextField(
-          controller: textController,
-          maxLines: null, // Allows the text field to grow vertically
-          keyboardType: TextInputType.multiline,
-          decoration: const InputDecoration(
-            // no border
-            border: InputBorder.none,
-          ),
-          style: const TextStyle(
-            fontSize: 14,
+      children: [
+        Center(
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
-      ),
-    ),
-  ]);
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: textController,
+            maxLines: null, // Allows the text field to grow vertically
+            keyboardType: TextInputType.multiline,
+            decoration: const InputDecoration(
+              // no border
+              border: InputBorder.none,
+            ),
+            style: const TextStyle(
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

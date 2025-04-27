@@ -108,7 +108,7 @@ List<SidebarModel> sidebarRoutes = [
     icon: const Dot(color: ColorPallete.metaColor),
     label: 'Meta Grammar',
     route: GoRoute(
-      name: '메타 데이터',
+      name: '메타 문법 데이터',
       path: '/meta',
       pageBuilder: (context, state) =>
           const NoTransitionPage(child: MetaGrammarScreen()),

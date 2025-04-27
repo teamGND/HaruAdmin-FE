@@ -78,6 +78,15 @@ void main() {
               width: 1,
             ),
           ),
+          radioTheme: RadioThemeData(
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return const Color(0xFF585858); // Color when selected
+              }
+              return const Color(0xFFCDCDCD); // Border color when unselected
+            }),
+            overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+          ),
         ),
       ),
     ),

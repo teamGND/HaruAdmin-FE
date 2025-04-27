@@ -14,7 +14,7 @@ LEVEL levelFromString(String level) {
   }
 }
 
-enum CATEGORY { WORD, GRAMMAR, TEST, MIDTERM }
+enum CATEGORY { WORD, GRAMMAR, TEST, MIDTERM, ALPHABET }
 
 CATEGORY categoryFromString(String category) {
   switch (category) {
@@ -26,6 +26,8 @@ CATEGORY categoryFromString(String category) {
       return CATEGORY.TEST;
     case 'MIDTERM':
       return CATEGORY.MIDTERM;
+    case 'ALPHABET':
+      return CATEGORY.ALPHABET;
     default:
       return CATEGORY.WORD;
   }

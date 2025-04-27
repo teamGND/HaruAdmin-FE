@@ -426,6 +426,12 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                                     },
                                                     child: Text(
                                                       data.titleKor ?? '',
+                                                      style: const TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Colors.black,
+                                                      ),
                                                     ))),
                                             SizedBox(
                                               height: _rowHeight,

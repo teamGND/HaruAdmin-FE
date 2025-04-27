@@ -6,6 +6,7 @@ import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/provider/grammar_provider.dart';
 import 'package:haru_admin/screens/grammer/widget/dialogue_widget.dart';
 import 'package:haru_admin/screens/grammer/widget/meta_grammar_modal.dart';
+import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -13,7 +14,6 @@ import '../../api/translate_service.dart';
 import '../../model/translate_model.dart';
 import '../../provider/intro_provider.dart';
 import '../../utils/enum_type.dart';
-import '../../widgets/buttons.dart';
 import 'widget/grammar_description_widget.dart';
 
 class AddGrammerScreen extends ConsumerStatefulWidget {
@@ -800,16 +800,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        MyCustomButton(
+                        ClickableButton(
                           text: '추가',
-                          onTap: () => addRepresentiveSentence(),
+                          onPressed: () => addRepresentiveSentence(),
                           color: Colors.orange,
-                          colorBorder: true,
                         ),
                         const SizedBox(width: 20),
-                        MyCustomButton(
+                        ClickableButton(
                           text: '삭제',
-                          onTap: () => deleteSelectedRepresentiveSentence(),
+                          onPressed: () => deleteSelectedRepresentiveSentence(),
                           color: Colors.orange,
                         ),
                         const Spacer(),
@@ -929,11 +928,10 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        MyCustomButton(
+                        ClickableButton(
                           text: '가져오기',
-                          onTap: () => addMetaGrammar(),
+                          onPressed: () => addMetaGrammar(),
                           color: Colors.orange,
-                          colorBorder: true,
                         ),
                       ],
                     ),
@@ -1020,16 +1018,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        MyCustomButton(
+                        ClickableButton(
                           text: '추가',
-                          onTap: () => addExampleSentence(),
+                          onPressed: () => addExampleSentence(),
                           color: Colors.orange,
-                          colorBorder: true,
                         ),
                         const SizedBox(width: 20),
-                        MyCustomButton(
+                        ClickableButton(
                           text: '삭제',
-                          onTap: () => deleteSelectedExampleSentence(),
+                          onPressed: () => deleteSelectedExampleSentence(),
                           color: Colors.orange,
                         ),
                         const Spacer(),
@@ -1108,15 +1105,15 @@ class _AddGrammerScreenState extends ConsumerState<AddGrammerScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 const Expanded(child: SizedBox()),
-                MyCustomButton(
+                ClickableButton(
                   text: 'CONFRIM',
-                  onTap: () => confirm(),
+                  onPressed: () => confirm(),
                   color: const Color(0xFFFF7D53),
                 ),
                 const SizedBox(width: 10),
-                MyCustomButton(
+                ClickableButton(
                   text: '저장하기',
-                  onTap: () => finalSave(false),
+                  onPressed: () => finalSave(false),
                   color: const Color(0xFF3F99F7),
                 ),
               ],

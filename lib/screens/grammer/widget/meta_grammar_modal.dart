@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/meta_grammar_services.dart';
 import 'package:haru_admin/model/grammer_data_model.dart';
 import 'package:haru_admin/provider/grammar_provider.dart';
-import 'package:haru_admin/widgets/buttons.dart';
+import 'package:haru_admin/widgets/button.dart';
 
 import '../../../model/meta_data_model.dart';
 
@@ -113,15 +113,15 @@ class _MetaGrammarModalState extends ConsumerState<MetaGrammarModal> {
             }),
       ),
       actions: [
-        MyCustomButton(
+        ClickableButton(
             text: '완료',
-            onTap: () => saveSelectedMetaGrammar(context),
+            onPressed: () => saveSelectedMetaGrammar(context),
             color: Colors.blue),
         const SizedBox(
           height: 10,
         ),
-        MyCustomButton(
-            text: '취소', onTap: () => cancel(context), color: Colors.grey)
+        ClickableButton(
+            text: '취소', onPressed: () => cancel(context), color: Colors.grey)
       ],
     );
   }

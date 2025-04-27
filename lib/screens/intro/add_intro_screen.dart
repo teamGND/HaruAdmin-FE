@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/model/intro_data_model.dart';
+import 'package:haru_admin/themes/colors.dart';
 import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
+import 'package:haru_admin/widgets/button.dart';
 
 import 'package:haru_admin/widgets/colors.dart';
 
-import '../../widgets/buttons.dart';
 import '../../provider/intro_provider.dart';
 
 class AddIntroScreen extends ConsumerStatefulWidget {
@@ -386,16 +387,16 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              MyCustomButton(
+                              ClickableButton(
                                 text: '추가',
-                                onTap: () => addWord(),
-                                color: Colors.blue,
+                                onPressed: () => addWord(),
+                                color: ColorPallete.blue,
                               ),
                               const SizedBox(width: 10),
-                              MyCustomButton(
+                              ClickableButton(
                                 text: '삭제',
-                                onTap: () => delete(),
-                                color: Colors.red,
+                                onPressed: () => delete(),
+                                color: ColorPallete.red,
                               ),
                             ],
                           ),

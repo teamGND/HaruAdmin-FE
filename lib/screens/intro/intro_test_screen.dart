@@ -3,9 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:haru_admin/api/intro_data_services.dart';
 import 'package:haru_admin/model/intro_data_model.dart';
+import 'package:haru_admin/themes/colors.dart';
 import 'package:haru_admin/utils/convert_word_title.dart';
 import 'package:haru_admin/utils/enum_type.dart';
-import 'package:haru_admin/widgets/buttons.dart';
+import 'package:haru_admin/widgets/button.dart';
+import 'package:haru_admin/widgets/category_chip.dart';
+import 'package:haru_admin/widgets/gaps.dart';
+import 'package:haru_admin/widgets/level_dropdown.dart';
+import 'package:haru_admin/widgets/pagination_controller.dart';
+import 'package:haru_admin/widgets/status_chip.dart';
 
 import '../../provider/intro_provider.dart';
 
@@ -21,7 +27,6 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   // 페이지 번호
   static const int _pageSize = 10;
   static const double _rowHeight = 50;
-  int _currentPage = 0;
   LEVEL dropdownValue = LEVEL.LEVEL1;
 
   late Future<void> _introDataFuture;
@@ -29,7 +34,7 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
   @override
   void initState() {
     super.initState();
-    _introDataFuture = fetchData(page: _currentPage);
+    _introDataFuture = fetchData(page: 0);
   }
 
   final tabletitle = [
@@ -37,41 +42,17 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     '유형',
     '사이클',
     '세트',
-    '회차',
+    '챕터',
     '타이틀',
     '상태',
-    '퀴즈',
   ];
 
   final List<bool> _selected = List.generate(_pageSize, (index) => false);
 
-  // Future<void> init() async {
-  //   try {
-  //     await IntroDataRepository()
-  //         .getIntroDataList(
-  //       page: 0,
-  //       size: _pageSize,
-  //     )
-  //         .then((value) {
-  //       setState(() {
-  //         _currentPage = value.totalPages - 1;
-  //       });
-  //     });
-  //     await fetchData(page: _currentPage);
-  //   } catch (e) {
-  //     throw Exception(e);
-  //   }
-  // }
-
-  void goToPage(int page) async {
+  Future<void> goToPage(int page) async {
     if (page < 0 || page >= introData.totalPages) {
       return;
     } else {
-      setState(() {
-        _currentPage = page;
-        _selected.fillRange(0, _pageSize, false);
-      });
-
       await fetchData(page: page);
     }
   }
@@ -248,7 +229,9 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                       _selected.fillRange(0, _pageSize, false);
                     });
 
-                    await fetchData(page: _currentPage);
+                    int currentPage = ref.watch(currentPageProvider);
+
+                    await fetchData(page: currentPage);
                   } catch (e) {
                     print(e);
                   }
@@ -272,6 +255,8 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
           introData = value;
         });
       });
+
+      ref.read(currentPageProvider.notifier).state = page;
     } catch (e) {
       throw Exception(e);
     }
@@ -283,64 +268,31 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
     return Center(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  '레벨',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(
-                  width: 20.0,
-                ),
-                DropdownMenu<String>(
-                  enableSearch: false,
-                  inputDecorationTheme: InputDecorationTheme(
-                    fillColor: Colors.white,
-                    focusColor: Colors.blue,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                        color: Colors.black,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  width: 300,
-                  initialSelection: dropdownValue.toString(),
-                  onSelected: (value) {
-                    setState(() {
-                      dropdownValue = value as LEVEL;
-                    });
-                  },
-                  dropdownMenuEntries: LEVEL.values.map((value) {
-                    return DropdownMenuEntry<String>(
-                      value: value.toString(),
-                      label: value.toString().split('.')[1],
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            FutureBuilder(
-              future: _introDataFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
-                  return SingleChildScrollView(
-                    child: Column(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  LevelDropdown(),
+                ],
+              ),
+              Gaps.v10,
+              FutureBuilder(
+                future: _introDataFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    return Column(
                       children: [
                         introData.content.isEmpty
                             ? const Center(
                                 child: Padding(
-                                  padding: EdgeInsets.all(20.0),
+                                  padding: EdgeInsets.only(
+                                    left: 20,
+                                    right: 20,
+                                  ),
                                   child: Text(
                                     '데이터가 없습니다.',
                                     textAlign: TextAlign.center,
@@ -351,222 +303,208 @@ class _IntroTestScreenState extends ConsumerState<IntroTestScreen> {
                                   ),
                                 ),
                               )
-                            : Table(
-                                border: TableBorder.all(
-                                  color: const Color(0xFFB9B9B9),
-                                  width: 1,
+                            : ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth:
+                                      MediaQuery.of(context).size.width - 80,
+                                  minHeight:
+                                      MediaQuery.of(context).size.height - 215,
                                 ),
-                                columnWidths: const {
-                                  0: FlexColumnWidth(1),
-                                  1: FlexColumnWidth(2),
-                                  2: FlexColumnWidth(1),
-                                  3: FlexColumnWidth(1),
-                                  4: FlexColumnWidth(1),
-                                  5: FlexColumnWidth(10), // title
-                                  6: FlexColumnWidth(2),
-                                  7: FlexColumnWidth(2),
-                                },
-                                children: [
-                                  TableRow(
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFF0F0F0),
-                                    ),
-                                    children: List.generate(
-                                      tabletitle.length,
-                                      (index) => SizedBox(
-                                          height: 40,
-                                          child: Center(
-                                              child: Text(tabletitle[index]))),
-                                    ),
+                                child: Container(
+                                  padding: const EdgeInsets.only(
+                                    left: 20,
+                                    right: 20,
                                   ),
-                                  ...List.generate(introData.content.length,
-                                      (index) {
-                                    IntroListComponentData data =
-                                        introData.content[index];
-                                    return TableRow(
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: Colors.white,
+                                  ),
+                                  child: Table(
+                                    border: const TableBorder(
+                                      horizontalInside: BorderSide(
+                                        color: Color(0xFFAFAFAF),
+                                        width: 1,
                                       ),
-                                      children: [
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Checkbox(
-                                              value: _selected[index],
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _selected[index] = value!;
-                                                });
-                                              },
+                                    ),
+                                    columnWidths: const {
+                                      0: FlexColumnWidth(1),
+                                      1: FlexColumnWidth(1),
+                                      2: FlexColumnWidth(1),
+                                      3: FlexColumnWidth(1),
+                                      4: FlexColumnWidth(1),
+                                      5: FlexColumnWidth(10), // title
+                                      6: FlexColumnWidth(2),
+                                    },
+                                    children: [
+                                      TableRow(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                        ),
+                                        children: List.generate(
+                                          tabletitle.length,
+                                          (index) => SizedBox(
+                                            height: 40,
+                                            child: Center(
+                                                child: Text(tabletitle[index],
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Color(0xFF585858),
+                                                    ))),
+                                          ),
+                                        ),
+                                      ),
+                                      ...List.generate(introData.content.length,
+                                          (index) {
+                                        IntroListComponentData data =
+                                            introData.content[index];
+                                        return TableRow(
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                          ),
+                                          children: [
+                                            SizedBox(
+                                              height: _rowHeight,
+                                              child: Center(
+                                                child: Checkbox(
+                                                  value: _selected[index],
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      _selected[index] = value!;
+                                                    });
+                                                  },
+                                                  fillColor: WidgetStateProperty
+                                                      .resolveWith((states) {
+                                                    if (states.contains(
+                                                        WidgetState.selected)) {
+                                                      return ColorPallete.red;
+                                                    }
+                                                    return Colors
+                                                        .transparent; // Fill color when unchecked
+                                                  }),
+                                                  checkColor: Colors.white,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.category),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.cycle.toString()),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.sets.toString()),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child:
-                                                Text(data.chapter.toString()),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                            height: _rowHeight,
-                                            child: TextButton(
-                                                onPressed: () {
-                                                  updateWordGrammarChapter(
-                                                      data);
-                                                },
+                                            SizedBox(
+                                              height: _rowHeight,
+                                              child: Center(
+                                                child: CategoryChip(
+                                                    category:
+                                                        Category.fromString(
+                                                            data.category)),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: _rowHeight,
+                                              child: Center(
+                                                child:
+                                                    Text(data.cycle.toString()),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: _rowHeight,
+                                              child: Center(
+                                                child:
+                                                    Text(data.sets.toString()),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: _rowHeight,
+                                              child: Center(
                                                 child: Text(
-                                                  data.titleKor ?? '',
-                                                ))),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: Text(data.status ?? '?'),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: _rowHeight,
-                                          child: Center(
-                                            child: (data.category == 'TEST' ||
-                                                    data.category == 'MIDTERM')
-                                                ? TextButton(
+                                                    data.chapter.toString()),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                                height: _rowHeight,
+                                                child: TextButton(
                                                     onPressed: () {
-                                                      addTest(data);
+                                                      updateWordGrammarChapter(
+                                                          data);
                                                     },
-                                                    child: const Text(
-                                                      '테스트',
-                                                      style: TextStyle(
-                                                        color: Colors.orange,
-                                                      ),
-                                                    ))
-                                                : (data.status == 'WAIT')
-                                                    ? const Text('-',
-                                                        style: TextStyle(
-                                                          color: Colors.grey,
-                                                          fontSize: 12,
-                                                        ))
-                                                    : TextButton(
-                                                        onPressed: () {
-                                                          addTest(data);
-                                                        },
-                                                        child: const Text(
-                                                          '퀴즈',
-                                                          style: TextStyle(
-                                                            color: Colors.blue,
-                                                          ),
-                                                        )),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }),
-                                ],
+                                                    child: Text(
+                                                      data.titleKor ?? '',
+                                                    ))),
+                                            SizedBox(
+                                              height: _rowHeight,
+                                              child: Center(
+                                                  child: StatusChip(
+                                                      status:
+                                                          DataStatus.fromString(
+                                                              data.status))),
+                                            ),
+                                            // SizedBox(
+                                            //   height: _rowHeight,
+                                            //   child: Center(
+                                            //     child: (data.category == 'TEST' ||
+                                            //             data.category ==
+                                            //                 'MIDTERM')
+                                            //         ? TextButton(
+                                            //             onPressed: () {
+                                            //               addTest(data);
+                                            //             },
+                                            //             child: const Text(
+                                            //               '테스트',
+                                            //               style: TextStyle(
+                                            //                 color: Colors.orange,
+                                            //               ),
+                                            //             ))
+                                            //         : (data.status == 'WAIT')
+                                            //             ? const Text('-',
+                                            //                 style: TextStyle(
+                                            //                   color: Colors.grey,
+                                            //                   fontSize: 12,
+                                            //                 ))
+                                            //             : TextButton(
+                                            //                 onPressed: () {
+                                            //                   addTest(data);
+                                            //                 },
+                                            //                 child: const Text(
+                                            //                   '퀴즈',
+                                            //                   style: TextStyle(
+                                            //                     color:
+                                            //                         Colors.blue,
+                                            //                   ),
+                                            //                 )),
+                                            //   ),
+                                            // ),
+                                          ],
+                                        );
+                                      }),
+                                    ],
+                                  ),
+                                ),
                               ),
-                        const SizedBox(height: 20),
+                        Gaps.v10,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TextButton(
-                              onPressed: () {
-                                deleteSelected();
-                              },
-                              child: const Text(
-                                '선택 삭제',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                ),
-                              ),
+                            ClickableButton(
+                                onPressed: deleteSelected,
+                                color: ColorPallete.red,
+                                text: '삭제'),
+                            PaginationController(
+                              totalPages: introData.totalPages,
+                              goToPage: goToPage,
                             ),
-                            SizedBox(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  (_currentPage != 0)
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            goToPage(0);
-                                          },
-                                          child: const Text('<< 맨앞으로 '),
-                                        )
-                                      : const SizedBox(width: 50),
-                                  const SizedBox(width: 10),
-                                  _currentPage != 0
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            goToPage(_currentPage - 1);
-                                          },
-                                          child: const SizedBox(
-                                              width: 50, child: Text('< 이전')))
-                                      : const SizedBox(width: 50),
-                                  Container(
-                                    padding: const EdgeInsets.all(5),
-                                    width: 50,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 1,
-                                        )),
-                                    child: Text(
-                                      (_currentPage + 1).toString(),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  (_currentPage + 1) != introData.totalPages
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            goToPage(_currentPage + 1);
-                                          },
-                                          child: const SizedBox(
-                                              width: 50, child: Text('다음 >')),
-                                        )
-                                      : const SizedBox(width: 50),
-                                  (_currentPage + 1 != introData.totalPages)
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            goToPage(introData.totalPages - 1);
-                                          },
-                                          child: const Text('맨뒤로 >>'),
-                                        )
-                                      : const SizedBox(width: 50),
-                                ],
-                              ),
-                            ),
-                            (_currentPage + 1 == introData.totalPages)
-                                ? MyCustomButton(
+                            (ref.watch(currentPageProvider) ==
+                                    introData.totalPages - 1)
+                                ? ClickableButton(
                                     text: '회차추가',
-                                    onTap: () => addChapter(),
-                                    color: Colors.blue)
+                                    onPressed: () => addChapter(),
+                                    color: ColorPallete.blue)
                                 : const SizedBox(width: 100),
                           ],
                         ),
                       ],
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

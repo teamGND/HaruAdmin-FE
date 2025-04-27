@@ -6,10 +6,10 @@ import 'package:haru_admin/api/word_data_services.dart';
 import 'package:haru_admin/model/translate_model.dart';
 import 'package:haru_admin/model/word_data_model.dart';
 import 'package:haru_admin/utils/enum_type.dart';
+import 'package:haru_admin/widgets/button.dart';
 import 'package:haru_admin/widgets/chapter_catalog_table.dart';
 import 'package:just_audio/just_audio.dart';
 
-import '../../widgets/buttons.dart';
 import '../../provider/intro_provider.dart';
 
 class AddWordScreen extends ConsumerStatefulWidget {
@@ -740,33 +740,33 @@ class _AddWordScreenState extends ConsumerState<AddWordScreen> {
                 width: MediaQuery.of(context).size.width * 0.75,
                 child: Row(
                   children: [
-                    MyCustomButton(
+                    ClickableButton(
                       text: '단어 뺴기',
-                      onTap: () => deleteSelectedWord(),
+                      onPressed: () => deleteSelectedWord(),
                       color: const Color(0xFFFFCC4A),
                     ),
                     const Expanded(child: SizedBox()),
                     _isSaving
                         ? const CircularProgressIndicator()
-                        : MyCustomButton(
+                        : ClickableButton(
                             text: 'CONFIRM',
-                            onTap: () => save(isConfirm: true),
+                            onPressed: () => save(isConfirm: true),
                             color: const Color(0xFFFF7D53),
                           ),
                     const SizedBox(width: 10),
                     _isTranslating
                         ? const CircularProgressIndicator()
-                        : MyCustomButton(
+                        : ClickableButton(
                             text: '번역하기',
-                            onTap: () => translate(),
+                            onPressed: () => translate(),
                             color: const Color(0xFF484848),
                           ),
                     const SizedBox(width: 10),
                     _isSaving
                         ? const CircularProgressIndicator()
-                        : MyCustomButton(
+                        : ClickableButton(
                             text: '저장하기',
-                            onTap: () => save(),
+                            onPressed: () => save(),
                             color: const Color(0xFF3F99F7),
                           )
                   ],

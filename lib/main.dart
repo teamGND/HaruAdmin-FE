@@ -35,6 +35,49 @@ void main() {
             contentTextStyle: TextStyle(
                 fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black),
           ),
+          dropdownMenuTheme: const DropdownMenuThemeData(
+            textStyle: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF585858),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: Color(0xFFFFFFFF),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+                borderSide: BorderSide(
+                  color: Color(0xFFAFAFAF),
+                  width: 1,
+                ),
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 20,
+              ),
+            ),
+            menuStyle: MenuStyle(
+              backgroundColor: WidgetStatePropertyAll<Color>(
+                Color(0xFFFFFFFF),
+              ),
+              shadowColor: null,
+              elevation: WidgetStatePropertyAll<double>(0),
+              shape: WidgetStatePropertyAll<OutlinedBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+            ),
+          ),
+          checkboxTheme: CheckboxThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            side: const BorderSide(
+              color: Color(0xFF9C9C9C),
+              width: 1,
+            ),
+          ),
         ),
       ),
     ),

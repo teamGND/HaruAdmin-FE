@@ -224,251 +224,260 @@ class _AddIntroScreenState extends ConsumerState<AddIntroScreen> {
       }).toList();
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Column(
+    return Center(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              height: 500,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  InputComponent(
-                    text: "레벨",
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: DropdownButton(
-                          value: info.level,
-                          isExpanded: true,
-                          items: LEVEL.values
-                              .map((LEVEL option) => DropdownMenuItem(
-                                    value: option,
-                                    child:
-                                        Text(option.toString().split('.')[1]),
-                                  ))
-                              .toList(),
-                          onChanged: (LEVEL? level) {
-                            setState(() {
-                              info = info.copyWith(level: level);
-                            });
-                          },
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          focusColor: Colors.white,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: 500,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      InputComponent(
+                        text: "레벨",
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          borderRadius: BorderRadius.circular(10),
-                          underline: Container(
-                            height: 0,
-                            color: Colors.transparent,
-                          ),
-                          icon: const Icon(Icons.keyboard_arrow_down)),
-                    ),
-                  ),
-                  InputComponent(
-                    text: "유형",
-                    hasBorder: false,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Wrap(
-                        children: CATEGORY.values
-                            .map((CATEGORY option) => Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Radio<CATEGORY>(
+                          child: DropdownButton(
+                              value: info.level,
+                              isExpanded: true,
+                              items: LEVEL.values
+                                  .map((LEVEL option) => DropdownMenuItem(
                                         value: option,
-                                        groupValue: info.category,
-                                        onChanged: (CATEGORY? value) {
-                                          changeCategory(value);
-                                        },
-                                        overlayColor:
-                                            const WidgetStatePropertyAll(
-                                          Colors.transparent,
-                                        )),
-                                    Text(
-                                      categoryMap[
-                                          option.toString().split('.')[1]]!,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Gaps.h20,
-                                  ],
-                                ))
-                            .toList(),
+                                        child: Text(
+                                            option.toString().split('.')[1]),
+                                      ))
+                                  .toList(),
+                              onChanged: (LEVEL? level) {
+                                setState(() {
+                                  info = info.copyWith(level: level);
+                                });
+                              },
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              focusColor: Colors.white,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              borderRadius: BorderRadius.circular(10),
+                              underline: Container(
+                                height: 0,
+                                color: Colors.transparent,
+                              ),
+                              icon: const Icon(Icons.keyboard_arrow_down)),
+                        ),
                       ),
-                    ),
-                  ),
-                  InputComponent(
-                    text: "사이클",
-                    child: InputTextField(chapterController: _cycleController),
-                  ),
-                  InputComponent(
-                    text: "세트",
-                    child: InputTextField(chapterController: _setsController),
-                  ),
-                  InputComponent(
-                    text: "회차",
-                    child:
-                        InputTextField(chapterController: _chapterController),
-                  ),
-                  InputComponent(
-                    text: "타이틀",
-                    child: InputTextField(chapterController: _titleController),
-                  ),
-                ],
-              ),
-            ),
-            Gaps.v20,
-            ClickableButton(
-              text: '저장',
-              onPressed: () => saveIntroData(),
-              color: ColorPallete.green,
-              size: ButtonSize.extraLarge,
-            ),
-          ],
-        ),
-
-        Gaps.h20,
-        // 7. 단어 리스트 //
-        info.category == CATEGORY.WORD
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 500,
-                    width: 450,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 10,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Gaps.v10,
-                          Text(
-                            "단어 리스트 (${wordList.length}개)",
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      InputComponent(
+                        text: "유형",
+                        hasBorder: false,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: Wrap(
+                            children: CATEGORY.values
+                                .map((CATEGORY option) => Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Radio<CATEGORY>(
+                                            value: option,
+                                            groupValue: info.category,
+                                            onChanged: (CATEGORY? value) {
+                                              changeCategory(value);
+                                            },
+                                            overlayColor:
+                                                const WidgetStatePropertyAll(
+                                              Colors.transparent,
+                                            )),
+                                        Text(
+                                          categoryMap[
+                                              option.toString().split('.')[1]]!,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Gaps.h20,
+                                      ],
+                                    ))
+                                .toList(),
                           ),
-                          Gaps.v20,
-                          SizedBox(
-                            width: 390,
-                            height: 400,
-                            child: wordList.isEmpty
-                                ? const Center(
-                                    child: Text(
-                                      '추가 버튼을 눌러\n단어를 추가해 주세요.',
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  )
-                                : SingleChildScrollView(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: List.generate(
-                                        wordList.length,
-                                        (index) => ListTile(
-                                          key: ValueKey(index),
-                                          leading: Text(
-                                            (index + 1).toString(),
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey,
-                                            ),
+                        ),
+                      ),
+                      InputComponent(
+                        text: "사이클",
+                        child:
+                            InputTextField(chapterController: _cycleController),
+                      ),
+                      InputComponent(
+                        text: "세트",
+                        child:
+                            InputTextField(chapterController: _setsController),
+                      ),
+                      InputComponent(
+                        text: "회차",
+                        child: InputTextField(
+                            chapterController: _chapterController),
+                      ),
+                      InputComponent(
+                        text: "타이틀",
+                        child:
+                            InputTextField(chapterController: _titleController),
+                      ),
+                    ],
+                  ),
+                ),
+                Gaps.v20,
+                ClickableButton(
+                  text: '저장',
+                  onPressed: () => saveIntroData(),
+                  color: ColorPallete.green,
+                  size: ButtonSize.extraLarge,
+                ),
+              ],
+            ),
+
+            Gaps.h20,
+            // 7. 단어 리스트 //
+            info.category == CATEGORY.WORD
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        height: 500,
+                        width: 450,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 10,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Gaps.v10,
+                              Text(
+                                "단어 리스트 (${wordList.length}개)",
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Gaps.v20,
+                              SizedBox(
+                                width: 390,
+                                height: 400,
+                                child: wordList.isEmpty
+                                    ? const Center(
+                                        child: Text(
+                                          '추가 버튼을 눌러\n단어를 추가해 주세요.',
+                                          style: TextStyle(
+                                            color: Colors.grey,
                                           ),
-                                          title: TextField(
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                            decoration: InputDecoration(
-                                              hintText: '단어를 입력해주세요',
-                                              hintStyle: TextStyle(
-                                                  height: 1,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      )
+                                    : SingleChildScrollView(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: List.generate(
+                                            wordList.length,
+                                            (index) => ListTile(
+                                              key: ValueKey(index),
+                                              leading: Text(
+                                                (index + 1).toString(),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              title: TextField(
+                                                style: const TextStyle(
                                                   fontSize: 14,
-                                                  color: Colors.grey[500]),
-                                              border: InputBorder.none,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                decoration: InputDecoration(
+                                                  hintText: '단어를 입력해주세요',
+                                                  hintStyle: TextStyle(
+                                                      height: 1,
+                                                      fontSize: 14,
+                                                      color: Colors.grey[500]),
+                                                  border: InputBorder.none,
+                                                ),
+                                                onEditingComplete: () {
+                                                  addWord();
+                                                },
+                                                controller: _controllers[index],
+                                              ),
+                                              trailing: IconButton(
+                                                icon: const Icon(
+                                                  Icons.cancel_outlined,
+                                                  color: ColorPallete.red,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    delete(index: index);
+                                                  });
+                                                },
+                                              ),
                                             ),
-                                            onEditingComplete: () {
-                                              addWord();
-                                            },
-                                            controller: _controllers[index],
-                                          ),
-                                          trailing: IconButton(
-                                            icon: const Icon(
-                                              Icons.cancel_outlined,
-                                              color: ColorPallete.red,
-                                            ),
-                                            onPressed: () {
-                                              setState(() {
-                                                delete(index: index);
-                                              });
-                                            },
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(2),
-                    child: Text(
-                      '- 최대 15개 추가 가능',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                  Gaps.v4,
-                  SizedBox(
-                    width: 450,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ClickableButton(
-                          text: '단어 추가',
-                          onPressed: () => addWord(),
-                          color: ColorPallete.blue,
                         ),
-                      ],
-                    ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(2),
+                        child: Text(
+                          '- 최대 15개 추가 가능',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      Gaps.v4,
+                      SizedBox(
+                        width: 450,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            ClickableButton(
+                              text: '단어 추가',
+                              onPressed: () => addWord(),
+                              color: ColorPallete.blue,
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
                   )
-                ],
-              )
-            : const SizedBox()
-      ],
+                : const SizedBox()
+          ],
+        ),
+      ),
     );
   }
 }
